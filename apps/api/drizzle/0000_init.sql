@@ -129,6 +129,7 @@ CREATE TABLE "character_progress" (
 --> statement-breakpoint
 CREATE TABLE "coin_transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"seq" bigserial NOT NULL,
 	"user_id" uuid NOT NULL,
 	"amount" integer NOT NULL,
 	"kind" text NOT NULL,
@@ -282,6 +283,7 @@ CREATE TABLE "integration_connections" (
 	"expires_at" timestamp with time zone,
 	"last_sync_at" timestamp with time zone,
 	"last_error" text,
+	"settings" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -443,6 +445,7 @@ CREATE TABLE "missions" (
 	"priority" integer DEFAULT 0 NOT NULL,
 	"attribute_weights" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"completed_at" timestamp with time zone,
+	"completed_on" date,
 	"grant_id" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -762,15 +765,15 @@ CREATE TABLE "wallets" (
 ALTER TABLE "achievements" ADD CONSTRAINT "achievements_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "achievements" ADD CONSTRAINT "achievements_reward_item_id_items_id_fk" FOREIGN KEY ("reward_item_id") REFERENCES "public"."items"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activities" ADD CONSTRAINT "activities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "activities" ADD CONSTRAINT "activities_type_id_activity_types_id_fk" FOREIGN KEY ("type_id") REFERENCES "public"."activity_types"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "activities" ADD CONSTRAINT "activities_type_id_activity_types_id_fk" FOREIGN KEY ("type_id") REFERENCES "public"."activity_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activities" ADD CONSTRAINT "activities_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activity_sets" ADD CONSTRAINT "activity_sets_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activity_sets" ADD CONSTRAINT "activity_sets_activity_id_activities_id_fk" FOREIGN KEY ("activity_id") REFERENCES "public"."activities"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "activity_sets" ADD CONSTRAINT "activity_sets_exercise_id_exercises_id_fk" FOREIGN KEY ("exercise_id") REFERENCES "public"."exercises"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "activity_sets" ADD CONSTRAINT "activity_sets_exercise_id_exercises_id_fk" FOREIGN KEY ("exercise_id") REFERENCES "public"."exercises"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activity_types" ADD CONSTRAINT "activity_types_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "activity_types" ADD CONSTRAINT "activity_types_skill_id_skills_id_fk" FOREIGN KEY ("skill_id") REFERENCES "public"."skills"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessments" ADD CONSTRAINT "assessments_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "assessments" ADD CONSTRAINT "assessments_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "assessments" ADD CONSTRAINT "assessments_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "assessments" ADD CONSTRAINT "assessments_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "attributes" ADD CONSTRAINT "attributes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_actor_id_users_id_fk" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -778,10 +781,10 @@ ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_user_id_users_id_fk" FOREIGN K
 ALTER TABLE "categories" ADD CONSTRAINT "categories_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "character_progress" ADD CONSTRAINT "character_progress_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_purchase_id_purchases_id_fk" FOREIGN KEY ("purchase_id") REFERENCES "public"."purchases"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_penalty_id_penalty_applications_id_fk" FOREIGN KEY ("penalty_id") REFERENCES "public"."penalty_applications"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_reversal_of_coin_transactions_id_fk" FOREIGN KEY ("reversal_of") REFERENCES "public"."coin_transactions"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_purchase_id_purchases_id_fk" FOREIGN KEY ("purchase_id") REFERENCES "public"."purchases"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_penalty_id_penalty_applications_id_fk" FOREIGN KEY ("penalty_id") REFERENCES "public"."penalty_applications"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_reversal_of_coin_transactions_id_fk" FOREIGN KEY ("reversal_of") REFERENCES "public"."coin_transactions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "coin_transactions" ADD CONSTRAINT "coin_transactions_actor_id_users_id_fk" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "exercises" ADD CONSTRAINT "exercises_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "game_configs" ADD CONSTRAINT "game_configs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -793,11 +796,11 @@ ALTER TABLE "goal_milestones" ADD CONSTRAINT "goal_milestones_goal_id_goals_id_f
 ALTER TABLE "goals" ADD CONSTRAINT "goals_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "goals" ADD CONSTRAINT "goals_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "goals" ADD CONSTRAINT "goals_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "grant_attribute_xp" ADD CONSTRAINT "grant_attribute_xp_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "grant_attribute_xp" ADD CONSTRAINT "grant_attribute_xp_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "grant_attribute_xp" ADD CONSTRAINT "grant_attribute_xp_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "grant_attribute_xp" ADD CONSTRAINT "grant_attribute_xp_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grant_attribute_xp" ADD CONSTRAINT "grant_attribute_xp_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "grant_skill_xp" ADD CONSTRAINT "grant_skill_xp_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "grant_skill_xp" ADD CONSTRAINT "grant_skill_xp_skill_id_skills_id_fk" FOREIGN KEY ("skill_id") REFERENCES "public"."skills"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "grant_skill_xp" ADD CONSTRAINT "grant_skill_xp_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "grant_skill_xp" ADD CONSTRAINT "grant_skill_xp_skill_id_skills_id_fk" FOREIGN KEY ("skill_id") REFERENCES "public"."skills"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grant_skill_xp" ADD CONSTRAINT "grant_skill_xp_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "habit_checkins" ADD CONSTRAINT "habit_checkins_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "habit_checkins" ADD CONSTRAINT "habit_checkins_habit_id_habits_id_fk" FOREIGN KEY ("habit_id") REFERENCES "public"."habits"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -810,7 +813,7 @@ ALTER TABLE "habits" ADD CONSTRAINT "habits_category_id_categories_id_fk" FOREIG
 ALTER TABLE "integration_connections" ADD CONSTRAINT "integration_connections_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "integration_events" ADD CONSTRAINT "integration_events_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inventory_items" ADD CONSTRAINT "inventory_items_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inventory_items" ADD CONSTRAINT "inventory_items_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "inventory_items" ADD CONSTRAINT "inventory_items_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inventory_items" ADD CONSTRAINT "inventory_items_purchase_id_purchases_id_fk" FOREIGN KEY ("purchase_id") REFERENCES "public"."purchases"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "items" ADD CONSTRAINT "items_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "items" ADD CONSTRAINT "items_required_achievement_id_achievements_id_fk" FOREIGN KEY ("required_achievement_id") REFERENCES "public"."achievements"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -848,7 +851,7 @@ ALTER TABLE "personal_records" ADD CONSTRAINT "personal_records_user_id_users_id
 ALTER TABLE "personal_records" ADD CONSTRAINT "personal_records_exercise_id_exercises_id_fk" FOREIGN KEY ("exercise_id") REFERENCES "public"."exercises"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "personal_records" ADD CONSTRAINT "personal_records_activity_id_activities_id_fk" FOREIGN KEY ("activity_id") REFERENCES "public"."activities"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "purchases" ADD CONSTRAINT "purchases_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "purchases" ADD CONSTRAINT "purchases_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "purchases" ADD CONSTRAINT "purchases_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "quick_logs" ADD CONSTRAINT "quick_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "quick_logs" ADD CONSTRAINT "quick_logs_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "quick_logs" ADD CONSTRAINT "quick_logs_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -856,7 +859,7 @@ ALTER TABLE "quick_logs" ADD CONSTRAINT "quick_logs_grant_id_reward_grants_id_fk
 ALTER TABLE "ranks" ADD CONSTRAINT "ranks_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reward_grants" ADD CONSTRAINT "reward_grants_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reward_grants" ADD CONSTRAINT "reward_grants_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reward_grants" ADD CONSTRAINT "reward_grants_reversal_of_reward_grants_id_fk" FOREIGN KEY ("reversal_of") REFERENCES "public"."reward_grants"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reward_grants" ADD CONSTRAINT "reward_grants_reversal_of_reward_grants_id_fk" FOREIGN KEY ("reversal_of") REFERENCES "public"."reward_grants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reward_grants" ADD CONSTRAINT "reward_grants_actor_id_users_id_fk" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "season_rewards" ADD CONSTRAINT "season_rewards_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "season_rewards" ADD CONSTRAINT "season_rewards_season_id_seasons_id_fk" FOREIGN KEY ("season_id") REFERENCES "public"."seasons"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -868,17 +871,17 @@ ALTER TABLE "skills" ADD CONSTRAINT "skills_user_id_users_id_fk" FOREIGN KEY ("u
 ALTER TABLE "skills" ADD CONSTRAINT "skills_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "skills" ADD CONSTRAINT "skills_parent_id_skills_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."skills"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_resources" ADD CONSTRAINT "study_resources_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "study_resources" ADD CONSTRAINT "study_resources_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "study_resources" ADD CONSTRAINT "study_resources_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_resources" ADD CONSTRAINT "study_resources_parent_id_study_resources_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."study_resources"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_resource_id_study_resources_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."study_resources"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_sessions" ADD CONSTRAINT "study_sessions_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_subjects" ADD CONSTRAINT "study_subjects_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_subjects" ADD CONSTRAINT "study_subjects_area_id_knowledge_areas_id_fk" FOREIGN KEY ("area_id") REFERENCES "public"."knowledge_areas"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "study_subjects" ADD CONSTRAINT "study_subjects_skill_id_skills_id_fk" FOREIGN KEY ("skill_id") REFERENCES "public"."skills"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_milestones" ADD CONSTRAINT "subject_milestones_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "subject_milestones" ADD CONSTRAINT "subject_milestones_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "subject_milestones" ADD CONSTRAINT "subject_milestones_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_milestones" ADD CONSTRAINT "subject_milestones_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_prerequisites" ADD CONSTRAINT "subject_prerequisites_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subject_prerequisites" ADD CONSTRAINT "subject_prerequisites_subject_id_study_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."study_subjects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -886,7 +889,7 @@ ALTER TABLE "subject_prerequisites" ADD CONSTRAINT "subject_prerequisites_prereq
 ALTER TABLE "unavailability" ADD CONSTRAINT "unavailability_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "unavailability" ADD CONSTRAINT "unavailability_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_achievement_id_achievements_id_fk" FOREIGN KEY ("achievement_id") REFERENCES "public"."achievements"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_achievement_id_achievements_id_fk" FOREIGN KEY ("achievement_id") REFERENCES "public"."achievements"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_grant_id_reward_grants_id_fk" FOREIGN KEY ("grant_id") REFERENCES "public"."reward_grants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_settings" ADD CONSTRAINT "user_settings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "wallets" ADD CONSTRAINT "wallets_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -897,6 +900,7 @@ CREATE UNIQUE INDEX "attributes_code_uq" ON "attributes" USING btree ("user_id",
 CREATE INDEX "audit_user_created_idx" ON "audit_log" USING btree ("user_id","created_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "categories_name_uq" ON "categories" USING btree ("user_id","name");--> statement-breakpoint
 CREATE INDEX "coin_tx_user_created_idx" ON "coin_transactions" USING btree ("user_id","created_at");--> statement-breakpoint
+CREATE UNIQUE INDEX "coin_tx_seq_uq" ON "coin_transactions" USING btree ("seq");--> statement-breakpoint
 CREATE UNIQUE INDEX "coin_tx_reversal_uq" ON "coin_transactions" USING btree ("reversal_of");--> statement-breakpoint
 CREATE UNIQUE INDEX "game_configs_version_uq" ON "game_configs" USING btree ("user_id","version");--> statement-breakpoint
 CREATE UNIQUE INDEX "game_configs_active_uq" ON "game_configs" USING btree ("user_id") WHERE "game_configs"."active";--> statement-breakpoint

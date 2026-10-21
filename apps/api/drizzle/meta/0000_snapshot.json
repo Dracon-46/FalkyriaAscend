@@ -1,5 +1,5 @@
 {
-  "id": "8d15eab5-2e38-4bd4-9034-5273d6fccad5",
+  "id": "9dc5a10b-cad0-4252-a59e-cc5c7b7e3743",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -364,7 +364,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "activities_grant_id_reward_grants_id_fk": {
@@ -488,7 +488,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -688,7 +688,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "assessments_grant_id_reward_grants_id_fk": {
@@ -1161,6 +1161,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "seq": {
+          "name": "seq",
+          "type": "bigserial",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "uuid",
@@ -1263,6 +1269,21 @@
           "method": "btree",
           "with": {}
         },
+        "coin_tx_seq_uq": {
+          "name": "coin_tx_seq_uq",
+          "columns": [
+            {
+              "expression": "seq",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "coin_tx_reversal_uq": {
           "name": "coin_tx_reversal_uq",
           "columns": [
@@ -1303,7 +1324,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "coin_transactions_purchase_id_purchases_id_fk": {
@@ -1316,7 +1337,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "coin_transactions_penalty_id_penalty_applications_id_fk": {
@@ -1329,7 +1350,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "coin_transactions_reversal_of_coin_transactions_id_fk": {
@@ -1342,7 +1363,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "coin_transactions_actor_id_users_id_fk": {
@@ -1968,7 +1989,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "grant_attribute_xp_attribute_id_attributes_id_fk": {
@@ -1981,7 +2002,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "grant_attribute_xp_user_id_users_id_fk": {
@@ -2075,7 +2096,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "grant_skill_xp_skill_id_skills_id_fk": {
@@ -2088,7 +2109,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "grant_skill_xp_user_id_users_id_fk": {
@@ -2631,6 +2652,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "settings": {
+          "name": "settings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -2939,7 +2967,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "inventory_items_purchase_id_purchases_id_fk": {
@@ -4019,6 +4047,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "completed_on": {
+          "name": "completed_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
         "grant_id": {
           "name": "grant_id",
           "type": "uuid",
@@ -5014,7 +5048,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -5498,7 +5532,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "reward_grants_actor_id_users_id_fk": {
@@ -6093,7 +6127,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "study_resources_parent_id_study_resources_id_fk": {
@@ -6298,7 +6332,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "study_sessions_resource_id_study_resources_id_fk": {
@@ -6537,7 +6571,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "subject_milestones_grant_id_reward_grants_id_fk": {
@@ -6829,7 +6863,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "user_achievements_grant_id_reward_grants_id_fk": {

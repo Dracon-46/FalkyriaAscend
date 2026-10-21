@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
+  bigserial,
   boolean,
   check,
   date,
@@ -302,7 +303,7 @@ export const rewardGrants = pgTable(
     configVersion: integer('config_version').notNull(),
     /** Passos do cálculo exibidos ao usuário ("por que recebi isto"). */
     explanation: jsonb('explanation').$type<string[]>().notNull().default([]),
-    reversalOf: uuid('reversal_of').references((): any => rewardGrants.id, { onDelete: 'restrict' }),
+    reversalOf: uuid('reversal_of').references((): any => rewardGrants.id, { onDelete: 'no action' }),
     reversedAt: timestamp('reversed_at', { withTimezone: true }),
     actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
@@ -320,10 +321,10 @@ export const grantAttributeXp = pgTable(
   {
     grantId: uuid('grant_id')
       .notNull()
-      .references(() => rewardGrants.id, { onDelete: 'restrict' }),
+      .references(() => rewardGrants.id, { onDelete: 'no action' }),
     attributeId: uuid('attribute_id')
       .notNull()
-      .references(() => attributes.id, { onDelete: 'restrict' }),
+      .references(() => attributes.id, { onDelete: 'no action' }),
     userId: userRef(),
     amount: integer('amount').notNull(),
   },
@@ -335,10 +336,10 @@ export const grantSkillXp = pgTable(
   {
     grantId: uuid('grant_id')
       .notNull()
-      .references(() => rewardGrants.id, { onDelete: 'restrict' }),
+      .references(() => rewardGrants.id, { onDelete: 'no action' }),
     skillId: uuid('skill_id')
       .notNull()
-      .references(() => skills.id, { onDelete: 'restrict' }),
+      .references(() => skills.id, { onDelete: 'no action' }),
     userId: userRef(),
     amount: integer('amount').notNull(),
   },
@@ -364,16 +365,18 @@ export const coinTransactions = pgTable(
   'coin_transactions',
   {
     id: id(),
+    /** Ordem estrita de lançamento (vários lançamentos podem compartilhar o mesmo instante). */
+    seq: bigserial('seq', { mode: 'number' }).notNull(),
     userId: userRef(),
     amount: integer('amount').notNull(),
     kind: text('kind', { enum: COIN_TX_KINDS }).notNull(),
     /** Categoria de origem (missões, hábitos, loja, penalidades, administração...). */
     category: text('category').notNull(),
     reason: text('reason').notNull(),
-    grantId: uuid('grant_id').references(() => rewardGrants.id, { onDelete: 'restrict' }),
-    purchaseId: uuid('purchase_id').references((): any => purchases.id, { onDelete: 'restrict' }),
-    penaltyId: uuid('penalty_id').references((): any => penaltyApplications.id, { onDelete: 'restrict' }),
-    reversalOf: uuid('reversal_of').references((): any => coinTransactions.id, { onDelete: 'restrict' }),
+    grantId: uuid('grant_id').references(() => rewardGrants.id, { onDelete: 'no action' }),
+    purchaseId: uuid('purchase_id').references((): any => purchases.id, { onDelete: 'no action' }),
+    penaltyId: uuid('penalty_id').references((): any => penaltyApplications.id, { onDelete: 'no action' }),
+    reversalOf: uuid('reversal_of').references((): any => coinTransactions.id, { onDelete: 'no action' }),
     balanceAfter: integer('balance_after').notNull(),
     localDate: date('local_date').notNull(),
     actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
@@ -381,6 +384,7 @@ export const coinTransactions = pgTable(
   },
   (t) => [
     index('coin_tx_user_created_idx').on(t.userId, t.createdAt),
+    uniqueIndex('coin_tx_seq_uq').on(t.seq),
     uniqueIndex('coin_tx_reversal_uq').on(t.reversalOf),
     check('coin_tx_balance_nonneg', sql`${t.balanceAfter} >= 0`),
     check('coin_tx_nonzero', sql`${t.amount} <> 0`),
@@ -769,7 +773,7 @@ export const studyResources = pgTable('study_resources', {
   userId: userRef(),
   subjectId: uuid('subject_id')
     .notNull()
-    .references(() => studySubjects.id, { onDelete: 'restrict' }),
+    .references(() => studySubjects.id, { onDelete: 'no action' }),
   parentId: uuid('parent_id').references((): any => studyResources.id, { onDelete: 'set null' }),
   kind: text('kind', { enum: RESOURCE_KINDS }).notNull(),
   title: text('title').notNull(),
@@ -788,7 +792,7 @@ export const studySessions = pgTable(
     userId: userRef(),
     subjectId: uuid('subject_id')
       .notNull()
-      .references(() => studySubjects.id, { onDelete: 'restrict' }),
+      .references(() => studySubjects.id, { onDelete: 'no action' }),
     resourceId: uuid('resource_id').references(() => studyResources.id, { onDelete: 'set null' }),
     localDate: date('local_date').notNull(),
     minutes: integer('minutes').notNull(),
@@ -815,7 +819,7 @@ export const assessments = pgTable('assessments', {
   userId: userRef(),
   subjectId: uuid('subject_id')
     .notNull()
-    .references(() => studySubjects.id, { onDelete: 'restrict' }),
+    .references(() => studySubjects.id, { onDelete: 'no action' }),
   title: text('title').notNull(),
   localDate: date('local_date').notNull(),
   score: numeric('score', { mode: 'number' }).notNull(),
@@ -831,7 +835,7 @@ export const subjectMilestones = pgTable('subject_milestones', {
   userId: userRef(),
   subjectId: uuid('subject_id')
     .notNull()
-    .references(() => studySubjects.id, { onDelete: 'restrict' }),
+    .references(() => studySubjects.id, { onDelete: 'no action' }),
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
   evidenceUrl: text('evidence_url'),
@@ -863,7 +867,7 @@ export const activities = pgTable(
     userId: userRef(),
     typeId: uuid('type_id')
       .notNull()
-      .references(() => activityTypes.id, { onDelete: 'restrict' }),
+      .references(() => activityTypes.id, { onDelete: 'no action' }),
     title: text('title'),
     localDate: date('local_date').notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }),
@@ -904,7 +908,7 @@ export const activitySets = pgTable('activity_sets', {
     .references(() => activities.id, { onDelete: 'cascade' }),
   exerciseId: uuid('exercise_id')
     .notNull()
-    .references(() => exercises.id, { onDelete: 'restrict' }),
+    .references(() => exercises.id, { onDelete: 'no action' }),
   setIndex: integer('set_index').notNull(),
   reps: integer('reps').notNull(),
   weightKg: numeric('weight_kg', { mode: 'number' }),
@@ -984,7 +988,7 @@ export const purchases = pgTable(
     userId: userRef(),
     itemId: uuid('item_id')
       .notNull()
-      .references(() => items.id, { onDelete: 'restrict' }),
+      .references(() => items.id, { onDelete: 'no action' }),
     quantity: integer('quantity').notNull().default(1),
     unitPrice: integer('unit_price').notNull(),
     total: integer('total').notNull(),
@@ -1005,7 +1009,7 @@ export const inventoryItems = pgTable(
     userId: userRef(),
     itemId: uuid('item_id')
       .notNull()
-      .references(() => items.id, { onDelete: 'restrict' }),
+      .references(() => items.id, { onDelete: 'no action' }),
     purchaseId: uuid('purchase_id').references(() => purchases.id, { onDelete: 'set null' }),
     source: text('source', { enum: INVENTORY_SOURCES }).notNull(),
     /** Slot de equipamento (tipo do item) para itens equipáveis. */
@@ -1052,7 +1056,7 @@ export const userAchievements = pgTable(
     userId: userRef(),
     achievementId: uuid('achievement_id')
       .notNull()
-      .references(() => achievements.id, { onDelete: 'restrict' }),
+      .references(() => achievements.id, { onDelete: 'no action' }),
     unlockedAt: timestamp('unlocked_at', { withTimezone: true }).notNull().defaultNow(),
     grantId: uuid('grant_id').references(() => rewardGrants.id, { onDelete: 'set null' }),
     snapshot: jsonb('snapshot'),
@@ -1106,6 +1110,8 @@ export const integrationConnections = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
     lastError: text('last_error'),
+    /** Preferências da integração (unidade de peso, tipo de atividade padrão). */
+    settings: jsonb('settings').$type<{ weightUnit?: 'kg' | 'lb'; defaultTypeId?: string; typeMap?: Record<string, string> }>().notNull().default({}),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
