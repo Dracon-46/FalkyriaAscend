@@ -200,8 +200,8 @@ export async function registerCoreRoutes(app: FastifyInstance, ctx: AppContext) 
     // Credenciais de integração nunca são exportadas.
     out.integrationConnections = (out.integrationConnections ?? []).map((c: any) => ({ ...c, accessTokenEnc: undefined, refreshTokenEnc: undefined }));
     await audit(ctx.db, { actorId: me.id, userId: me.id, action: 'data.export', entityType: 'users', entityId: me.id });
-    reply.header('content-disposition', `attachment; filename="rpg-export-${new Date().toISOString().slice(0, 10)}.json"`);
-    return { format: 'chronicles-export', version: 1, exportedAt: new Date().toISOString(), user: u, data: out };
+    reply.header('content-disposition', `attachment; filename="ascend-export-${new Date().toISOString().slice(0, 10)}.json"`);
+    return { format: 'ascend-export', version: 1, exportedAt: new Date().toISOString(), user: u, data: out };
   });
 
   app.post('/api/account/delete', { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (req, reply) => {

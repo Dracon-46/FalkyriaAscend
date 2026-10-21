@@ -1,8 +1,8 @@
 {
-  "name": "chronicles-of-the-self",
+  "name": "ascend",
   "private": true,
   "version": "0.1.0",
-  "description": "RPG pessoal de vida real: progressão, missões, hábitos, economia e estatísticas.",
+  "description": "Ascend — RPG pessoal de vida real (um produto Falkyria).",
   "type": "module",
   "workspaces": [
     "packages/*",

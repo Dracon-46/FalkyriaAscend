@@ -23,6 +23,7 @@ import {
 
 export const DEFAULT_WIDGETS = [
   'character',
+  'alerts',
   'today',
   'habits',
   'weekly',
@@ -35,7 +36,6 @@ export const DEFAULT_WIDGETS = [
   'recent',
   'achievements',
   'records',
-  'alerts',
 ].map((id) => ({ id, visible: true }));
 
 const ATTRIBUTES = [
