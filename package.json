@@ -1,0 +1,30 @@
+{
+  "name": "chronicles-of-the-self",
+  "private": true,
+  "version": "0.1.0",
+  "description": "RPG pessoal de vida real: progressão, missões, hábitos, economia e estatísticas.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @rpg/api & npm run dev --workspace @rpg/web",
+    "build": "npm run build --workspace @rpg/web && npm run build --workspace @rpg/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "db:migrate": "npm run db:migrate --workspace @rpg/api",
+    "db:generate": "npm run db:generate --workspace @rpg/api",
+    "seed:demo": "npm run seed:demo --workspace @rpg/api",
+    "simulate": "npm run simulate --workspace @rpg/engine"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.19.0",
+    "typescript": "5.9.3"
+  }
+}
