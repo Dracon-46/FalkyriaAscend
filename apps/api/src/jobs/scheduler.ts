@@ -1,5 +1,5 @@
 import type { FastifyBaseLogger } from 'fastify';
-import type { Db } from '../persistence/client';
+import type { Db } from '../persistence/unit-of-work';
 import { evaluateAllUsers } from '../application/evaluation';
 
 /** Agendador simples em processo: fecha os dias de todos os usuários periodicamente. */

@@ -1,6 +1,11 @@
-import { getTableColumns, getTableName } from 'drizzle-orm';
+/**
+ * Registro dos recursos administráveis (metadados derivados do schema — uma única fonte) e
+ * repositório genérico usado pelo CRUD administrativo. A aplicação só enxerga `ResourceMeta`.
+ */
+import { and, asc, count, desc, eq, getTableColumns, isNull, or, sql, type SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
-import * as s from './schema';
+import type { DbOrTx } from '../client';
+import * as s from '../schema';
 
 export type FieldType = 'uuid' | 'ref' | 'text' | 'longtext' | 'enum' | 'int' | 'number' | 'boolean' | 'date' | 'datetime' | 'json';
 
@@ -18,7 +23,7 @@ export interface FieldMeta {
 
 export type ResourceMode = 'crud' | 'readonly';
 
-export interface ResourceDef {
+interface ResourceDef {
   key: string;
   label: string;
   group: string;
@@ -44,7 +49,7 @@ const DIRECT_EDIT_NOTE = 'Edição direta altera os dados brutos (com auditoria)
 
 const GENERAL_READONLY = ['id', 'userId', 'createdAt', 'updatedAt'];
 
-export const RESOURCES: ResourceDef[] = [
+const RESOURCES: ResourceDef[] = [
   // Identidade
   { key: 'users', label: 'Usuários', group: 'Identidade', table: s.users, mode: 'crud', display: 'email', hidden: ['passwordHash'], global: true, note: 'Senhas são redefinidas pela ação "Redefinir senha". O e-mail deve ser único.' },
   { key: 'user_settings', label: 'Configurações do usuário', group: 'Identidade', table: s.userSettings, mode: 'readonly', display: 'timezone', note: 'Edite pela tela de Configurações (validação de fuso e temas).' },
@@ -119,9 +124,6 @@ export const RESOURCES: ResourceDef[] = [
   { key: 'audit_log', label: 'Auditoria', group: 'Sistema', table: s.auditLog, mode: 'readonly', display: 'action' },
 ];
 
-export function getResource(key: string): ResourceDef | undefined {
-  return RESOURCES.find((r) => r.key === key);
-}
 
 const LABELS: Record<string, string> = {
   id: 'ID', userId: 'Usuário', createdAt: 'Criado em', updatedAt: 'Atualizado em', title: 'Título', name: 'Nome',
@@ -136,7 +138,7 @@ function humanize(key: string) {
 }
 
 /** Metadados dos campos derivados das colunas do Drizzle (uma única fonte: o schema). */
-export function fieldsOf(def: ResourceDef): FieldMeta[] {
+function fieldsOf(def: ResourceDef): FieldMeta[] {
   const cols = getTableColumns(def.table) as Record<string, any>;
   const out: FieldMeta[] = [];
   for (const [key, col] of Object.entries(cols)) {
@@ -166,6 +168,107 @@ export function fieldsOf(def: ResourceDef): FieldMeta[] {
   return out;
 }
 
-export function tableName(def: ResourceDef) {
-  return getTableName(def.table);
+// ------------------------------------------------------------------ Metadados expostos à aplicação
+
+export interface ResourceMeta {
+  key: string;
+  label: string;
+  group: string;
+  mode: ResourceMode;
+  display: string;
+  note: string | null;
+  hidden: string[];
+  composite: boolean;
+  global: boolean;
+  archivable: boolean;
+  fields: FieldMeta[];
+}
+
+const toMeta = (r: ResourceDef): ResourceMeta => {
+  const cols = getTableColumns(r.table);
+  return {
+    key: r.key,
+    label: r.label,
+    group: r.group,
+    mode: r.mode,
+    display: r.display,
+    note: r.note ?? null,
+    hidden: r.hidden ?? [],
+    composite: r.composite ?? false,
+    global: r.global ?? false,
+    archivable: 'archivedAt' in cols,
+    fields: fieldsOf(r),
+  };
+};
+
+export function resourceCatalog(): ResourceMeta[] {
+  return RESOURCES.map(toMeta);
+}
+
+export function findResourceMeta(key: string): ResourceMeta | null {
+  const def = RESOURCES.find((r) => r.key === key);
+  return def ? toMeta(def) : null;
+}
+
+// ------------------------------------------------------------------ Acesso genérico aos dados
+
+type Row = Record<string, unknown>;
+const tableOf = (key: string) => RESOURCES.find((r) => r.key === key)!.table as any;
+
+export interface ResourceListQuery {
+  /** Dono dos registros (ignorado em recursos globais). */
+  userId: string;
+  includeArchived: boolean;
+  /** Busca textual nas colunas de texto e enum. */
+  search?: string;
+  searchFields: string[];
+  sortField: string;
+  direction: 'asc' | 'desc';
+  limit: number;
+  offset: number;
+}
+
+export async function listResourceRows(db: DbOrTx, meta: ResourceMeta, q: ResourceListQuery): Promise<{ total: number; rows: Row[] }> {
+  const t = tableOf(meta.key);
+  const conds: SQL[] = [];
+  if (!meta.global) conds.push(eq(t.userId, q.userId));
+  if (!q.includeArchived && meta.archivable) conds.push(isNull(t.archivedAt));
+  if (q.search && q.searchFields.length) conds.push(or(...q.searchFields.map((f) => sql`${t[f]}::text ilike ${'%' + q.search + '%'}`))!);
+  const where = conds.length ? and(...conds) : undefined;
+  const rows = await db
+    .select()
+    .from(t)
+    .where(where)
+    .orderBy(q.direction === 'asc' ? asc(t[q.sortField]) : desc(t[q.sortField]))
+    .limit(q.limit)
+    .offset(q.offset);
+  const [total] = await db.select({ n: count() }).from(t).where(where);
+  return { total: total?.n ?? 0, rows: rows as Row[] };
+}
+
+/** Busca por id; tabelas sem `id` (chave = usuário) são buscadas pelo `userId`. */
+export async function findResourceRow(db: DbOrTx, meta: ResourceMeta, userId: string, id: string, opts: { lock?: boolean } = {}): Promise<Row | null> {
+  const t = tableOf(meta.key);
+  const idCol = t.id ? t.id : t.userId;
+  const where = meta.global ? eq(t.id, id) : and(eq(idCol, id), eq(t.userId, userId));
+  const query = db.select().from(t).where(where);
+  const rows = (opts.lock ? await query.for('update') : await query) as Row[];
+  return rows[0] ?? null;
+}
+
+export async function insertResourceRow(tx: DbOrTx, meta: ResourceMeta, values: Row): Promise<Row> {
+  const rows = (await tx.insert(tableOf(meta.key)).values(values).returning()) as Row[];
+  return rows[0]!;
+}
+
+export async function updateResourceRow(tx: DbOrTx, meta: ResourceMeta, id: string, values: Row): Promise<Row> {
+  const t = tableOf(meta.key);
+  const patch = 'updatedAt' in getTableColumns(t) ? { ...values, updatedAt: new Date() } : values;
+  const rows = (await tx.update(t).set(patch).where(eq(t.id, id)).returning()) as Row[];
+  return rows[0]!;
+}
+
+export async function deleteResourceRow(tx: DbOrTx, meta: ResourceMeta, id: string): Promise<void> {
+  const t = tableOf(meta.key);
+  await tx.delete(t).where(eq(t.id, id));
 }

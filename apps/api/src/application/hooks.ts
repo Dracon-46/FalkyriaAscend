@@ -1,4 +1,4 @@
-import type { DbOrTx } from '../persistence/client';
+import type { DbOrTx } from '../persistence/unit-of-work';
 import { evaluateAchievements } from './achievements';
 import { refreshActiveGoals } from './goals';
 import { refreshActiveMissions } from './missions';

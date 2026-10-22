@@ -1,4 +1,3 @@
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
 import {
   TERMINAL_MISSION_STATUSES,
   addDays,
@@ -16,39 +15,45 @@ import {
   type MissionStatus,
 } from '@rpg/engine';
 import type { MissionInput } from '@rpg/contracts';
-import type { DbOrTx } from '../persistence/client';
+import type { Mission } from '../persistence/models';
+import { metricValue } from '../persistence/queries/metrics';
 import {
-  categories,
-  goals,
-  missionEvents,
-  missionObjectives,
-  missionPenaltyRules,
-  missions,
-  missionTemplates,
-  penaltyRules,
-  seasons,
-} from '../persistence/schema';
+  deleteObjectives,
+  insertMissionEvent,
+  insertMissionIfNew,
+  insertObjectives,
+  listActiveTemplates,
+  listObjectives,
+  listOpenMissions,
+  listOpenMissionsDueOn,
+  listOpenUncompletedMissions,
+  lockMission,
+  missionHasPenaltyRules,
+  recentOutcomesOfSeries,
+  replaceMissionRules,
+  updateMissionRow,
+  updateObjective,
+} from '../persistence/repositories/missions';
+import { rulesOfMission } from '../persistence/repositories/penalties';
+import { type DbOrTx } from '../persistence/unit-of-work';
 import { badRequest, conflict, notFound, unprocessable } from '../shared/errors';
 import { getActiveConfig } from './config';
 import { currentMultiplier, hardMissionsCompletedToday, xpTodayBySource } from './gameplay';
-import { metricValue } from './metrics';
 import { notify } from './notifications';
 import { applyPenalties } from './penalties';
 import { grantReward } from './rewards';
 import { assertOwned, validatePenaltyRules, validateWeights } from './validation';
 
-type Mission = typeof missions.$inferSelect;
-type Actor = 'user' | 'system' | 'admin';
+export type Actor = 'user' | 'system' | 'admin';
 
-async function getMission(tx: DbOrTx, userId: string, id: string, lock = false): Promise<Mission> {
-  const q = tx.select().from(missions).where(and(eq(missions.id, id), eq(missions.userId, userId)));
-  const [m] = lock ? await q.for('update') : await q;
+async function getMissionForUpdate(tx: DbOrTx, userId: string, id: string): Promise<Mission> {
+  const m = await lockMission(tx, userId, id);
   if (!m) throw notFound('Missão');
   return m;
 }
 
 async function logEvent(tx: DbOrTx, m: Mission, to: string, actor: Actor, reason?: string | null, data?: unknown) {
-  await tx.insert(missionEvents).values({
+  await insertMissionEvent(tx, {
     userId: m.userId,
     missionId: m.id,
     fromStatus: m.status,
@@ -73,10 +78,10 @@ async function validateMissionInput(tx: DbOrTx, userId: string, input: MissionIn
   );
   if (input.startDate && input.dueDate && input.dueDate < input.startDate) errors.push('O prazo deve ser posterior ao início.');
   if (errors.length) throw unprocessable(errors.join(' '), { errors });
-  await assertOwned(tx, categories, input.categoryId, userId, 'Categoria');
-  await assertOwned(tx, goals, input.goalId, userId, 'Meta');
-  await assertOwned(tx, seasons, input.seasonId, userId, 'Temporada');
-  await assertOwned(tx, missions, input.parentId, userId, 'Missão-mãe');
+  await assertOwned(tx, 'categories', input.categoryId, userId, 'Categoria');
+  await assertOwned(tx, 'goals', input.goalId, userId, 'Meta');
+  await assertOwned(tx, 'seasons', input.seasonId, userId, 'Temporada');
+  await assertOwned(tx, 'missions', input.parentId, userId, 'Missão-mãe');
   const weights = await validateWeights(tx, userId, input.attributeWeights);
   await validatePenaltyRules(tx, userId, input.penaltyRuleIds);
   return weights;
@@ -89,10 +94,8 @@ export async function createMission(
   opts: { source?: Mission['source']; templateId?: string; periodKey?: string; actor?: Actor } = {},
 ): Promise<Mission | null> {
   const weights = await validateMissionInput(tx, userId, input);
-  const inserted = await tx
-    .insert(missions)
-    .values({
-      userId,
+  const m = await insertMissionIfNew(tx, {
+    userId,
       title: input.title,
       description: input.description,
       type: input.type,
@@ -112,15 +115,12 @@ export async function createMission(
       attributeWeights: weights,
       source: opts.source ?? 'manual',
       templateId: opts.templateId ?? null,
-      periodKey: opts.periodKey ?? null,
-    })
-    .onConflictDoNothing()
-    .returning();
-  const m = inserted[0];
+    periodKey: opts.periodKey ?? null,
+  });
   if (!m) return null; // instância recorrente já existente
-  if (input.objectives.length) {
-    await tx.insert(missionObjectives).values(
-      input.objectives.map((o, i) => ({
+  await insertObjectives(
+    tx,
+    input.objectives.map((o, i) => ({
         userId,
         missionId: m.id,
         title: o.title,
@@ -130,19 +130,16 @@ export async function createMission(
         current: o.metric === 'manual' ? (o.current ?? 0) : 0,
         unit: o.unit ?? null,
         optional: o.optional,
-        sortOrder: i,
-      })),
-    );
-  }
-  if (input.penaltyRuleIds.length) {
-    await tx.insert(missionPenaltyRules).values(input.penaltyRuleIds.map((ruleId) => ({ userId, missionId: m.id, ruleId })));
-  }
-  await tx.insert(missionEvents).values({ userId, missionId: m.id, toStatus: m.status, actor: opts.actor ?? 'user', reason: 'Criada' });
+      sortOrder: i,
+    })),
+  );
+  await replaceMissionRules(tx, userId, m.id, input.penaltyRuleIds);
+  await insertMissionEvent(tx, { userId, missionId: m.id, toStatus: m.status, actor: opts.actor ?? 'user', reason: 'Criada' });
   return m;
 }
 
 export async function updateMission(tx: DbOrTx, userId: string, id: string, input: MissionInput, today: string, actor: Actor = 'user') {
-  const m = await getMission(tx, userId, id, true);
+  const m = await getMissionForUpdate(tx, userId, id);
   if (TERMINAL_MISSION_STATUSES.includes(m.status) && actor !== 'admin') {
     throw conflict(`Missão ${MISSION_STATUS_LABELS[m.status].toLowerCase()} não pode ser editada.`);
   }
@@ -150,10 +147,8 @@ export async function updateMission(tx: DbOrTx, userId: string, id: string, inpu
     throw conflict('O prazo já passou: o reagendamento precisa ser feito antes do prazo.');
   }
   const weights = await validateMissionInput(tx, userId, input);
-  const [updated] = await tx
-    .update(missions)
-    .set({
-      title: input.title,
+  const updated = await updateMissionRow(tx, id, {
+    title: input.title,
       description: input.description,
       type: input.type,
       difficulty: input.difficulty,
@@ -169,17 +164,13 @@ export async function updateMission(tx: DbOrTx, userId: string, id: string, inpu
       isSecret: input.isSecret,
       evidenceRequired: input.evidenceRequired,
       priority: input.priority,
-      attributeWeights: weights,
-      updatedAt: new Date(),
-    })
-    .where(eq(missions.id, id))
-    .returning();
+    attributeWeights: weights,
+  });
 
   // Objetivos: atualiza os existentes, cria novos e remove os ausentes.
-  const existing = await tx.select().from(missionObjectives).where(eq(missionObjectives.missionId, id));
+  const existing = await listObjectives(tx, id);
   const keep = new Set(input.objectives.map((o) => o.id).filter(Boolean) as string[]);
-  const toDelete = existing.filter((o) => !keep.has(o.id)).map((o) => o.id);
-  if (toDelete.length) await tx.delete(missionObjectives).where(inArray(missionObjectives.id, toDelete));
+  await deleteObjectives(tx, existing.filter((o) => !keep.has(o.id)).map((o) => o.id));
   for (const [i, o] of input.objectives.entries()) {
     const values = {
       title: o.title,
@@ -192,35 +183,28 @@ export async function updateMission(tx: DbOrTx, userId: string, id: string, inpu
       ...(o.metric === 'manual' && o.current !== undefined ? { current: o.current } : {}),
     };
     if (o.id && existing.some((e) => e.id === o.id)) {
-      await tx.update(missionObjectives).set(values).where(eq(missionObjectives.id, o.id));
+      await updateObjective(tx, o.id, values);
     } else {
-      await tx.insert(missionObjectives).values({ ...values, userId, missionId: id, current: o.current ?? 0 });
+      await insertObjectives(tx, [{ ...values, userId, missionId: id, current: o.current ?? 0 }]);
     }
   }
-  await tx.delete(missionPenaltyRules).where(eq(missionPenaltyRules.missionId, id));
-  if (input.penaltyRuleIds.length) {
-    await tx.insert(missionPenaltyRules).values(input.penaltyRuleIds.map((ruleId) => ({ userId, missionId: id, ruleId })));
-  }
+  await replaceMissionRules(tx, userId, id, input.penaltyRuleIds);
   if (m.dueDate !== (input.dueDate ?? null)) {
     await logEvent(tx, m, m.status, actor, 'Prazo alterado', { from: m.dueDate, to: input.dueDate ?? null });
   }
-  return updated!;
+  return updated;
 }
 
 /** Atualiza objetivos automáticos a partir dos registros e retorna o progresso composto. */
 export async function refreshObjectives(tx: DbOrTx, m: Mission, today: string) {
-  const objectives = await tx
-    .select()
-    .from(missionObjectives)
-    .where(eq(missionObjectives.missionId, m.id))
-    .orderBy(asc(missionObjectives.sortOrder));
+  const objectives = await listObjectives(tx, m.id);
   const from = m.startDate ?? m.createdAt.toISOString().slice(0, 10);
   const to = m.dueDate && m.dueDate < today ? m.dueDate : today;
   for (const o of objectives) {
     if (o.metric === 'manual') continue;
     const value = await metricValue(tx, m.userId, o.metric, { from, to, refId: o.metricRefId, excludeMissionId: m.id });
     if (value !== Number(o.current)) {
-      await tx.update(missionObjectives).set({ current: value }).where(eq(missionObjectives.id, o.id));
+      await updateObjective(tx, o.id, { current: value });
       o.current = value;
     }
   }
@@ -229,10 +213,7 @@ export async function refreshObjectives(tx: DbOrTx, m: Mission, today: string) {
 
 /** Atualiza missões ativas com objetivos automáticos e conclui as de modo automático. */
 export async function refreshActiveMissions(tx: DbOrTx, userId: string, today: string): Promise<string[]> {
-  const active = await tx
-    .select()
-    .from(missions)
-    .where(and(eq(missions.userId, userId), inArray(missions.status, ['available', 'in_progress'])));
+  const active = await listOpenMissions(tx, userId);
   const completed: string[] = [];
   for (const m of active) {
     const { objectives, progress } = await refreshObjectives(tx, m, today);
@@ -251,7 +232,7 @@ export async function completeMission(
   today: string,
   opts: { actor?: Actor; evidence?: string | null } = {},
 ) {
-  const m = await getMission(tx, userId, id, true);
+  const m = await getMissionForUpdate(tx, userId, id);
   if (m.status === 'completed') return { mission: m, reward: null };
   if (!canTransitionMission(m.status, 'completed')) {
     throw conflict(`Não é possível concluir uma missão ${MISSION_STATUS_LABELS[m.status].toLowerCase()}.`);
@@ -289,11 +270,7 @@ export async function completeMission(
     localDate: today,
     reward,
   });
-  const [updated] = await tx
-    .update(missions)
-    .set({ status: 'completed', completedAt: new Date(), completedOn: today, grantId: grant.grantId, evidence, updatedAt: new Date() })
-    .where(eq(missions.id, m.id))
-    .returning();
+  const updated = await updateMissionRow(tx, m.id, { status: 'completed', completedAt: new Date(), completedOn: today, grantId: grant.grantId, evidence });
   await logEvent(tx, m, 'completed', opts.actor ?? 'user', null, { xp: grant.xp, coins: grant.coins });
   await notify(tx, userId, {
     category: 'mission',
@@ -302,7 +279,7 @@ export async function completeMission(
     link: `/missoes/${m.id}`,
     dedupeKey: `mission-complete:${m.id}`,
   });
-  return { mission: updated!, reward: { ...grant, explanation: reward.explanation } };
+  return { mission: updated, reward: { ...grant, explanation: reward.explanation } };
 }
 
 /** Falha explícita ou por prazo: aplica as penalidades configuradas na missão. */
@@ -313,30 +290,17 @@ export async function failMission(
   today: string,
   opts: { actor: Actor; reason?: string | null; status?: 'failed' | 'expired'; suppressPenalty?: string | null },
 ) {
-  const m = await getMission(tx, userId, id, true);
+  const m = await getMissionForUpdate(tx, userId, id);
   const to = opts.status ?? 'failed';
   if (!canTransitionMission(m.status, to)) throw conflict(`Transição inválida: ${m.status} → ${to}`);
-  const [updated] = await tx
-    .update(missions)
-    .set({ status: to, statusReason: opts.reason ?? null, updatedAt: new Date() })
-    .where(eq(missions.id, id))
-    .returning();
+  const updated = await updateMissionRow(tx, id, { status: to, statusReason: opts.reason ?? null });
   await logEvent(tx, m, to, opts.actor, opts.reason ?? (opts.suppressPenalty ? `Sem penalidade: ${opts.suppressPenalty}` : null));
-  const rules = await tx
-    .select({ r: penaltyRules })
-    .from(missionPenaltyRules)
-    .innerJoin(penaltyRules, eq(penaltyRules.id, missionPenaltyRules.ruleId))
-    .where(eq(missionPenaltyRules.missionId, id));
+  const rules = await rulesOfMission(tx, id);
   if (rules.length && !opts.suppressPenalty) {
     // Falhas consecutivas da mesma série recorrente escalonam a penalidade.
     let consecutive = 1;
     if (m.templateId) {
-      const previous = await tx
-        .select({ status: missions.status })
-        .from(missions)
-        .where(and(eq(missions.templateId, m.templateId), inArray(missions.status, ['completed', 'failed', 'expired'])))
-        .orderBy(desc(missions.dueDate))
-        .limit(10);
+      const previous = await recentOutcomesOfSeries(tx, m.templateId);
       for (const p of previous.slice(1)) {
         if (p.status === 'completed') break;
         consecutive++;
@@ -344,7 +308,7 @@ export async function failMission(
     }
     await applyPenalties(tx, {
       userId,
-      rules: rules.map((r) => r.r),
+      rules,
       sourceType: 'mission',
       sourceId: m.id,
       sourceTitle: m.title,
@@ -354,7 +318,7 @@ export async function failMission(
       categoryId: m.categoryId,
     });
   }
-  return updated!;
+  return updated;
 }
 
 export async function transitionMission(
@@ -365,7 +329,7 @@ export async function transitionMission(
   today: string,
   opts: { reason?: string | null; dueDate?: string | null; actor?: Actor },
 ) {
-  const m = await getMission(tx, userId, id, true);
+  const m = await getMissionForUpdate(tx, userId, id);
   const actor = opts.actor ?? 'user';
   let to: MissionStatus = m.status;
   const patch: Partial<Mission> = {};
@@ -392,28 +356,20 @@ export async function transitionMission(
       if (opts.dueDate < today) throw badRequest('O novo prazo não pode estar no passado.');
       patch.dueDate = opts.dueDate;
       await logEvent(tx, m, m.status, actor, opts.reason ?? 'Reagendada', { from: m.dueDate, to: opts.dueDate });
-      const [u] = await tx.update(missions).set({ ...patch, updatedAt: new Date() }).where(eq(missions.id, id)).returning();
-      return u!;
+      return updateMissionRow(tx, id, patch);
     }
   }
   if (!canTransitionMission(m.status, to)) {
     throw conflict(`Transição inválida: ${MISSION_STATUS_LABELS[m.status]} → ${MISSION_STATUS_LABELS[to]}`);
   }
-  const [u] = await tx
-    .update(missions)
-    .set({ status: to, statusReason: opts.reason ?? null, updatedAt: new Date() })
-    .where(eq(missions.id, id))
-    .returning();
+  const u = await updateMissionRow(tx, id, { status: to, statusReason: opts.reason ?? null });
   await logEvent(tx, m, to, actor, opts.reason);
-  return u!;
+  return u;
 }
 
 /** Gera instâncias de modelos recorrentes para o período atual (idempotente por período). */
 export async function generateRecurringMissions(tx: DbOrTx, userId: string, today: string): Promise<number> {
-  const templates = await tx
-    .select()
-    .from(missionTemplates)
-    .where(and(eq(missionTemplates.userId, userId), eq(missionTemplates.active, true)));
+  const templates = await listActiveTemplates(tx, userId);
   let created = 0;
   for (const t of templates) {
     if (t.recurrence === 'none') continue;
@@ -479,14 +435,9 @@ export async function generateRecurringMissions(tx: DbOrTx, userId: string, toda
 
 /** Expira/falha missões cujo prazo terminou em `date`. */
 export async function closeOverdueMissions(tx: DbOrTx, userId: string, date: string, isUnavailable: (d: string, categoryId: string | null) => boolean) {
-  const overdue = await tx
-    .select()
-    .from(missions)
-    .where(and(eq(missions.userId, userId), inArray(missions.status, ['available', 'in_progress']), eq(missions.dueDate, date)));
+  const overdue = await listOpenMissionsDueOn(tx, userId, date);
   for (const m of overdue) {
-    const hasRules =
-      (await tx.select({ id: missionPenaltyRules.ruleId }).from(missionPenaltyRules).where(eq(missionPenaltyRules.missionId, m.id)).limit(1))
-        .length > 0;
+    const hasRules = await missionHasPenaltyRules(tx, m.id);
     const unavailable = isUnavailable(date, m.categoryId);
     await failMission(tx, userId, m.id, addDays(date, 1), {
       actor: 'system',
@@ -500,10 +451,7 @@ export async function closeOverdueMissions(tx: DbOrTx, userId: string, date: str
 
 /** Missões que vencem hoje ou amanhã: notificação de prazo (uma por missão). */
 export async function notifyDeadlines(tx: DbOrTx, userId: string, today: string) {
-  const soon = await tx
-    .select()
-    .from(missions)
-    .where(and(eq(missions.userId, userId), inArray(missions.status, ['available', 'in_progress']), isNull(missions.completedAt)));
+  const soon = await listOpenUncompletedMissions(tx, userId);
   for (const m of soon) {
     if (!m.dueDate) continue;
     const days = diffDays(today, m.dueDate);

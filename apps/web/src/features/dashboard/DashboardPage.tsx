@@ -7,7 +7,7 @@ import type { AfterAction, Dashboard, Habit, Mission, RewardOutcome } from '../.
 import { AttributeRadar, DonutChart, StatusStrip, TimeSeriesChart } from '../../components/charts/Charts';
 import { Icon } from '../../components/ui/Icon';
 import { Coins, DifficultyBadge, RarityBadge } from '../../components/ui/domain';
-import { Badge, Button, EmptyState, ErrorState, Loading, PageHeader, Panel, ProgressBar, Stat } from '../../components/ui/primitives';
+import { Badge, EmptyState, ErrorState, Loading, PageHeader, Panel, ProgressBar, Stat } from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 
 const RECORD_LABEL: Record<string, string> = {

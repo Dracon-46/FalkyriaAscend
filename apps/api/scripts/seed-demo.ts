@@ -19,7 +19,7 @@ import { checkin } from '../src/application/habits';
 import { afterAction } from '../src/application/hooks';
 import { completeMission, createMission } from '../src/application/missions';
 import { logAssessment, logStudySession } from '../src/application/study';
-import { deleteUserData } from '../src/http/routes/core';
+import { deleteUserCascade } from '../src/persistence/repositories/users';
 
 const DEMO_EMAIL = 'demo@falkyria.local';
 const DAYS = 60;
@@ -32,7 +32,7 @@ await runMigrations(db);
 const [existing] = await db.select().from(users).where(eq(users.email, DEMO_EMAIL));
 if (existing) {
   if (!existing.isDemo) throw new Error('Existe um usuário real com o e-mail de demonstração; abortando.');
-  await db.transaction((tx) => deleteUserData(tx, existing.id));
+  await db.transaction((tx) => deleteUserCascade(tx, existing.id));
 }
 
 const start = new Date(Date.now() - DAYS * 86_400_000);

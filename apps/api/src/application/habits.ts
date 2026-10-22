@@ -1,4 +1,3 @@
-import { and, asc, eq, gte, lte } from 'drizzle-orm';
 import {
   addDays,
   computeHabitReward,
@@ -13,15 +12,31 @@ import {
   type HabitSchedule,
   type StreakEntry,
 } from '@rpg/engine';
-import type { DbOrTx } from '../persistence/client';
-import { habitCheckins, habitPenaltyRules, habits, penaltyRules, rewardGrants } from '../persistence/schema';
+import type { Habit } from '../persistence/models';
+import {
+  checkinsOfHabit,
+  checkinsOfHabitBetween,
+  countDoneBetween,
+  deleteCheckin,
+  findCheckin,
+  findHabit,
+  insertCheckin,
+  insertCheckinIfAbsent,
+  checkinsOfUserBetween,
+  listCurrentHabits,
+  lockHabit,
+  setHabitStreak,
+} from '../persistence/repositories/habits';
+import { findGrant } from '../persistence/repositories/ledger';
+import { rulesOfHabit } from '../persistence/repositories/penalties';
+import { type DbOrTx } from '../persistence/unit-of-work';
 import { badRequest, conflict, notFound } from '../shared/errors';
 import { getActiveConfig } from './config';
 import { currentMultiplier, xpTodayBySource } from './gameplay';
 import { applyPenalties } from './penalties';
 import { grantReward, reverseGrant } from './rewards';
 
-export type Habit = typeof habits.$inferSelect;
+export type { Habit };
 
 export function scheduleOf(h: Habit): HabitSchedule {
   return {
@@ -34,19 +49,14 @@ export function scheduleOf(h: Habit): HabitSchedule {
 }
 
 export async function getHabit(tx: DbOrTx, userId: string, id: string, lock = false): Promise<Habit> {
-  const q = tx.select().from(habits).where(and(eq(habits.id, id), eq(habits.userId, userId)));
-  const [h] = lock ? await q.for('update') : await q;
+  const h = lock ? await lockHabit(tx, userId, id) : await findHabit(tx, userId, id);
   if (!h) throw notFound('Hábito');
   return h;
 }
 
 /** Entradas de sequência: diárias ou, para metas semanais, uma por semana encerrada. */
 export async function streakEntries(tx: DbOrTx, h: Habit, today: string): Promise<StreakEntry[]> {
-  const rows = await tx
-    .select({ date: habitCheckins.localDate, status: habitCheckins.status })
-    .from(habitCheckins)
-    .where(eq(habitCheckins.habitId, h.id))
-    .orderBy(asc(habitCheckins.localDate));
+  const rows = await checkinsOfHabit(tx, h.id);
   if (h.frequency !== 'times_per_week') return rows;
   const weeks = new Map<string, { done: number; excused: number; monday: string }>();
   for (const r of rows) {
@@ -73,7 +83,7 @@ export async function streakEntries(tx: DbOrTx, h: Habit, today: string): Promis
 export async function refreshStreak(tx: DbOrTx, h: Habit, today: string): Promise<{ current: number; best: number; milestones: number[] }> {
   const state = computeStreak(await streakEntries(tx, h, today));
   const best = Math.max(state.best, h.bestStreak);
-  await tx.update(habits).set({ currentStreak: state.current, bestStreak: best }).where(eq(habits.id, h.id));
+  await setHabitStreak(tx, h.id, state.current, best);
   const { config } = await getActiveConfig(tx, h.userId);
   const crossed = streakMilestonesCrossed(h.bestStreak, best, config.streakMilestones.map((m) => m.days));
   for (const days of crossed) {
@@ -91,15 +101,6 @@ export async function refreshStreak(tx: DbOrTx, h: Habit, today: string): Promis
     });
   }
   return { current: state.current, best, milestones: crossed };
-}
-
-async function habitRules(tx: DbOrTx, habitId: string) {
-  const rows = await tx
-    .select({ r: penaltyRules })
-    .from(habitPenaltyRules)
-    .innerJoin(penaltyRules, eq(penaltyRules.id, habitPenaltyRules.ruleId))
-    .where(eq(habitPenaltyRules.habitId, habitId));
-  return rows.map((r) => r.r);
 }
 
 /**
@@ -122,10 +123,7 @@ export async function checkin(
   if (h.frequency !== 'times_per_week' && !isScheduledOn(scheduleOf(h), date)) {
     throw badRequest('Este hábito não está programado para este dia.');
   }
-  const [existing] = await tx
-    .select()
-    .from(habitCheckins)
-    .where(and(eq(habitCheckins.habitId, habitId), eq(habitCheckins.localDate, date)));
+  const existing = await findCheckin(tx, habitId, date);
   if (existing) {
     if (existing.status === input.status) return { checkin: existing, reward: null, streak: null };
     throw conflict('Já existe um registro para este dia. Desfaça-o antes de alterar.');
@@ -137,19 +135,8 @@ export async function checkin(
     let eligible = true;
     if (h.frequency === 'times_per_week') {
       const monday = startOfIsoWeek(date);
-      const doneThisWeek = await tx
-        .select({ id: habitCheckins.id })
-        .from(habitCheckins)
-        .where(
-          and(
-            eq(habitCheckins.habitId, habitId),
-            eq(habitCheckins.status, 'done'),
-            gte(habitCheckins.localDate, monday),
-            lte(habitCheckins.localDate, addDays(monday, 6)),
-          ),
-        );
       // Execuções além da meta semanal são registradas, mas não recompensadas.
-      eligible = doneThisWeek.length < h.timesPerWeek;
+      eligible = (await countDoneBetween(tx, habitId, monday, addDays(monday, 6))) < h.timesPerWeek;
     }
     if (eligible) {
       const { config } = await getActiveConfig(tx, userId);
@@ -174,29 +161,23 @@ export async function checkin(
       reward = { xp: g.xp, coins: g.coins, explanation: r.explanation, levelUps: g.levelUps };
     }
   }
-  const [row] = await tx
-    .insert(habitCheckins)
-    .values({ userId, habitId, localDate: date, status: input.status, note: input.note ?? null, grantId })
-    .returning();
+  const row = await insertCheckin(tx, { userId, habitId, localDate: date, status: input.status, note: input.note ?? null, grantId });
   const streak = await refreshStreak(tx, h, today);
-  return { checkin: row!, reward, streak };
+  return { checkin: row, reward, streak };
 }
 
 /** Desfaz um registro feito pelo usuário hoje (ex.: clique por engano), estornando a recompensa. */
 export async function undoCheckin(tx: DbOrTx, userId: string, habitId: string, date: string, today: string) {
   const h = await getHabit(tx, userId, habitId, true);
   if (date !== today) throw conflict('Somente registros de hoje podem ser desfeitos. Para correções, use o histórico.');
-  const [c] = await tx
-    .select()
-    .from(habitCheckins)
-    .where(and(eq(habitCheckins.habitId, habitId), eq(habitCheckins.localDate, date)));
+  const c = await findCheckin(tx, habitId, date);
   if (!c) throw notFound('Registro');
   if (c.source !== 'user') throw conflict('Registros gerados pela avaliação diária não podem ser desfeitos aqui.');
   if (c.grantId) {
-    const [g] = await tx.select().from(rewardGrants).where(eq(rewardGrants.id, c.grantId));
+    const g = await findGrant(tx, c.grantId);
     if (g && !g.reversedAt) await reverseGrant(tx, userId, c.grantId, 'Registro desfeito pelo usuário', userId);
   }
-  await tx.delete(habitCheckins).where(eq(habitCheckins.id, c.id));
+  await deleteCheckin(tx, c.id);
   await refreshStreak(tx, h, today);
 }
 
@@ -218,10 +199,7 @@ export async function evaluateHabitDay(tx: DbOrTx, h: Habit, date: string, ctx: 
     if (new Date(`${date}T00:00:00Z`).getUTCDay() !== 0) return null; // avalia no domingo
     if (paused) return null;
     const monday = startOfIsoWeek(date);
-    const rows = await tx
-      .select({ status: habitCheckins.status })
-      .from(habitCheckins)
-      .where(and(eq(habitCheckins.habitId, h.id), gte(habitCheckins.localDate, monday), lte(habitCheckins.localDate, date)));
+    const rows = await checkinsOfHabitBetween(tx, h.id, monday, date);
     let excusedDays = rows.filter((r) => r.status === 'excused' || r.status === 'rest').length;
     for (let d = monday; d <= date; d = addDays(d, 1)) if (ctx.isUnavailable(d, h.categoryId)) excusedDays++;
     const s = weeklyShortfall(scheduleOf(h), date, rows.filter((r) => r.status === 'done').length, Math.min(7, excusedDays));
@@ -229,7 +207,7 @@ export async function evaluateHabitDay(tx: DbOrTx, h: Habit, date: string, ctx: 
     if (ctx.penaltiesSuspendedUntil && ctx.penaltiesSuspendedUntil >= date) return 'missed';
     await applyPenalties(tx, {
       userId: h.userId,
-      rules: await habitRules(tx, h.id),
+      rules: await rulesOfHabit(tx, h.id),
       sourceType: 'habit',
       sourceId: h.id,
       sourceTitle: `${h.title} (meta semanal ${s.done}/${s.target})`,
@@ -242,14 +220,10 @@ export async function evaluateHabitDay(tx: DbOrTx, h: Habit, date: string, ctx: 
   }
 
   if (!isScheduledOn(scheduleOf(h), date)) return null;
-  const [existing] = await tx
-    .select({ id: habitCheckins.id })
-    .from(habitCheckins)
-    .where(and(eq(habitCheckins.habitId, h.id), eq(habitCheckins.localDate, date)));
-  if (existing) return null;
+  if (await findCheckin(tx, h.id, date)) return null;
 
   const insert = (status: 'excused' | 'tolerated' | 'missed', note: string | null) =>
-    tx.insert(habitCheckins).values({ userId: h.userId, habitId: h.id, localDate: date, status, note, source: 'evaluation' }).onConflictDoNothing();
+    insertCheckinIfAbsent(tx, { userId: h.userId, habitId: h.id, localDate: date, status, note, source: 'evaluation' });
 
   if (paused) {
     await insert('excused', 'Hábito pausado');
@@ -264,12 +238,8 @@ export async function evaluateHabitDay(tx: DbOrTx, h: Habit, date: string, ctx: 
     return 'excused';
   }
 
-  const rules = await habitRules(tx, h.id);
-  const history = await tx
-    .select({ date: habitCheckins.localDate, status: habitCheckins.status })
-    .from(habitCheckins)
-    .where(and(eq(habitCheckins.habitId, h.id), gte(habitCheckins.localDate, addDays(date, -60)), lte(habitCheckins.localDate, date)))
-    .orderBy(asc(habitCheckins.localDate));
+  const rules = await rulesOfHabit(tx, h.id);
+  const history = await checkinsOfHabitBetween(tx, h.id, addDays(date, -60), date);
   const noTolerance = rules.some((r) => r.type === 'streak_reset' && r.active);
   if (!noTolerance && isMissTolerated(date, history, h.tolerancePerWeek)) {
     await insert('tolerated', `Dentro da tolerância (${h.tolerancePerWeek}/semana)`);
@@ -297,4 +267,23 @@ export async function evaluateHabitDay(tx: DbOrTx, h: Habit, date: string, ctx: 
     categoryId: h.categoryId,
   });
   return 'missed';
+}
+
+/** Hábitos ativos e pausados com o estado do dia, a semana e os últimos 14 dias. */
+export async function habitsForDay(db: DbOrTx, userId: string, today: string) {
+  const list = await listCurrentHabits(db, userId);
+  const monday = startOfIsoWeek(today);
+  const checkins = await checkinsOfUserBetween(db, userId, addDays(today, -13), today);
+  return list.map((h) => {
+    const mine = checkins.filter((c) => c.habitId === h.id);
+    const todayCheckin = mine.find((c) => c.localDate === today) ?? null;
+    const weekDone = mine.filter((c) => c.localDate >= monday && c.status === 'done').length;
+    const scheduledToday = h.frequency === 'times_per_week' ? weekDone < h.timesPerWeek || todayCheckin !== null : isScheduledOn(scheduleOf(h), today);
+    const last14 = Array.from({ length: 14 }, (_, i) => {
+      const d = addDays(today, i - 13);
+      const c = mine.find((x) => x.localDate === d);
+      return { date: d, status: c?.status ?? (h.frequency !== 'times_per_week' && isScheduledOn(scheduleOf(h), d) ? (d === today ? 'pending' : 'none') : 'off') };
+    });
+    return { ...h, scheduledToday, todayStatus: todayCheckin?.status ?? null, weekDone, last14 };
+  });
 }

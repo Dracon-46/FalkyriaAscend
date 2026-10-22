@@ -1,5 +1,5 @@
-import type { DbOrTx } from '../persistence/client';
-import { auditLog } from '../persistence/schema';
+import { insertAuditEntry } from '../persistence/repositories/audit';
+import type { DbOrTx } from '../persistence/unit-of-work';
 
 export interface AuditInput {
   actorId: string | null;
@@ -28,7 +28,7 @@ export function redact(value: unknown): unknown {
 }
 
 export async function audit(db: DbOrTx, input: AuditInput): Promise<void> {
-  await db.insert(auditLog).values({
+  await insertAuditEntry(db, {
     actorId: input.actorId,
     userId: input.userId,
     action: input.action,

@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+import type { SessionUser } from '../application/use-cases/auth';
 import { badRequest, forbidden, unauthorized } from '../shared/errors';
 
 /** Valida a entrada com Zod; erros viram 400 com a lista de campos inválidos. */
@@ -14,13 +15,7 @@ export function parse<T extends z.ZodType>(schema: T, data: unknown): z.infer<T>
 
 export const idParam = z.object({ id: z.uuid('Identificador inválido') });
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: 'admin' | 'user';
-  displayName: string;
-  sessionId: string;
-}
+export type AuthUser = SessionUser;
 
 export function requireUser(req: FastifyRequest): AuthUser {
   if (!req.user) throw unauthorized();

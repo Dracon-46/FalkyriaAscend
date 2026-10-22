@@ -1,25 +1,24 @@
-import { and, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import { addDays, computePenalty, startOfIsoWeek, type PenaltyRule } from '@rpg/engine';
-import type { DbOrTx } from '../persistence/client';
+import type { PenaltyApplication, PenaltyRule as RuleRow } from '../persistence/models';
+import { findActiveGrantByKey } from '../persistence/repositories/ledger';
+import { activeMissionIdsInCategory, findMission } from '../persistence/repositories/missions';
 import {
-  coinTransactions,
-  missionObjectives,
-  missions,
-  penaltyApplications,
-  penaltyRules,
-  rewardGrants,
-  skills,
-  userSettings,
-  wallets,
-} from '../persistence/schema';
+  activeRewardLocks,
+  insertApplicationIfNew,
+  lockApplication,
+  markApplicationReversed,
+  reduceManualObjectives,
+} from '../persistence/repositories/penalties';
+import { findSkill } from '../persistence/repositories/progression';
+import { findSettings } from '../persistence/repositories/settings';
+import { findPenaltyCoinTx, findWallet, sumCoinsEarned, sumPenaltyCoinsLost } from '../persistence/repositories/wallets';
+import type { DbOrTx } from '../persistence/unit-of-work';
 import { conflict, notFound } from '../shared/errors';
 import { audit } from './audit';
 import { getActiveConfig } from './config';
 import { notify } from './notifications';
 import { grantReward, reverseGrant } from './rewards';
 import { postCoinTx } from './wallet';
-
-type RuleRow = typeof penaltyRules.$inferSelect;
 
 export interface ApplyPenaltiesInput {
   userId: string;
@@ -34,65 +33,22 @@ export interface ApplyPenaltiesInput {
   categoryId?: string | null;
 }
 
-async function coinsLost(tx: DbOrTx, userId: string, from: string, to: string): Promise<number> {
-  const [r] = await tx
-    .select({ total: sql<number>`coalesce(-sum(${coinTransactions.amount}), 0)::int` })
-    .from(coinTransactions)
-    .where(
-      and(
-        eq(coinTransactions.userId, userId),
-        eq(coinTransactions.kind, 'penalty'),
-        gte(coinTransactions.localDate, from),
-        lte(coinTransactions.localDate, to),
-      ),
-    );
-  // Penalidades revertidas devolvem moedas; o limite considera apenas o que ficou aplicado.
-  const [rev] = await tx
-    .select({ total: sql<number>`coalesce(sum(${coinTransactions.amount}), 0)::int` })
-    .from(coinTransactions)
-    .innerJoin(penaltyApplications, eq(penaltyApplications.id, coinTransactions.penaltyId))
-    .where(
-      and(
-        eq(coinTransactions.userId, userId),
-        eq(coinTransactions.kind, 'reversal'),
-        gte(penaltyApplications.localDate, from),
-        lte(penaltyApplications.localDate, to),
-      ),
-    );
-  return Math.max(0, (r?.total ?? 0) - (rev?.total ?? 0));
-}
-
-async function coinsEarned(tx: DbOrTx, userId: string, from: string, to: string): Promise<number> {
-  const [r] = await tx
-    .select({ total: sql<number>`coalesce(sum(${coinTransactions.amount}), 0)::int` })
-    .from(coinTransactions)
-    .where(
-      and(
-        eq(coinTransactions.userId, userId),
-        eq(coinTransactions.kind, 'earn'),
-        gte(coinTransactions.localDate, from),
-        lte(coinTransactions.localDate, to),
-      ),
-    );
-  return r?.total ?? 0;
-}
-
 /** Aplica exatamente as regras configuradas para a origem. Idempotente por regra e ocorrência. */
 export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
-  const [settings] = await tx.select().from(userSettings).where(eq(userSettings.userId, input.userId));
+  const settings = await findSettings(tx, input.userId);
   if (settings && !settings.penaltiesEnabled) return [];
   const { config } = await getActiveConfig(tx, input.userId);
-  const applied: Array<typeof penaltyApplications.$inferSelect> = [];
+  const applied: PenaltyApplication[] = [];
 
   for (const rule of input.rules.filter((r) => r.active)) {
-    const [wallet] = await tx.select().from(wallets).where(eq(wallets.userId, input.userId));
+    const wallet = await findWallet(tx, input.userId);
     const ctx = {
       consecutiveMisses: input.consecutiveMisses,
-      coinsLostToday: await coinsLost(tx, input.userId, input.localDate, input.localDate),
-      coinsLostThisWeek: await coinsLost(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
+      coinsLostToday: await sumPenaltyCoinsLost(tx, input.userId, input.localDate, input.localDate),
+      coinsLostThisWeek: await sumPenaltyCoinsLost(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
       balance: wallet?.balance ?? 0,
       allowSkillXpLoss: settings?.allowSkillXpPenalty ?? false,
-      coinsEarnedThisWeek: await coinsEarned(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
+      coinsEarnedThisWeek: await sumCoinsEarned(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
     };
     const engineRule: PenaltyRule = {
       type: rule.type,
@@ -105,10 +61,8 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
     const effect = computePenalty(engineRule, ctx, config);
     const expiresOn = effect.durationDays ? addDays(input.localDate, effect.durationDays - 1) : null;
 
-    const inserted = await tx
-      .insert(penaltyApplications)
-      .values({
-        userId: input.userId,
+    const app = await insertApplicationIfNew(tx, {
+      userId: input.userId,
         ruleId: rule.id,
         ruleSnapshot: rule,
         idempotencyKey: `${input.keyBase}:rule:${rule.id}`,
@@ -124,11 +78,8 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
         expiresOn: rule.type === 'multiplier_reduction' || rule.type === 'reward_lock' ? expiresOn : null,
         targetItemId: rule.type === 'reward_lock' ? rule.targetItemId : null,
         targetSkillId: rule.type === 'skill_xp_loss' ? rule.targetSkillId : null,
-        explanation: effect.explanation,
-      })
-      .onConflictDoNothing()
-      .returning();
-    const app = inserted[0];
+      explanation: effect.explanation,
+    });
     if (!app) continue;
 
     if (rule.type === 'coin_loss' && effect.amount > 0) {
@@ -144,7 +95,7 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
     }
 
     if (rule.type === 'skill_xp_loss' && effect.amount > 0 && rule.targetSkillId) {
-      const [skill] = await tx.select().from(skills).where(eq(skills.id, rule.targetSkillId));
+      const skill = await findSkill(tx, rule.targetSkillId);
       const amount = Math.min(effect.amount, skill?.xp ?? 0);
       if (amount > 0) {
         await grantReward(tx, {
@@ -185,41 +136,17 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
 async function reduceMissionProgress(tx: DbOrTx, input: ApplyPenaltiesInput, amount: number) {
   let missionIds: string[] = [];
   if (input.sourceType === 'mission') {
-    const [m] = await tx.select({ parentId: missions.parentId }).from(missions).where(eq(missions.id, input.sourceId));
+    const m = await findMission(tx, input.userId, input.sourceId);
     if (m?.parentId) missionIds = [m.parentId];
   } else if (input.categoryId) {
-    const rows = await tx
-      .select({ id: missions.id })
-      .from(missions)
-      .where(
-        and(
-          eq(missions.userId, input.userId),
-          eq(missions.categoryId, input.categoryId),
-          inArray(missions.status, ['available', 'in_progress']),
-        ),
-      );
-    missionIds = rows.map((r) => r.id);
+    missionIds = await activeMissionIdsInCategory(tx, input.userId, input.categoryId);
   }
-  if (missionIds.length === 0) return;
-  await tx
-    .update(missionObjectives)
-    .set({ current: sql`greatest(0, ${missionObjectives.current} - ${amount})` })
-    .where(and(inArray(missionObjectives.missionId, missionIds), eq(missionObjectives.metric, 'manual')));
+  await reduceManualObjectives(tx, missionIds, amount);
 }
 
 /** Itens bloqueados por penalidades ativas (reward_lock). */
 export async function activeItemLocks(db: DbOrTx, userId: string, today: string): Promise<Map<string, string>> {
-  const rows = await db
-    .select({ itemId: penaltyApplications.targetItemId, until: penaltyApplications.expiresOn })
-    .from(penaltyApplications)
-    .where(
-      and(
-        eq(penaltyApplications.userId, userId),
-        eq(penaltyApplications.type, 'reward_lock'),
-        eq(penaltyApplications.status, 'applied'),
-        gte(penaltyApplications.expiresOn, today),
-      ),
-    );
+  const rows = await activeRewardLocks(db, userId, today);
   const map = new Map<string, string>();
   for (const r of rows) if (r.itemId && r.until) map.set(r.itemId, r.until > (map.get(r.itemId) ?? '') ? r.until : map.get(r.itemId)!);
   return map;
@@ -227,18 +154,11 @@ export async function activeItemLocks(db: DbOrTx, userId: string, today: string)
 
 /** Reverte uma penalidade aplicada incorretamente, devolvendo seus efeitos e registrando auditoria. */
 export async function revertPenalty(tx: DbOrTx, userId: string, penaltyId: string, reason: string, actorId: string | null) {
-  const [app] = await tx
-    .select()
-    .from(penaltyApplications)
-    .where(and(eq(penaltyApplications.id, penaltyId), eq(penaltyApplications.userId, userId)))
-    .for('update');
+  const app = await lockApplication(tx, userId, penaltyId);
   if (!app) throw notFound('Penalidade');
   if (app.status === 'reversed') throw conflict('Penalidade já revertida');
 
-  const [coinTx] = await tx
-    .select()
-    .from(coinTransactions)
-    .where(and(eq(coinTransactions.penaltyId, app.id), eq(coinTransactions.kind, 'penalty')));
+  const coinTx = await findPenaltyCoinTx(tx, app.id);
   if (coinTx) {
     await postCoinTx(tx, {
       userId,
@@ -252,17 +172,10 @@ export async function revertPenalty(tx: DbOrTx, userId: string, penaltyId: strin
       actorId,
     });
   }
-  const [skillGrant] = await tx
-    .select()
-    .from(rewardGrants)
-    .where(and(eq(rewardGrants.userId, userId), eq(rewardGrants.idempotencyKey, `penalty:${app.id}`), isNull(rewardGrants.reversedAt)));
+  const skillGrant = await findActiveGrantByKey(tx, userId, `penalty:${app.id}`);
   if (skillGrant) await reverseGrant(tx, userId, skillGrant.id, reason, actorId);
 
-  const [updated] = await tx
-    .update(penaltyApplications)
-    .set({ status: 'reversed', reversedAt: new Date(), reversalReason: reason })
-    .where(eq(penaltyApplications.id, app.id))
-    .returning();
+  const updated = await markApplicationReversed(tx, app.id, reason);
   await audit(tx, { actorId, userId, action: 'penalty.revert', entityType: 'penalty_applications', entityId: app.id, before: app, after: updated, meta: { reason } });
-  return updated!;
+  return updated;
 }

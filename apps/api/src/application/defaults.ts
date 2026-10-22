@@ -1,25 +1,10 @@
+/**
+ * Conteúdo inicial de cada conta. Tudo aqui é editável e opcional para o usuário: são pontos de
+ * partida (categorias, atributos, habilidades, loja, conquistas, regras), não dados de atividade.
+ */
 import { DEFAULT_GAME_CONFIG, DEFAULT_RANKS, addDays, type AchievementCriteria } from '@rpg/engine';
-import type { DbOrTx } from '../persistence/client';
-import {
-  achievements,
-  activityTypes,
-  attributes,
-  categories,
-  characterProgress,
-  exercises,
-  gameConfigs,
-  items,
-  knowledgeAreas,
-  levelRewards,
-  missionTemplates,
-  penaltyRules,
-  ranks,
-  seasons,
-  skills,
-  studySubjects,
-  userSettings,
-  wallets,
-} from '../persistence/schema';
+import { insertStarterContent, type StarterContent } from '../persistence/repositories/starter-content';
+import type { DbOrTx } from '../persistence/unit-of-work';
 
 export const DEFAULT_WIDGETS = [
   'character',
@@ -61,15 +46,15 @@ const CATEGORIES = [
   { name: 'Necessidades básicas', color: '#5f6b73', icon: 'bed', isBasicNeed: true, description: 'Sono, alimentação e descanso: podem ser registrados, mas nunca geram penalidade.' },
 ];
 
-const SKILL_TREE: Array<{ attr: string; name: string; icon: string; children: string[] }> = [
-  { attr: 'FOR', name: 'Treinamento de força', icon: 'dumbbell', children: ['Força máxima', 'Técnica', 'Resistência muscular'] },
-  { attr: 'RES', name: 'Condicionamento', icon: 'footprints', children: ['Corrida', 'Capacidade aeróbica', 'Ciclismo'] },
-  { attr: 'VIT', name: 'Recuperação', icon: 'heart-pulse', children: ['Mobilidade', 'Cuidados com a saúde'] },
-  { attr: 'INT', name: 'Conhecimento', icon: 'book-open', children: ['Economia', 'História', 'Tecnologia'] },
-  { attr: 'DIS', name: 'Autodomínio', icon: 'flame', children: ['Hábitos', 'Rotina'] },
-  { attr: 'ORG', name: 'Planejamento', icon: 'list-checks', children: ['Organização pessoal', 'Finanças pessoais'] },
-  { attr: 'EXE', name: 'Projetos', icon: 'hammer', children: ['Planejamento de projetos', 'Desenvolvimento', 'Conclusão'] },
-  { attr: 'END', name: 'Superação', icon: 'skull', children: ['Desafios difíceis', 'Provas de resistência'] },
+const SKILL_TREE: StarterContent['skillTree'] = [
+  { attributeCode: 'FOR', name: 'Treinamento de força', icon: 'dumbbell', children: ['Força máxima', 'Técnica', 'Resistência muscular'] },
+  { attributeCode: 'RES', name: 'Condicionamento', icon: 'footprints', children: ['Corrida', 'Capacidade aeróbica', 'Ciclismo'] },
+  { attributeCode: 'VIT', name: 'Recuperação', icon: 'heart-pulse', children: ['Mobilidade', 'Cuidados com a saúde'] },
+  { attributeCode: 'INT', name: 'Conhecimento', icon: 'book-open', children: ['Economia', 'História', 'Tecnologia'] },
+  { attributeCode: 'DIS', name: 'Autodomínio', icon: 'flame', children: ['Hábitos', 'Rotina'] },
+  { attributeCode: 'ORG', name: 'Planejamento', icon: 'list-checks', children: ['Organização pessoal', 'Finanças pessoais'] },
+  { attributeCode: 'EXE', name: 'Projetos', icon: 'hammer', children: ['Planejamento de projetos', 'Desenvolvimento', 'Conclusão'] },
+  { attributeCode: 'END', name: 'Superação', icon: 'skull', children: ['Desafios difíceis', 'Provas de resistência'] },
 ];
 
 const ach = (
@@ -125,182 +110,136 @@ const ACHIEVEMENTS = [
   ach('explorer', 'Explorador do reino', 'Visite 10 áreas diferentes do aplicativo.', 'Exploração do aplicativo', 'common', [{ metric: 'distinct_pages_visited', gte: 10 }], 30, 15, 'compass', true),
 ];
 
-/**
- * Cria o conteúdo inicial editável de um usuário: configuração, atributos, árvore de habilidades,
- * categorias, regras de penalidade, loja, conquistas, ranks, marcos de nível e uma temporada.
- * Nada aqui é "dado de atividade": não há XP, missões concluídas ou histórico falso.
- */
-export async function seedUserDefaults(tx: DbOrTx, userId: string, today: string): Promise<void> {
-  await tx.insert(userSettings).values({ userId, dashboardWidgets: { widgets: DEFAULT_WIDGETS, periodDays: 30 } }).onConflictDoNothing();
-  await tx.insert(characterProgress).values({ userId }).onConflictDoNothing();
-  await tx.insert(wallets).values({ userId }).onConflictDoNothing();
-  await tx.insert(gameConfigs).values({ userId, version: 1, config: DEFAULT_GAME_CONFIG, active: true, note: 'Configuração inicial calibrada' });
-  await tx.insert(ranks).values(DEFAULT_RANKS.map((r) => ({ ...r, userId })));
+const RANK_TITLE_RARITIES = ['common', 'uncommon', 'uncommon', 'rare', 'rare', 'epic', 'legendary', 'mythic'] as const;
 
-  const cats = await tx
-    .insert(categories)
-    .values(CATEGORIES.map((c, i) => ({ userId, sortOrder: i, isBasicNeed: false, ...c })))
-    .returning();
-  const catId = (name: string) => cats.find((c) => c.name === name)!.id;
-
-  const attrs = await tx
-    .insert(attributes)
-    .values(ATTRIBUTES.map((a, i) => ({ ...a, userId, sortOrder: i })))
-    .returning();
-  const attrId = (code: string) => attrs.find((a) => a.code === code)!.id;
-
-  const skillIds: Record<string, string> = {};
-  for (const [i, branch] of SKILL_TREE.entries()) {
-    const [root] = await tx
-      .insert(skills)
-      .values({ userId, attributeId: attrId(branch.attr), name: branch.name, icon: branch.icon, sortOrder: i })
-      .returning();
-    skillIds[branch.name] = root!.id;
-    const children = await tx
-      .insert(skills)
-      .values(branch.children.map((name, j) => ({ userId, attributeId: attrId(branch.attr), parentId: root!.id, name, icon: branch.icon, sortOrder: j })))
-      .returning();
-    for (const c of children) skillIds[c.name] = c.id;
-  }
-
-  const [social, tech] = await tx
-    .insert(knowledgeAreas)
-    .values([
-      { userId, name: 'Ciências sociais', description: 'Economia, História e áreas afins.', color: '#c9a84c' },
-      { userId, name: 'Tecnologia', description: 'Programação, sistemas e computação.', color: '#3b6fa3' },
-    ])
-    .returning();
-  await tx.insert(studySubjects).values([
-    { userId, areaId: social!.id, skillId: skillIds['Economia']!, name: 'Economia', color: '#c9a84c' },
-    { userId, areaId: social!.id, skillId: skillIds['História']!, name: 'História', color: '#a37b3b' },
-    { userId, areaId: tech!.id, skillId: skillIds['Tecnologia']!, name: 'Tecnologia', color: '#3b6fa3' },
-  ]);
-
-  await tx.insert(activityTypes).values([
-    { userId, name: 'Musculação', category: 'strength', icon: 'dumbbell', skillId: skillIds['Técnica']!, intensity: 1, attributeWeights: { FOR: 0.7, DIS: 0.15, END: 0.15 } },
-    { userId, name: 'Corrida', category: 'run', icon: 'footprints', skillId: skillIds['Corrida']!, intensity: 1.1, attributeWeights: { RES: 0.7, VIT: 0.1, END: 0.2 } },
-    { userId, name: 'Caminhada', category: 'walk', icon: 'footprints', skillId: skillIds['Capacidade aeróbica']!, intensity: 0.7, attributeWeights: { RES: 0.5, VIT: 0.5 } },
-    { userId, name: 'Ciclismo', category: 'cycle', icon: 'bike', skillId: skillIds['Ciclismo']!, intensity: 1, attributeWeights: { RES: 0.7, VIT: 0.3 } },
-    { userId, name: 'Mobilidade', category: 'mobility', icon: 'stretch-horizontal', skillId: skillIds['Mobilidade']!, intensity: 0.6, attributeWeights: { VIT: 1 } },
-  ]);
-  await tx.insert(exercises).values(
-    [
+/** Monta o conteúdo inicial; `today` define o início da primeira temporada. */
+export function starterContent(today: string): StarterContent {
+  const promotedRanks = DEFAULT_RANKS.filter((r) => r.minLevel > 1);
+  return {
+    dashboardWidgets: { widgets: DEFAULT_WIDGETS, periodDays: 30 },
+    gameConfig: DEFAULT_GAME_CONFIG,
+    ranks: DEFAULT_RANKS.map((r) => ({ ...r })),
+    categories: CATEGORIES.map((c, i) => ({ sortOrder: i, isBasicNeed: false, ...c })),
+    attributes: ATTRIBUTES.map((a, i) => ({ ...a, sortOrder: i })),
+    skillTree: SKILL_TREE,
+    knowledgeAreas: [
+      { name: 'Ciências sociais', description: 'Economia, História e áreas afins.', color: '#c9a84c' },
+      { name: 'Tecnologia', description: 'Programação, sistemas e computação.', color: '#3b6fa3' },
+    ],
+    subjects: [
+      { area: 'Ciências sociais', skill: 'Economia', name: 'Economia', color: '#c9a84c' },
+      { area: 'Ciências sociais', skill: 'História', name: 'História', color: '#a37b3b' },
+      { area: 'Tecnologia', skill: 'Tecnologia', name: 'Tecnologia', color: '#3b6fa3' },
+    ],
+    activityTypes: [
+      { name: 'Musculação', category: 'strength', icon: 'dumbbell', skill: 'Técnica', intensity: 1, attributeWeights: { FOR: 0.7, DIS: 0.15, END: 0.15 } },
+      { name: 'Corrida', category: 'run', icon: 'footprints', skill: 'Corrida', intensity: 1.1, attributeWeights: { RES: 0.7, VIT: 0.1, END: 0.2 } },
+      { name: 'Caminhada', category: 'walk', icon: 'footprints', skill: 'Capacidade aeróbica', intensity: 0.7, attributeWeights: { RES: 0.5, VIT: 0.5 } },
+      { name: 'Ciclismo', category: 'cycle', icon: 'bike', skill: 'Ciclismo', intensity: 1, attributeWeights: { RES: 0.7, VIT: 0.3 } },
+      { name: 'Mobilidade', category: 'mobility', icon: 'stretch-horizontal', skill: 'Mobilidade', intensity: 0.6, attributeWeights: { VIT: 1 } },
+    ],
+    exercises: [
       ['Supino reto', 'Peito'],
       ['Agachamento livre', 'Pernas'],
       ['Levantamento terra', 'Posterior'],
       ['Barra fixa', 'Costas'],
       ['Desenvolvimento', 'Ombros'],
       ['Remada curvada', 'Costas'],
-    ].map(([name, muscleGroup]) => ({ userId, name: name!, muscleGroup: muscleGroup! })),
-  );
-
-  await tx.insert(penaltyRules).values([
-    { userId, name: 'Registro de falha', type: 'failure_record', description: 'Apenas registra a falha no histórico. Recomendado como padrão.' },
-    { userId, name: 'Multa leve', type: 'coin_loss', baseAmount: 5, escalationStep: 5, maxAmount: 20, description: '5 moedas na 1ª falha, +5 por falha consecutiva, no máximo 20.' },
-    { userId, name: 'Multa de missão crítica', type: 'coin_loss', baseAmount: 15, escalationStep: 10, maxAmount: 40, description: 'Para missões com prazo crítico.' },
-    { userId, name: 'Freio de consistência', type: 'multiplier_reduction', reductionPct: 0.05, durationDays: 3, baseAmount: 3, maxAmount: 3, description: 'Reduz o multiplicador de consistência em 5% por 3 dias.' },
-    { userId, name: 'Sem tolerância', type: 'streak_reset', description: 'A falha quebra a sequência mesmo havendo tolerância.' },
-  ]);
-
-  const shop = await tx
-    .insert(items)
-    .values([
-      { userId, name: '1 hora de lazer livre', kind: 'real_reward', category: 'Lazer', price: 60, icon: 'gamepad-2', description: 'Uma hora reservada para lazer sem culpa.' },
-      { userId, name: 'Episódio de série', kind: 'real_reward', category: 'Lazer', price: 40, icon: 'tv' },
-      { userId, name: 'Sessão de cinema em casa', kind: 'real_reward', category: 'Lazer', price: 250, icon: 'clapperboard', cooldownDays: 3 },
-      { userId, name: 'Refeição especial', kind: 'real_reward', category: 'Recompensas pessoais', price: 300, icon: 'utensils', cooldownDays: 7 },
-      { userId, name: 'Compra planejada (pequena)', kind: 'real_reward', category: 'Recompensas especiais', price: 1000, icon: 'shopping-bag', rarity: 'rare', cooldownDays: 14 },
-      { userId, name: 'Experiência especial', kind: 'real_reward', category: 'Recompensas especiais', price: 3000, icon: 'tent', rarity: 'epic', minLevel: 10 },
-      { userId, name: 'Item físico desejado', kind: 'real_reward', category: 'Recompensas especiais', price: 5000, icon: 'gift', rarity: 'legendary', minLevel: 15 },
-      { userId, name: 'Fragmento rúnico', kind: 'collectible', category: 'Itens colecionáveis', price: 150, icon: 'gem', rarity: 'uncommon', purchaseLimit: 12 },
-      { userId, name: 'Moldura de bronze', kind: 'frame', category: 'Molduras', price: 300, icon: 'square', rarity: 'uncommon', payload: { color: '#b87333' } },
-      { userId, name: 'Moldura de prata', kind: 'frame', category: 'Molduras', price: 900, icon: 'square', rarity: 'rare', minLevel: 15, payload: { color: '#c0c0c0' } },
-      { userId, name: 'Aura dourada', kind: 'effect', category: 'Efeitos visuais', price: 600, icon: 'sun', rarity: 'rare', minLevel: 10, payload: { effect: 'aura-gold' } },
-      { userId, name: 'Título: O Persistente', kind: 'title', category: 'Títulos', price: 400, icon: 'scroll', rarity: 'uncommon', minLevel: 5, payload: { title: 'O Persistente' } },
-      { userId, name: 'Insígnia do Corredor', kind: 'badge', category: 'Insígnias', price: 500, icon: 'footprints', rarity: 'rare', payload: { badge: 'runner' } },
-    ])
-    .returning();
-  void shop;
-
-  const rankTitles = await tx
-    .insert(items)
-    .values(
-      DEFAULT_RANKS.filter((r) => r.minLevel > 1).map((r, i) => ({
-        userId,
+    ].map(([name, muscleGroup]) => ({ name: name!, muscleGroup: muscleGroup! })),
+    penaltyRules: [
+      { name: 'Registro de falha', type: 'failure_record', description: 'Apenas registra a falha no histórico. Recomendado como padrão.' },
+      { name: 'Multa leve', type: 'coin_loss', baseAmount: 5, escalationStep: 5, maxAmount: 20, description: '5 moedas na 1ª falha, +5 por falha consecutiva, no máximo 20.' },
+      { name: 'Multa de missão crítica', type: 'coin_loss', baseAmount: 15, escalationStep: 10, maxAmount: 40, description: 'Para missões com prazo crítico.' },
+      { name: 'Freio de consistência', type: 'multiplier_reduction', reductionPct: 0.05, durationDays: 3, baseAmount: 3, maxAmount: 3, description: 'Reduz o multiplicador de consistência em 5% por 3 dias.' },
+      { name: 'Sem tolerância', type: 'streak_reset', description: 'A falha quebra a sequência mesmo havendo tolerância.' },
+    ],
+    shopItems: [
+      { name: '1 hora de lazer livre', kind: 'real_reward', category: 'Lazer', price: 60, icon: 'gamepad-2', description: 'Uma hora reservada para lazer sem culpa.' },
+      { name: 'Episódio de série', kind: 'real_reward', category: 'Lazer', price: 40, icon: 'tv' },
+      { name: 'Sessão de cinema em casa', kind: 'real_reward', category: 'Lazer', price: 250, icon: 'clapperboard', cooldownDays: 3 },
+      { name: 'Refeição especial', kind: 'real_reward', category: 'Recompensas pessoais', price: 300, icon: 'utensils', cooldownDays: 7 },
+      { name: 'Compra planejada (pequena)', kind: 'real_reward', category: 'Recompensas especiais', price: 1000, icon: 'shopping-bag', rarity: 'rare', cooldownDays: 14 },
+      { name: 'Experiência especial', kind: 'real_reward', category: 'Recompensas especiais', price: 3000, icon: 'tent', rarity: 'epic', minLevel: 10 },
+      { name: 'Item físico desejado', kind: 'real_reward', category: 'Recompensas especiais', price: 5000, icon: 'gift', rarity: 'legendary', minLevel: 15 },
+      { name: 'Fragmento rúnico', kind: 'collectible', category: 'Itens colecionáveis', price: 150, icon: 'gem', rarity: 'uncommon', purchaseLimit: 12 },
+      { name: 'Moldura de bronze', kind: 'frame', category: 'Molduras', price: 300, icon: 'square', rarity: 'uncommon', payload: { color: '#b87333' } },
+      { name: 'Moldura de prata', kind: 'frame', category: 'Molduras', price: 900, icon: 'square', rarity: 'rare', minLevel: 15, payload: { color: '#c0c0c0' } },
+      { name: 'Aura dourada', kind: 'effect', category: 'Efeitos visuais', price: 600, icon: 'sun', rarity: 'rare', minLevel: 10, payload: { effect: 'aura-gold' } },
+      { name: 'Título: O Persistente', kind: 'title', category: 'Títulos', price: 400, icon: 'scroll', rarity: 'uncommon', minLevel: 5, payload: { title: 'O Persistente' } },
+      { name: 'Insígnia do Corredor', kind: 'badge', category: 'Insígnias', price: 500, icon: 'footprints', rarity: 'rare', payload: { badge: 'runner' } },
+    ],
+    levelMilestones: promotedRanks.map((r, i) => ({
+      level: r.minLevel,
+      description: `Rank ${r.code} — ${r.name}`,
+      coins: r.minLevel * 10,
+      title: {
         name: `Título: ${r.name}`,
         kind: 'title' as const,
         category: 'Títulos',
         price: null,
         icon: 'crown',
-        rarity: (['common', 'uncommon', 'uncommon', 'rare', 'rare', 'epic', 'legendary', 'mythic'] as const)[i] ?? 'rare',
+        rarity: RANK_TITLE_RARITIES[i] ?? 'rare',
         description: `Concedido ao alcançar o rank ${r.code} (nível ${r.minLevel}).`,
         payload: { title: r.name, rank: r.code },
-      })),
-    )
-    .returning();
-  await tx.insert(levelRewards).values(
-    DEFAULT_RANKS.filter((r) => r.minLevel > 1).map((r, i) => ({
-      userId,
-      level: r.minLevel,
-      description: `Rank ${r.code} — ${r.name}`,
-      itemId: rankTitles[i]!.id,
-      coins: r.minLevel * 10,
+      },
     })),
-  );
-
-  await tx.insert(achievements).values(ACHIEVEMENTS.map((a, i) => ({ ...a, userId, sortOrder: i })));
-
-  await tx.insert(missionTemplates).values([
-    {
-      userId,
-      title: 'Semana de desenvolvimento',
-      description: 'Missão composta semanal: estudos, treinos e hábitos essenciais. Conclui automaticamente.',
-      type: 'weekly',
-      difficulty: 'hard',
-      categoryId: catId('Projetos'),
-      recurrence: 'weekly',
-      durationDays: 7,
-      attributeWeights: { DIS: 0.4, EXE: 0.3, END: 0.3 },
-      objectives: [
-        { title: 'Estudar 5 horas', metric: 'study_minutes', target: 300, unit: 'min' },
-        { title: 'Treinar 3 vezes', metric: 'training_sessions', target: 3, unit: 'sessões' },
-        { title: 'Cumprir 20 hábitos', metric: 'habit_checkins', target: 20, unit: 'hábitos' },
-      ],
-      active: true,
+    achievements: ACHIEVEMENTS.map((a, i) => ({ ...a, sortOrder: i })),
+    missionTemplates: [
+      {
+        title: 'Semana de desenvolvimento',
+        description: 'Missão composta semanal: estudos, treinos e hábitos essenciais. Conclui automaticamente.',
+        type: 'weekly',
+        difficulty: 'hard',
+        category: 'Projetos',
+        recurrence: 'weekly',
+        durationDays: 7,
+        attributeWeights: { DIS: 0.4, EXE: 0.3, END: 0.3 },
+        objectives: [
+          { title: 'Estudar 5 horas', metric: 'study_minutes', target: 300, unit: 'min' },
+          { title: 'Treinar 3 vezes', metric: 'training_sessions', target: 3, unit: 'sessões' },
+          { title: 'Cumprir 20 hábitos', metric: 'habit_checkins', target: 20, unit: 'hábitos' },
+        ],
+        active: true,
+      },
+      {
+        title: 'Revisão semanal',
+        description: 'Revisar metas, agenda e prioridades da próxima semana.',
+        type: 'weekly',
+        difficulty: 'easy',
+        category: 'Casa e organização',
+        recurrence: 'weekly',
+        durationDays: 7,
+        attributeWeights: { ORG: 1 },
+        active: false,
+      },
+      {
+        title: 'Revisão mensal de metas',
+        description: 'Avaliar progresso das metas de longo prazo e ajustar o plano.',
+        type: 'monthly',
+        difficulty: 'moderate',
+        category: 'Projetos',
+        recurrence: 'monthly',
+        durationDays: 30,
+        attributeWeights: { ORG: 0.6, EXE: 0.4 },
+        active: false,
+      },
+    ],
+    season: {
+      name: 'Temporada I — O Despertar',
+      description: 'Primeira temporada: estabeleça a fundação de hábitos, estudos e treinos.',
+      theme: 'medieval',
+      startDate: today,
+      endDate: addDays(today, 89),
+      status: 'active',
     },
-    {
-      userId,
-      title: 'Revisão semanal',
-      description: 'Revisar metas, agenda e prioridades da próxima semana.',
-      type: 'weekly',
-      difficulty: 'easy',
-      categoryId: catId('Casa e organização'),
-      recurrence: 'weekly',
-      durationDays: 7,
-      attributeWeights: { ORG: 1 },
-      active: false,
-    },
-    {
-      userId,
-      title: 'Revisão mensal de metas',
-      description: 'Avaliar progresso das metas de longo prazo e ajustar o plano.',
-      type: 'monthly',
-      difficulty: 'moderate',
-      categoryId: catId('Projetos'),
-      recurrence: 'monthly',
-      durationDays: 30,
-      attributeWeights: { ORG: 0.6, EXE: 0.4 },
-      active: false,
-    },
-  ]);
+  };
+}
 
-  await tx.insert(seasons).values({
-    userId,
-    name: 'Temporada I — O Despertar',
-    description: 'Primeira temporada: estabeleça a fundação de hábitos, estudos e treinos.',
-    theme: 'medieval',
-    startDate: today,
-    endDate: addDays(today, 89),
-    status: 'active',
-  });
+/**
+ * Cria o conteúdo inicial editável de um usuário: configuração, atributos, árvore de habilidades,
+ * categorias, regras de penalidade, loja, conquistas, ranks, marcos de nível e uma temporada.
+ * Nada aqui é "dado de atividade": não há XP, missões concluídas ou histórico falso.
+ */
+export function seedUserDefaults(tx: DbOrTx, userId: string, today: string): Promise<void> {
+  return insertStarterContent(tx, userId, starterContent(today));
 }

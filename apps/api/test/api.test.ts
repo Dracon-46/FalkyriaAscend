@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { eq, sql } from 'drizzle-orm';
 import { coinTransactions, wallets } from '../src/persistence/schema';
-import { resetEvaluationThrottle } from '../src/http/routes/core';
+import { resetEvaluationThrottle } from '../src/application/evaluation';
 import { Client, registerUser, setup, type TestCtx } from './helpers';
 
 let t: TestCtx;

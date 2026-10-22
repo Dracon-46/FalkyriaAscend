@@ -259,6 +259,20 @@ export const unavailabilityInput = z.object({
   categoryId: optionalId,
 });
 
+export const rankInput = z.object({
+  minLevel: z.number().int().min(1).max(999),
+  code: z.string().trim().min(1).max(4),
+  name: z.string().trim().min(1).max(60),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullish(),
+});
+
+export const levelRewardInput = z.object({
+  level: z.number().int().min(2).max(999),
+  description: z.string().trim().min(1).max(200),
+  itemId: z.uuid().nullish(),
+  coins: z.number().int().min(0).max(100_000).default(0),
+});
+
 // ------------------------------------------------------------------ Metas
 
 export const goalInput = z.object({
@@ -440,3 +454,44 @@ export const configUpdateInput = z.object({
   config: z.unknown(),
   note: z.string().trim().min(3, 'Descreva a mudança').max(500),
 });
+
+// Tipos inferidos das entradas (usados pela camada de aplicação).
+export type RegisterInput = z.infer<typeof registerInput>;
+export type LoginInput = z.infer<typeof loginInput>;
+export type ChangePasswordInput = z.infer<typeof changePasswordInput>;
+export type ProfileInput = z.infer<typeof profileInput>;
+export type SettingsInput = z.infer<typeof settingsInput>;
+export type CategoryInput = z.infer<typeof categoryInput>;
+export type AttributeInput = z.infer<typeof attributeInput>;
+export type SkillInput = z.infer<typeof skillInput>;
+export type PenaltyRuleInput = z.infer<typeof penaltyRuleInput>;
+export type ObjectiveInput = z.infer<typeof objectiveInput>;
+export type MissionActionInput = z.infer<typeof missionActionInput>;
+export type ObjectiveProgressInput = z.infer<typeof objectiveProgressInput>;
+export type TemplateInput = z.infer<typeof templateInput>;
+export type HabitInput = z.infer<typeof habitInput>;
+export type HabitCheckinInput = z.infer<typeof habitCheckinInput>;
+export type HabitStatusInput = z.infer<typeof habitStatusInput>;
+export type UnavailabilityInput = z.infer<typeof unavailabilityInput>;
+export type GoalInput = z.infer<typeof goalInput>;
+export type GoalStatusInput = z.infer<typeof goalStatusInput>;
+export type AreaInput = z.infer<typeof areaInput>;
+export type SubjectInput = z.infer<typeof subjectInput>;
+export type ResourceInput = z.infer<typeof resourceInput>;
+export type StudySessionInput = z.infer<typeof studySessionInput>;
+export type AssessmentInput = z.infer<typeof assessmentInput>;
+export type SubjectMilestoneInput = z.infer<typeof subjectMilestoneInput>;
+export type ActivityTypeInput = z.infer<typeof activityTypeInput>;
+export type ExerciseInput = z.infer<typeof exerciseInput>;
+export type ActivityInput = z.infer<typeof activityInput>;
+export type QuickLogInput = z.infer<typeof quickLogInput>;
+export type ItemInput = z.infer<typeof itemInput>;
+export type PurchaseInput = z.infer<typeof purchaseInput>;
+export type InventoryActionInput = z.infer<typeof inventoryActionInput>;
+export type AchievementInput = z.infer<typeof achievementInput>;
+export type SeasonInput = z.infer<typeof seasonInput>;
+export type ReversalInput = z.infer<typeof reversalInput>;
+export type AdjustmentInput = z.infer<typeof adjustmentInput>;
+export type RankInput = z.infer<typeof rankInput>;
+export type LevelRewardInput = z.infer<typeof levelRewardInput>;
+export type ConfigUpdateInput = z.infer<typeof configUpdateInput>;

@@ -1,6 +1,6 @@
 import { and, count, eq, gte, isNull, lte, ne, sql, type SQL } from 'drizzle-orm';
-import type { DbOrTx } from '../persistence/client';
-import { activities, habitCheckins, missions, studySessions, OBJECTIVE_METRICS } from '../persistence/schema';
+import type { DbOrTx } from '../client';
+import { activities, habitCheckins, missions, studySessions, OBJECTIVE_METRICS } from '../schema';
 
 export type ObjectiveMetric = (typeof OBJECTIVE_METRICS)[number];
 

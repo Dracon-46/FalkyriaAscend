@@ -1,14 +1,29 @@
-import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { EQUIPPABLE_KINDS, SINGLE_USE_KINDS, purchaseBlockers } from '@rpg/engine';
-import type { DbOrTx } from '../persistence/client';
-import { characterProgress, inventoryItems, items, purchases, userAchievements } from '../persistence/schema';
+import type { Item } from '../persistence/models';
+import { hasUnlocked } from '../persistence/repositories/achievements';
+import {
+  countHeldInventory,
+  countUsedUnitsOfPurchase,
+  findOwnedItem,
+  findPurchaseByKey,
+  insertInventoryItems,
+  insertPurchase,
+  listEquipped,
+  lockInventoryWithItem,
+  lockPurchase,
+  markPurchaseRefunded,
+  purchaseTotalsOf,
+  revokeUnitsOfPurchase,
+  unequipSlot,
+  updateInventoryItem,
+} from '../persistence/repositories/inventory';
+import { findCharacterProgress } from '../persistence/repositories/progression';
+import { type DbOrTx } from '../persistence/unit-of-work';
 import { conflict, notFound, unprocessable } from '../shared/errors';
 import { audit } from './audit';
 import { notify } from './notifications';
 import { activeItemLocks } from './penalties';
 import { lockWallet, postCoinTx } from './wallet';
-
-type Item = typeof items.$inferSelect;
 
 export interface ItemAvailability {
   canBuy: boolean;
@@ -18,24 +33,11 @@ export interface ItemAvailability {
 }
 
 async function availability(tx: DbOrTx, userId: string, item: Item, quantity: number, balance: number, today: string, now: Date): Promise<ItemAvailability> {
-  const [cp] = await tx.select().from(characterProgress).where(eq(characterProgress.userId, userId));
-  const [bought] = await tx
-    .select({ n: sql<number>`coalesce(sum(${purchases.quantity}),0)::int`, last: sql<Date | null>`max(${purchases.createdAt})` })
-    .from(purchases)
-    .where(and(eq(purchases.userId, userId), eq(purchases.itemId, item.id), eq(purchases.status, 'completed')));
-  let reqUnlocked: boolean | null = null;
-  if (item.requiredAchievementId) {
-    const [ua] = await tx
-      .select({ id: userAchievements.id })
-      .from(userAchievements)
-      .where(and(eq(userAchievements.userId, userId), eq(userAchievements.achievementId, item.requiredAchievementId)));
-    reqUnlocked = Boolean(ua);
-  }
+  const cp = await findCharacterProgress(tx, userId);
+  const bought = await purchaseTotalsOf(tx, userId, item.id);
+  const reqUnlocked = item.requiredAchievementId ? await hasUnlocked(tx, userId, item.requiredAchievementId) : null;
   const locks = await activeItemLocks(tx, userId, today);
-  const [owned] = await tx
-    .select({ n: sql<number>`count(*)::int` })
-    .from(inventoryItems)
-    .where(and(eq(inventoryItems.userId, userId), eq(inventoryItems.itemId, item.id), inArray(inventoryItems.state, ['owned', 'equipped'])));
+  const owned = await countHeldInventory(tx, userId, item.id);
   const permanent = !SINGLE_USE_KINDS.includes(item.kind);
   const blockers = purchaseBlockers({
     price: item.price ?? 0,
@@ -49,15 +51,15 @@ async function availability(tx: DbOrTx, userId: string, item: Item, quantity: nu
     characterLevel: cp?.level ?? 1,
     requiredAchievementUnlocked: reqUnlocked,
     purchaseLimit: item.purchaseLimit,
-    alreadyPurchased: bought?.n ?? 0,
+    alreadyPurchased: bought.quantity,
     lockedUntil: locks.has(item.id) ? new Date(`${locks.get(item.id)}T23:59:59Z`) : null,
-    lastPurchaseAt: bought?.last ? new Date(bought.last) : null,
+    lastPurchaseAt: bought.lastAt,
     cooldownDays: item.cooldownDays,
   });
   // Itens permanentes (cosméticos, títulos, colecionáveis únicos) só podem ser possuídos uma vez.
-  if (permanent && item.kind !== 'collectible' && (owned?.n ?? 0) > 0) blockers.push('Você já possui este item');
+  if (permanent && item.kind !== 'collectible' && owned > 0) blockers.push('Você já possui este item');
   if (permanent && item.kind !== 'collectible' && quantity > 1) blockers.push('Itens permanentes são comprados uma unidade por vez');
-  return { canBuy: blockers.length === 0, blockers, owned: owned?.n ?? 0, purchased: bought?.n ?? 0 };
+  return { canBuy: blockers.length === 0, blockers, owned, purchased: bought.quantity };
 }
 
 export async function itemAvailability(db: DbOrTx, userId: string, item: Item, balance: number, today: string) {
@@ -72,32 +74,26 @@ export async function itemAvailability(db: DbOrTx, userId: string, item: Item, b
  */
 export async function purchase(tx: DbOrTx, userId: string, itemId: string, quantity: number, idempotencyKey: string, today: string) {
   const wallet = await lockWallet(tx, userId);
-  const [existing] = await tx
-    .select()
-    .from(purchases)
-    .where(and(eq(purchases.userId, userId), eq(purchases.idempotencyKey, idempotencyKey)));
+  const existing = await findPurchaseByKey(tx, userId, idempotencyKey);
   if (existing) {
     if (existing.itemId !== itemId) throw conflict('Chave de idempotência já usada para outra compra.');
     return { purchase: existing, replayed: true };
   }
-  const [item] = await tx.select().from(items).where(and(eq(items.id, itemId), eq(items.userId, userId)));
+  const item = await findOwnedItem(tx, userId, itemId);
   if (!item) throw notFound('Item');
   const avail = await availability(tx, userId, item, quantity, wallet.balance, today, new Date());
   if (!avail.canBuy) throw conflict(avail.blockers.join('; '), { blockers: avail.blockers });
 
   const total = item.price! * quantity;
-  const [p] = await tx
-    .insert(purchases)
-    .values({
-      userId,
-      itemId,
-      quantity,
-      unitPrice: item.price!,
-      total,
-      idempotencyKey,
-      itemSnapshot: { name: item.name, kind: item.kind, category: item.category, price: item.price, rarity: item.rarity },
-    })
-    .returning();
+  const p = await insertPurchase(tx, {
+    userId,
+    itemId,
+    quantity,
+    unitPrice: item.price!,
+    total,
+    idempotencyKey,
+    itemSnapshot: { name: item.name, kind: item.kind, category: item.category, price: item.price, rarity: item.rarity },
+  });
   if (total > 0) {
     await postCoinTx(tx, {
       userId,
@@ -106,62 +102,44 @@ export async function purchase(tx: DbOrTx, userId: string, itemId: string, quant
       category: item.category,
       reason: `Compra: ${item.name}${quantity > 1 ? ` ×${quantity}` : ''}`,
       localDate: today,
-      purchaseId: p!.id,
+      purchaseId: p.id,
     });
   }
   const equippable = EQUIPPABLE_KINDS.includes(item.kind);
-  await tx.insert(inventoryItems).values(
-    Array.from({ length: quantity }, () => ({
-      userId,
-      itemId,
-      purchaseId: p!.id,
-      source: 'purchase' as const,
-      slot: equippable ? item.kind : null,
-    })),
+  await insertInventoryItems(
+    tx,
+    Array.from({ length: quantity }, () => ({ userId, itemId, purchaseId: p.id, source: 'purchase' as const, slot: equippable ? item.kind : null })),
   );
-  await notify(tx, userId, { category: 'purchase', title: `Compra realizada: ${item.name}`, body: `−${total} moedas`, link: '/inventario', dedupeKey: `purchase:${p!.id}` });
-  return { purchase: p!, replayed: false };
+  await notify(tx, userId, { category: 'purchase', title: `Compra realizada: ${item.name}`, body: `−${total} moedas`, link: '/inventario', dedupeKey: `purchase:${p.id}` });
+  return { purchase: p, replayed: false };
 }
 
 /** Reembolso administrativo: devolve moedas por lançamento de reembolso e revoga itens não usados. */
 export async function refundPurchase(tx: DbOrTx, userId: string, purchaseId: string, reason: string, actorId: string | null, today: string) {
-  const [p] = await tx.select().from(purchases).where(and(eq(purchases.id, purchaseId), eq(purchases.userId, userId))).for('update');
+  const p = await lockPurchase(tx, userId, purchaseId);
   if (!p) throw notFound('Compra');
   if (p.status === 'refunded') throw conflict('Compra já reembolsada');
-  const used = await tx
-    .select({ id: inventoryItems.id })
-    .from(inventoryItems)
-    .where(and(eq(inventoryItems.purchaseId, p.id), inArray(inventoryItems.state, ['consumed', 'redeemed'])));
-  if (used.length > 0) throw conflict('Itens desta compra já foram usados/resgatados; registre um ajuste em vez de reembolso.');
+  if ((await countUsedUnitsOfPurchase(tx, p.id)) > 0) throw conflict('Itens desta compra já foram usados/resgatados; registre um ajuste em vez de reembolso.');
   if (p.total > 0) {
     await postCoinTx(tx, { userId, amount: p.total, kind: 'refund', category: 'shop', reason: `Reembolso: ${(p.itemSnapshot as { name: string }).name} — ${reason}`, localDate: today, purchaseId: p.id, actorId });
   }
-  await tx.update(inventoryItems).set({ state: 'revoked', usedAt: new Date(), note: `Reembolso: ${reason}` }).where(eq(inventoryItems.purchaseId, p.id));
-  const [u] = await tx.update(purchases).set({ status: 'refunded', refundedAt: new Date(), refundReason: reason }).where(eq(purchases.id, p.id)).returning();
+  await revokeUnitsOfPurchase(tx, p.id, `Reembolso: ${reason}`);
+  const u = await markPurchaseRefunded(tx, p.id, reason);
   await audit(tx, { actorId, userId, action: 'purchase.refund', entityType: 'purchases', entityId: p.id, before: p, after: u, meta: { reason } });
-  return u!;
+  return u;
 }
 
 /** Possuir ≠ equipar ≠ consumir ≠ resgatar: cada ação tem regras próprias. */
 export async function inventoryAction(tx: DbOrTx, userId: string, inventoryId: string, action: 'equip' | 'unequip' | 'consume' | 'redeem', note?: string | null) {
-  const [row] = await tx
-    .select({ inv: inventoryItems, item: items })
-    .from(inventoryItems)
-    .innerJoin(items, eq(items.id, inventoryItems.itemId))
-    .where(and(eq(inventoryItems.id, inventoryId), eq(inventoryItems.userId, userId)))
-    .for('update');
+  const row = await lockInventoryWithItem(tx, userId, inventoryId);
   if (!row) throw notFound('Item do inventário');
   const { inv, item } = row;
   if (inv.state === 'revoked' || inv.state === 'consumed' || inv.state === 'redeemed') throw conflict('Este item não está mais disponível.');
   switch (action) {
-    case 'equip': {
+    case 'equip':
       if (!EQUIPPABLE_KINDS.includes(item.kind)) throw unprocessable('Este item não pode ser equipado.');
-      await tx
-        .update(inventoryItems)
-        .set({ state: 'owned' })
-        .where(and(eq(inventoryItems.userId, userId), eq(inventoryItems.slot, item.kind), eq(inventoryItems.state, 'equipped'), ne(inventoryItems.id, inv.id)));
+      await unequipSlot(tx, userId, item.kind, inv.id);
       break;
-    }
     case 'unequip':
       if (inv.state !== 'equipped') throw conflict('Item não está equipado.');
       break;
@@ -173,19 +151,9 @@ export async function inventoryAction(tx: DbOrTx, userId: string, inventoryId: s
       break;
   }
   const state = action === 'equip' ? 'equipped' : action === 'unequip' ? 'owned' : action === 'consume' ? 'consumed' : 'redeemed';
-  const [u] = await tx
-    .update(inventoryItems)
-    .set({ state, usedAt: action === 'consume' || action === 'redeem' ? new Date() : inv.usedAt, note: note ?? inv.note })
-    .where(eq(inventoryItems.id, inv.id))
-    .returning();
-  return u!;
+  return updateInventoryItem(tx, inv.id, { state, usedAt: action === 'consume' || action === 'redeem' ? new Date() : inv.usedAt, note: note ?? inv.note });
 }
 
-export async function equippedItems(db: DbOrTx, userId: string) {
-  return db
-    .select({ inv: inventoryItems, item: items })
-    .from(inventoryItems)
-    .innerJoin(items, eq(items.id, inventoryItems.itemId))
-    .where(and(eq(inventoryItems.userId, userId), eq(inventoryItems.state, 'equipped')))
-    .orderBy(desc(inventoryItems.acquiredAt));
+export function equippedItems(db: DbOrTx, userId: string) {
+  return listEquipped(db, userId);
 }

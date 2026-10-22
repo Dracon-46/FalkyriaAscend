@@ -29,6 +29,13 @@ module.exports = {
       to: { path: '^(apps|packages/contracts)/' },
     },
     {
+      name: 'http-only-use-cases',
+      severity: 'error',
+      comment: 'Regra 2: controllers chamam apenas casos de uso (e o tipo do serviço genérico de cadastro).',
+      from: { path: `${API}http/` },
+      to: { path: `${API}application/`, pathNot: `${API}application/(use-cases/|crud\\.ts$)` },
+    },
+    {
       name: 'http-not-to-persistence',
       severity: 'error',
       comment: 'Regra 2: controllers HTTP falam só com a camada de aplicação.',
@@ -38,9 +45,30 @@ module.exports = {
     {
       name: 'application-not-to-orm',
       severity: 'error',
-      comment: 'Regra 3: a aplicação acessa dados só por repositórios, consultas e unit of work.',
+      comment: 'Regra 3: a aplicação não usa o ORM nem o driver do banco.',
       from: { path: `${API}application/` },
-      to: { path: ['node_modules/drizzle-orm/', 'node_modules/pg/', `${API}persistence/(schema|client|migrate|admin-registry)`] },
+      to: { path: ['node_modules/drizzle-orm/', 'node_modules/pg/'] },
+    },
+    {
+      name: 'application-persistence-allowlist',
+      severity: 'error',
+      comment: 'Regra 3: a aplicação acessa dados só por repositórios, consultas, unit of work e tipos de linha.',
+      from: { path: `${API}application/` },
+      to: { path: `${API}persistence/`, pathNot: `${API}persistence/(repositories/|queries/|unit-of-work\\.ts$|models\\.ts$)` },
+    },
+    {
+      name: 'domain-services-not-to-use-cases',
+      severity: 'error',
+      comment: 'Regra 3: serviços de domínio (application/*.ts) não dependem de casos de uso.',
+      from: { path: `${API}application/[^/]+\\.ts$` },
+      to: { path: `${API}application/use-cases/` },
+    },
+    {
+      name: 'use-cases-are-independent',
+      severity: 'error',
+      comment: 'Regra 3: um caso de uso não chama outro; o que for comum vira serviço de domínio.',
+      from: { path: `${API}application/use-cases/([^/]+)\\.ts$` },
+      to: { path: `${API}application/use-cases/`, pathNot: `${API}application/use-cases/$1\\.ts$` },
     },
     {
       name: 'application-not-to-http',
@@ -62,6 +90,13 @@ module.exports = {
       comment: 'Regra 5: adaptadores de integração não importam aplicação, HTTP nem persistência.',
       from: { path: `${API}integrations/` },
       to: { path: [`${API}(application|http|persistence|jobs)/`] },
+    },
+    {
+      name: 'jobs-not-to-persistence',
+      severity: 'error',
+      comment: 'Tarefas agendadas usam a camada de aplicação, nunca o banco diretamente.',
+      from: { path: `${API}jobs/` },
+      to: { path: [`${API}persistence/(?!unit-of-work\\.ts$)`, 'node_modules/drizzle-orm/'] },
     },
     {
       name: 'shared-is-leaf',
