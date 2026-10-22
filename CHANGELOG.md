@@ -4,6 +4,16 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Alterado
+- Dependências atualizadas: react-router 8, lucide-react 1, @fastify/static 10, tsup 9, Playwright 1.64, Prettier 3.9 e typescript-eslint 8.72; Actions `checkout`, `setup-node` e `upload-artifact` v7, `docker/build-push-action` v7 e `docker/setup-buildx-action` v4.
+
+## [0.2.1] - 2026-10-22
+
+### Corrigido
+- Workflow `Release`: no disparo manual, o checkout é do commit do workflow, e o alvo informado só define onde a tag aponta. Antes, publicar uma versão antiga falhava porque o script de notas não existia naquele commit.
+
+## [0.2.0] - 2026-10-22
+
 ### Adicionado
 - Deploy em produção com Supabase (PostgreSQL) e Render (Docker): `render.yaml`, guia em `docs/14-deploy.md`, TLS configurável na conexão com o banco (`DATABASE_SSL`, `DATABASE_CA_CERT`) e tamanho do pool (`DATABASE_POOL_MAX`).
 - Workflow `Release`: depois da CI verde na `main`, cria a tag `vX.Y.Z` e a GitHub Release com as notas do CHANGELOG.
@@ -27,5 +37,7 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.1.0...develop
+[Não lançado]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.2.1...develop
+[0.2.1]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Dracon-46/Sistema-Gameficado/releases/tag/v0.1.0

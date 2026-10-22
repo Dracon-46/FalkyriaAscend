@@ -33,9 +33,11 @@ jobs:
     env:
       TARGET: ${{ inputs.target || github.event.workflow_run.head_sha || github.sha }}
     steps:
+      # No disparo manual, o checkout é do commit do workflow (scripts e CHANGELOG atuais);
+      # o alvo informado só define onde a tag aponta.
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.TARGET }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Resolver versão
         id: version
         env:
