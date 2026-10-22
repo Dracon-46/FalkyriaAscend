@@ -63,6 +63,8 @@ O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotf
 docker compose --profile app up -d --build   # banco + aplicação em http://localhost:3333
 ```
 
+**Em produção na nuvem:** Supabase (PostgreSQL) + Render (Docker), com deploy automático a cada release na `main`. Passo a passo em [docs/14-deploy.md](docs/14-deploy.md).
+
 Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @rpg/api`. A API serve a interface, aplica as migrações e roda o avaliador diário. Backups: `apps/api/scripts/backup.sh` (ver `docs/10-backup-e-recuperacao.md`).
 
 ## Documentação
@@ -79,5 +81,7 @@ Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @
 10. [Backup e recuperação](docs/10-backup-e-recuperacao.md)
 11. [Estratégia de testes](docs/11-estrategia-de-testes.md)
 12. [Roadmap, pendências e ideias](docs/12-roadmap.md)
+13. [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)
+14. [Deploy (Supabase + Render)](docs/14-deploy.md)
 
 O protótipo HTML original foi preservado em `docs/legacy/`.

@@ -5,6 +5,7 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 ## [Não lançado]
 
 ### Adicionado
+- Deploy em produção com Supabase (PostgreSQL) e Render (Docker): `render.yaml`, guia em `docs/14-deploy.md`, TLS configurável na conexão com o banco (`DATABASE_SSL`, `DATABASE_CA_CERT`) e tamanho do pool (`DATABASE_POOL_MAX`).
 - Git Flow (`main`/`develop`/`feature`/`release`/`hotfix`), CI no GitHub Actions (tipos, arquitetura, motor, API com PostgreSQL, build, E2E e Docker), templates de PR e issue, CODEOWNERS, Dependabot, CONTRIBUTING e SECURITY.
 - Prettier e ESLint (TypeScript e React hooks) verificados na CI.
 - ADR-001: arquitetura em camadas com regras de dependência verificadas por `npm run lint:arch`.
