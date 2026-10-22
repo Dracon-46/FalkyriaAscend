@@ -1,0 +1,38 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec).
+# Um único serviço Docker: a API aplica as migrações ao iniciar e serve a interface.
+# Valores com `sync: false` são secretos e preenchidos no painel do Render (nunca no repositório).
+services:
+  - type: web
+    name: falkyria-ascend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    # Mesma região do banco (Supabase East US / North Virginia) para evitar latência por consulta.
+    region: virginia
+    branch: main
+    # Publica só depois que a CI do commit na main passar.
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: verify-full
+      - key: DATABASE_CA_CERT
+        sync: false
+      - key: DATABASE_POOL_MAX
+        value: '5'
+      - key: APP_ORIGIN
+        sync: false
+      - key: INTEGRATION_ENCRYPTION_KEY
+        sync: false
+      - key: ALLOW_REGISTRATION
+        value: 'false'
+      - key: SESSION_TTL_DAYS
+        value: '30'
+      - key: EVALUATION_INTERVAL_MINUTES
+        value: '15'
+      - key: LOG_LEVEL
+        value: info

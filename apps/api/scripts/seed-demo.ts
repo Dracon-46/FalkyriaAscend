@@ -10,7 +10,7 @@ import { addDays, localDateOf, mulberry32 } from '@rpg/engine';
 import { createDb } from '../src/persistence/client';
 import { runMigrations } from '../src/persistence/migrate';
 import { activityTypes, exercises, habitPenaltyRules, habits, penaltyRules, studySubjects, users } from '../src/persistence/schema';
-import { loadEnv } from '../src/config/env';
+import { databaseOptions, loadEnv } from '../src/config/env';
 import { hashPassword } from '../src/shared/crypto';
 import { recordActivity, quickLog } from '../src/application/activities';
 import { seedUserDefaults } from '../src/application/defaults';
@@ -26,7 +26,7 @@ const DAYS = 60;
 const TZ = 'America/Sao_Paulo';
 
 const env = loadEnv();
-const { db, pool } = createDb(env.DATABASE_URL);
+const { db, pool } = createDb(databaseOptions(env));
 await runMigrations(db);
 
 const [existing] = await db.select().from(users).where(eq(users.email, DEMO_EMAIL));
