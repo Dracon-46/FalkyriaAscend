@@ -1,0 +1,29 @@
+name: Funcionalidade
+description: Proponha uma melhoria ou uma ideia nova.
+title: 'feat: '
+labels: [melhoria, triagem]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema ou oportunidade
+      description: Que dor isso resolve? Por que agora?
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: Como deveria funcionar. Inclua regras de jogo (XP, moedas, penalidades) se houver.
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de aceite
+      placeholder: |
+        - [ ] …
+  - type: textarea
+    id: riscos
+    attributes:
+      label: Riscos (economia, privacidade, integrações)

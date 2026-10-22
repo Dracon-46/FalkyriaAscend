@@ -1,0 +1,26 @@
+name: Convenções de PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  gitflow:
+    name: Git Flow e Conventional Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar branch de origem e destino
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: scripts/ci/check-gitflow.sh "$HEAD_REF" "$BASE_REF"
+      # PRs para develop entram por squash: o título vira a mensagem do commit.
+      - name: Validar título do PR (Conventional Commits)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: scripts/ci/check-conventional.sh "$PR_TITLE"
