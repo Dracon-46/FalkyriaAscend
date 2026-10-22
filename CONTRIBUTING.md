@@ -9,6 +9,7 @@
 | `feature/<descricao>` | `develop` | `develop` | PR | Funcionalidade nova. |
 | `bugfix/<descricao>` | `develop` | `develop` | PR | Correção de algo ainda não lançado. |
 | `docs/<descricao>`, `chore/<descricao>` | `develop` | `develop` | PR | Documentação e manutenção. |
+| `dependabot/…` | `develop` | `develop` | PR (squash) | Criada pelo Dependabot. Atualizações major do Node e de `@types/node` são ignoradas: trocar a versão do Node é decisão explícita, só para LTS. |
 | `release/X.Y.Z` | `develop` | `main` e `develop` | PR | Congela a versão: só correções, CHANGELOG e versão. |
 | `hotfix/X.Y.Z` | `main` | `main` e `develop` | PR | Correção urgente em produção. |
 

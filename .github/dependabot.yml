@@ -18,6 +18,10 @@ updates:
       desenvolvimento:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # Os tipos acompanham o Node de produção (Dockerfile); sobem junto com ele, por decisão explícita.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
@@ -34,3 +38,7 @@ updates:
       interval: monthly
     commit-message:
       prefix: build
+    ignore:
+      # Troca de versão major do Node é decisão explícita (só versões LTS), não atualização automática.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']

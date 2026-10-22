@@ -8,6 +8,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 - Deploy em produção com Supabase (PostgreSQL) e Render (Docker): `render.yaml`, guia em `docs/14-deploy.md`, TLS configurável na conexão com o banco (`DATABASE_SSL`, `DATABASE_CA_CERT`) e tamanho do pool (`DATABASE_POOL_MAX`).
 - Workflow `Release`: depois da CI verde na `main`, cria a tag `vX.Y.Z` e a GitHub Release com as notas do CHANGELOG.
 
+### Corrigido
+- Validação do Git Flow aceita as branches do Dependabot (`dependabot/…` → `develop`), e o Dependabot deixa de propor versões major do Node e de `@types/node`.
+
 ## [0.1.0] - 2026-10-22
 
 Primeira versão do Ascend.
