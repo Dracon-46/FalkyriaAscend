@@ -1,0 +1,58 @@
+name: Release
+
+# Depois que a CI passa num commit da main (merge de release/* ou hotfix/*), publica a tag vX.Y.Z
+# e a GitHub Release, com as notas da seção da versão no CHANGELOG.md. A versão vem do package.json.
+# Se a tag já existe, não faz nada.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão a publicar (ex.: 0.1.0). Vazio = versão do package.json'
+        required: false
+      target:
+        description: 'SHA do commit da tag. Vazio = commit do disparo'
+        required: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag e GitHub Release
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TARGET: ${{ inputs.target || github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET }}
+      - name: Resolver versão
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          version="${INPUT_VERSION:-$(node -p "require('./package.json').version")}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Versão inválida: '$version'"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Publicar se a tag ainda não existe
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag já existe; nada a fazer."
+            exit 0
+          fi
+          scripts/ci/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md"
+          gh release create "$tag" --target "$TARGET" --title "$tag" --notes-file "$RUNNER_TEMP/notes.md"
