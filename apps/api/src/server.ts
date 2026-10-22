@@ -1,7 +1,7 @@
 import { buildApp } from './app';
-import { createDb } from './db/client';
-import { runMigrations } from './db/migrate';
-import { loadEnv } from './env';
+import { createDb } from './persistence/client';
+import { runMigrations } from './persistence/migrate';
+import { loadEnv } from './config/env';
 import { startScheduler } from './jobs/scheduler';
 
 const env = loadEnv();

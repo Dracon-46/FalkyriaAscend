@@ -1,10 +1,10 @@
 import { sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../src/app';
-import { createDb, type Db } from '../src/db/client';
-import { runMigrations } from '../src/db/migrate';
-import { loadEnv } from '../src/env';
-import { resetEvaluationThrottle } from '../src/routes/core';
+import { createDb, type Db } from '../src/persistence/client';
+import { runMigrations } from '../src/persistence/migrate';
+import { loadEnv } from '../src/config/env';
+import { resetEvaluationThrottle } from '../src/http/routes/core';
 
 export const TEST_DB_URL = process.env.TEST_DATABASE_URL ?? 'postgresql://rpg:rpg@localhost:5432/rpg_test';
 

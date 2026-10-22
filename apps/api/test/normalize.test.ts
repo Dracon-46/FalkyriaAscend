@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeHevy, normalizeLyfta, normalizeStrava } from '../src/integrations/normalize';
-import { epley1rm, normalizeKey } from '../src/services/activities';
+import { epley1rm, normalizeKey } from '../src/application/activities';
 
 describe('normalização de integrações', () => {
   it('Strava: metros → km, segundos → minutos, sport_type → categoria', () => {

@@ -2,7 +2,7 @@
  * Clientes HTTP mínimos das APIs oficiais. Nenhum segredo é registrado em log.
  * Strava: https://developers.strava.com/docs/  ·  Lyfta: https://my.lyfta.app/developers  ·  Hevy: https://api.hevyapp.com/docs/
  */
-import { AppError } from '../lib/errors';
+import { AppError } from '../shared/errors';
 import type { HevyWorkout, LyftaWorkout, StravaActivityPayload } from './normalize';
 
 const TIMEOUT_MS = 15_000;

@@ -1,6 +1,6 @@
 import type { FastifyBaseLogger } from 'fastify';
-import type { Db } from '../db/client';
-import { evaluateAllUsers } from '../services/evaluation';
+import type { Db } from '../persistence/client';
+import { evaluateAllUsers } from '../application/evaluation';
 
 /** Agendador simples em processo: fecha os dias de todos os usuários periodicamente. */
 export function startScheduler(db: Db, minutes: number, log: FastifyBaseLogger): () => void {

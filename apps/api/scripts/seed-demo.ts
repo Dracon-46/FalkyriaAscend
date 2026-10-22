@@ -7,19 +7,19 @@
  */
 import { eq } from 'drizzle-orm';
 import { addDays, localDateOf, mulberry32 } from '@rpg/engine';
-import { createDb } from '../src/db/client';
-import { runMigrations } from '../src/db/migrate';
-import { activityTypes, exercises, habitPenaltyRules, habits, penaltyRules, studySubjects, users } from '../src/db/schema';
-import { loadEnv } from '../src/env';
-import { hashPassword } from '../src/lib/crypto';
-import { recordActivity, quickLog } from '../src/services/activities';
-import { seedUserDefaults } from '../src/services/defaults';
-import { evaluateUser } from '../src/services/evaluation';
-import { checkin } from '../src/services/habits';
-import { afterAction } from '../src/services/hooks';
-import { completeMission, createMission } from '../src/services/missions';
-import { logAssessment, logStudySession } from '../src/services/study';
-import { deleteUserData } from '../src/routes/core';
+import { createDb } from '../src/persistence/client';
+import { runMigrations } from '../src/persistence/migrate';
+import { activityTypes, exercises, habitPenaltyRules, habits, penaltyRules, studySubjects, users } from '../src/persistence/schema';
+import { loadEnv } from '../src/config/env';
+import { hashPassword } from '../src/shared/crypto';
+import { recordActivity, quickLog } from '../src/application/activities';
+import { seedUserDefaults } from '../src/application/defaults';
+import { evaluateUser } from '../src/application/evaluation';
+import { checkin } from '../src/application/habits';
+import { afterAction } from '../src/application/hooks';
+import { completeMission, createMission } from '../src/application/missions';
+import { logAssessment, logStudySession } from '../src/application/study';
+import { deleteUserData } from '../src/http/routes/core';
 
 const DEMO_EMAIL = 'demo@falkyria.local';
 const DAYS = 60;
