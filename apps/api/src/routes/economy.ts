@@ -97,9 +97,10 @@ export async function registerEconomyRoutes(app: FastifyInstance, ctx: AppContex
   app.post('/api/purchases/:id/refund', async (req) => {
     const me = requireAdmin(req);
     const { id } = parse(idParam, req.params);
-    const { reason } = parse(reversalInput, req.body);
-    const today = await todayFor(ctx.db, me.id, ctx.now());
-    return ctx.db.transaction((tx) => refundPurchase(tx, me.id, id, reason, me.id, today));
+    const { reason, userId } = parse(reversalInput.extend({ userId: z.uuid().optional() }), req.body);
+    const uid = userId ?? me.id;
+    const today = await todayFor(ctx.db, uid, ctx.now());
+    return ctx.db.transaction((tx) => refundPurchase(tx, uid, id, reason, me.id, today));
   });
 
   app.get('/api/purchases', async (req) => {
@@ -353,7 +354,7 @@ export async function registerEconomyRoutes(app: FastifyInstance, ctx: AppContex
   app.post('/api/history/penalties/:id/revert', async (req) => {
     const me = requireAdmin(req);
     const { id } = parse(idParam, req.params);
-    const { reason } = parse(reversalInput, req.body);
-    return ctx.db.transaction((tx) => revertPenalty(tx, me.id, id, reason, me.id));
+    const { reason, userId } = parse(reversalInput.extend({ userId: z.uuid().optional() }), req.body);
+    return ctx.db.transaction((tx) => revertPenalty(tx, userId ?? me.id, id, reason, me.id));
   });
 }
