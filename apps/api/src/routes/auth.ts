@@ -18,7 +18,8 @@ let dummyHash: Promise<string> | null = null;
 
 export async function registerAuthRoutes(app: FastifyInstance, ctx: AppContext) {
   app.get('/api/auth/status', async () => {
-    const [r] = await ctx.db.select({ n: count() }).from(users);
+    // Contas de demonstração não contam: o primeiro usuário real sempre vira administrador.
+    const [r] = await ctx.db.select({ n: count() }).from(users).where(eq(users.isDemo, false));
     return { hasUsers: (r?.n ?? 0) > 0, registrationOpen: (r?.n ?? 0) === 0 || ctx.env.ALLOW_REGISTRATION };
   });
 
@@ -27,7 +28,7 @@ export async function registerAuthRoutes(app: FastifyInstance, ctx: AppContext) 
     const user = await ctx.db.transaction(async (tx) => {
       // Trava a criação do primeiro usuário (que se torna administrador).
       await tx.execute(sql`select pg_advisory_xact_lock(4242)`);
-      const [r] = await tx.select({ n: count() }).from(users);
+      const [r] = await tx.select({ n: count() }).from(users).where(eq(users.isDemo, false));
       const first = (r?.n ?? 0) === 0;
       if (!first && !ctx.env.ALLOW_REGISTRATION) throw forbidden('Novos cadastros estão desativados nesta instalação.');
       const [exists] = await tx.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = lower(${input.email})`);

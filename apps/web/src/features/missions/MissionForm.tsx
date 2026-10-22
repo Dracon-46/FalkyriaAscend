@@ -129,6 +129,7 @@ export function MissionForm({ open, onClose, initial, missionId, title }: { open
             </p>
           )
         )}
+        <GoalSelect value={v.goalId} onChange={(g) => form.set('goalId', g)} />
         <div className="grid gap-3 sm:grid-cols-3">
           <Input label="Início" type="date" value={v.startDate ?? ''} onChange={(e) => form.set('startDate', e.target.value || null)} error={form.errors.startDate} />
           <Input label="Prazo" type="date" value={v.dueDate ?? ''} onChange={(e) => form.set('dueDate', e.target.value || null)} error={form.errors.dueDate} hint="Opcional. Após o prazo, a missão expira." />
@@ -207,4 +208,11 @@ export function MissionForm({ open, onClose, initial, missionId, title }: { open
       </form>
     </Modal>
   );
+}
+
+function GoalSelect({ value, onChange }: { value: string | null | undefined; onChange: (v: string | null) => void }) {
+  const goals = useQuery({ queryKey: ['goals'], queryFn: () => api.get<Array<{ id: string; title: string; status: string }>>('/api/goals') });
+  const options = (goals.data ?? []).filter((g) => g.status === 'active' || g.id === value).map((g) => ({ value: g.id, label: g.title }));
+  if (options.length === 0) return null;
+  return <Select label="Meta vinculada (opcional)" value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} placeholder="Nenhuma" options={options} hint="Metas medidas por missões contam a conclusão desta missão." />;
 }

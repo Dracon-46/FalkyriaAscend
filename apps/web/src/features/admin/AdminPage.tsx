@@ -159,7 +159,7 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
   });
   const columns = useMemo(() => {
     const pref = [meta.display, 'title', 'name', 'status', 'type', 'kind', 'amount', 'xp', 'coins', 'localDate', 'level', 'createdAt'];
-    const visible = meta.fields.filter((f) => f.type !== 'json' && f.type !== 'longtext' && f.key !== 'userId');
+    const visible = meta.fields.filter((f) => f.type !== 'json' && f.type !== 'longtext' && f.key !== 'userId' && (f.key !== 'id' || meta.fields.length < 4));
     const sorted = [...visible].sort((a, b) => {
       const ia = pref.indexOf(a.key);
       const ib = pref.indexOf(b.key);
