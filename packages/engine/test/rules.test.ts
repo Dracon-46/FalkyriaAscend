@@ -105,6 +105,12 @@ describe('penalidades', () => {
     expect(broke.limited).toBe(true);
     expect(computePenalty(coinRule, { ...ctx, balance: 0 }, cfg).recordOnly).toBe(true);
   });
+  it('teto proporcional: multas da semana não passam de 50% das moedas ganhas na semana', () => {
+    const r = computePenalty(coinRule, { ...ctx, consecutiveMisses: 4, coinsEarnedThisWeek: 30, coinsLostThisWeek: 10 }, cfg);
+    expect(r.amount).toBe(5);
+    expect(r.explanation.join(' ')).toMatch(/Teto proporcional/);
+    expect(computePenalty(coinRule, { ...ctx, coinsEarnedThisWeek: 0 }, cfg).amount).toBe(0);
+  });
   it('perda de XP de habilidade é opcional e limitada', () => {
     const rule: PenaltyRule = { type: 'skill_xp_loss', baseAmount: 100, escalationStep: 0, maxAmount: 100 };
     expect(computePenalty(rule, ctx, cfg).amount).toBe(0);

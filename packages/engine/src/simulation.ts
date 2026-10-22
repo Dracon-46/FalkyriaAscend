@@ -125,9 +125,16 @@ export function simulateProfile(profile: ActivityProfile, cfg: GameConfig, opts:
   let coins = 0;
   let penaltyCoins = 0;
   let consecutiveMisses = 0;
+  let earnedWeek = 0;
+  let lostWeek = 0;
   const levelByMonth: number[] = [];
 
   for (let day = 0; day < opts.days; day++) {
+    if (day % 7 === 0) {
+      earnedWeek = 0;
+      lostWeek = 0;
+    }
+    const coinsAtStart = coins;
     const window = habitHistory.slice(-cfg.consistency.windowDays);
     const mult = consistencyMultiplier(
       {
@@ -165,6 +172,8 @@ export function simulateProfile(profile: ActivityProfile, cfg: GameConfig, opts:
               consecutiveMisses,
             ),
             cfg.penalties.dailyCoinCap - dayPenalty,
+            cfg.penalties.weeklyCoinCap - lostWeek - dayPenalty,
+            Math.floor(earnedWeek * cfg.penalties.maxShareOfWeeklyEarnings) - lostWeek - dayPenalty,
             coins,
           );
           dayPenalty += Math.max(0, amount);
@@ -173,6 +182,7 @@ export function simulateProfile(profile: ActivityProfile, cfg: GameConfig, opts:
     }
     coins -= dayPenalty;
     penaltyCoins += dayPenalty;
+    lostWeek += dayPenalty;
     habitHistory.push({ scheduled: profile.habitsScheduled, done: habitsDone });
 
     if (active) {
@@ -206,6 +216,7 @@ export function simulateProfile(profile: ActivityProfile, cfg: GameConfig, opts:
       }
     }
 
+    earnedWeek += Math.max(0, coins - coinsAtStart + dayPenalty);
     const lvl = levelFromXp(xp, cfg.curves.character).level;
     for (const m of marks) if (reached[m] === null && lvl >= m) reached[m] = day + 1;
     if ((day + 1) % 30 === 0) levelByMonth.push(lvl);

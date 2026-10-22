@@ -23,6 +23,8 @@ export interface PenaltyContext {
   /** Saldo atual de moedas: a penalidade nunca deixa o saldo negativo. */
   balance: number;
   allowSkillXpLoss: boolean;
+  /** Moedas ganhas na semana (antes desta penalidade). Ausente = sem teto proporcional. */
+  coinsEarnedThisWeek?: number;
 }
 
 export interface PenaltyEffect {
@@ -76,12 +78,18 @@ export function computePenalty(rule: PenaltyRule, ctx: PenaltyContext, cfg: Game
     case 'coin_loss': {
       const dailyLeft = Math.max(0, cfg.penalties.dailyCoinCap - ctx.coinsLostToday);
       const weeklyLeft = Math.max(0, cfg.penalties.weeklyCoinCap - ctx.coinsLostThisWeek);
-      const amount = Math.max(0, Math.min(requested, dailyLeft, weeklyLeft, ctx.balance));
+      const shareLeft =
+        ctx.coinsEarnedThisWeek === undefined
+          ? Number.POSITIVE_INFINITY
+          : Math.max(0, Math.floor(ctx.coinsEarnedThisWeek * cfg.penalties.maxShareOfWeeklyEarnings) - ctx.coinsLostThisWeek);
+      const amount = Math.max(0, Math.min(requested, dailyLeft, weeklyLeft, shareLeft, ctx.balance));
       const limited = amount < requested;
       if (limited) {
         if (amount === ctx.balance && ctx.balance < requested) explanation.push('Limitado ao saldo disponível (saldo nunca fica negativo)');
         if (amount === dailyLeft && dailyLeft < requested) explanation.push(`Limite diário de penalidades: ${cfg.penalties.dailyCoinCap} moedas`);
         if (amount === weeklyLeft && weeklyLeft < requested) explanation.push(`Limite semanal de penalidades: ${cfg.penalties.weeklyCoinCap} moedas`);
+        if (amount === shareLeft && shareLeft < requested)
+          explanation.push(`Teto proporcional: multas da semana limitadas a ${Math.round(cfg.penalties.maxShareOfWeeklyEarnings * 100)}% das moedas ganhas na semana`);
       }
       return { ...base, amount, limited, recordOnly: amount === 0 };
     }

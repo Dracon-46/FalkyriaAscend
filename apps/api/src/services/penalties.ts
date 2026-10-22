@@ -62,6 +62,21 @@ async function coinsLost(tx: DbOrTx, userId: string, from: string, to: string): 
   return Math.max(0, (r?.total ?? 0) - (rev?.total ?? 0));
 }
 
+async function coinsEarned(tx: DbOrTx, userId: string, from: string, to: string): Promise<number> {
+  const [r] = await tx
+    .select({ total: sql<number>`coalesce(sum(${coinTransactions.amount}), 0)::int` })
+    .from(coinTransactions)
+    .where(
+      and(
+        eq(coinTransactions.userId, userId),
+        eq(coinTransactions.kind, 'earn'),
+        gte(coinTransactions.localDate, from),
+        lte(coinTransactions.localDate, to),
+      ),
+    );
+  return r?.total ?? 0;
+}
+
 /** Aplica exatamente as regras configuradas para a origem. Idempotente por regra e ocorrência. */
 export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
   const [settings] = await tx.select().from(userSettings).where(eq(userSettings.userId, input.userId));
@@ -77,6 +92,7 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
       coinsLostThisWeek: await coinsLost(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
       balance: wallet?.balance ?? 0,
       allowSkillXpLoss: settings?.allowSkillXpPenalty ?? false,
+      coinsEarnedThisWeek: await coinsEarned(tx, input.userId, startOfIsoWeek(input.localDate), input.localDate),
     };
     const engineRule: PenaltyRule = {
       type: rule.type,

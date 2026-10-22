@@ -70,6 +70,8 @@ export const gameConfigSchema = z.object({
     dailyCoinCap: z.number().int().min(0),
     weeklyCoinCap: z.number().int().min(0),
     skillXpLossCap: z.number().int().min(0),
+    /** Teto proporcional: multas da semana ≤ esta fração das moedas ganhas na semana (evita espiral). */
+    maxShareOfWeeklyEarnings: z.number().min(0).max(1).default(0.5),
   }),
   /** Fração do XP geral (antes de multiplicadores) convertida em XP de atributos. */
   attributeXpFactor: z.number().min(0).max(5),
@@ -157,6 +159,7 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
     dailyCoinCap: 40,
     weeklyCoinCap: 150,
     skillXpLossCap: 50,
+    maxShareOfWeeklyEarnings: 0.5,
   },
   attributeXpFactor: 1,
   study: {
