@@ -28,6 +28,9 @@ case "$head" in
     [[ "$head" =~ ^hotfix/${semver}$ ]] || fail "Nome inválido: '$head'. Use hotfix/X.Y.Z."
     [[ "$base" == "main" || "$base" == "develop" || "$base" =~ ^release/ ]] || fail "'$head' deve ir para 'main' e 'develop'."
     ;;
+  dependabot/*)
+    [[ "$base" == "develop" ]] || fail "Atualizações do Dependabot entram em 'develop', não em '$base'."
+    ;;
   main)
     [[ "$base" == "develop" ]] || fail "'main' só pode ser sincronizada de volta em 'develop'."
     ;;

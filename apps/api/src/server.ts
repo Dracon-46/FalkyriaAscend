@@ -1,11 +1,11 @@
 import { buildApp } from './app';
 import { createDb } from './persistence/client';
 import { runMigrations } from './persistence/migrate';
-import { loadEnv } from './config/env';
+import { databaseOptions, loadEnv } from './config/env';
 import { startScheduler } from './jobs/scheduler';
 
 const env = loadEnv();
-const { db, pool } = createDb(env.DATABASE_URL);
+const { db, pool } = createDb(databaseOptions(env));
 await runMigrations(db);
 const app = await buildApp({ db, env });
 const stop = startScheduler(db, env.EVALUATION_INTERVAL_MINUTES, app.log);

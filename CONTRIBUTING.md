@@ -9,6 +9,7 @@
 | `feature/<descricao>` | `develop` | `develop` | PR | Funcionalidade nova. |
 | `bugfix/<descricao>` | `develop` | `develop` | PR | Correção de algo ainda não lançado. |
 | `docs/<descricao>`, `chore/<descricao>` | `develop` | `develop` | PR | Documentação e manutenção. |
+| `dependabot/…` | `develop` | `develop` | PR (squash) | Criada pelo Dependabot. Atualizações major do Node e de `@types/node` são ignoradas: trocar a versão do Node é decisão explícita, só para LTS. |
 | `release/X.Y.Z` | `develop` | `main` e `develop` | PR | Congela a versão: só correções, CHANGELOG e versão. |
 | `hotfix/X.Y.Z` | `main` | `main` e `develop` | PR | Correção urgente em produção. |
 
@@ -58,6 +59,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 |---|---|---|
 | `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright e imagem Docker |
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
+| `Release` | CI verde em push na `main`; manual | tag `vX.Y.Z` e GitHub Release com as notas do CHANGELOG |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
 ## Configuração recomendada do repositório (Settings)
@@ -77,10 +79,11 @@ Isto é feito pelo dono do repositório na interface do GitHub:
 git switch develop && git pull
 git switch -c release/0.2.0
 # atualizar version nos package.json e mover "Não lançado" para [0.2.0] no CHANGELOG.md
-git push -u origin release/0.2.0     # PR para main; depois do merge:
-git switch main && git pull && git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
-# e PR de main → develop para trazer de volta os ajustes da release
+git push -u origin release/0.2.0     # PR para main (merge commit)
+# depois do merge: PR de main → develop para trazer de volta os ajustes da release
 ```
+
+A tag `v0.2.0` e a GitHub Release são criadas pelo workflow `Release` assim que a CI passa no commit da `main`. As notas vêm da seção `[0.2.0]` do CHANGELOG; sem essa seção, a release falha. Para publicar uma versão manualmente (por exemplo, uma anterior ao workflow), use **Actions → Release → Run workflow** com a versão e o SHA do commit.
 
 ## Arquitetura
 
