@@ -1,6 +1,6 @@
 {
   "name": "@rpg/contracts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Esquemas de entrada (Zod) e tipos de resposta compartilhados entre API e interface.",
