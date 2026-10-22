@@ -1,5 +1,6 @@
 /** Exportação completa dos dados do usuário (portabilidade). */
-import { eq } from 'drizzle-orm';
+import { eq, getTableColumns, is, type Column } from 'drizzle-orm';
+import { PgTable } from 'drizzle-orm/pg-core';
 import type { DbOrTx } from '../client';
 import * as schema from '../schema';
 
@@ -9,13 +10,15 @@ const SKIP = new Set(['sessions', 'users']);
 export async function exportUserData(db: DbOrTx, userId: string) {
   const out: Record<string, unknown[]> = {};
   for (const [name, table] of Object.entries(schema)) {
-    if (typeof table !== 'object' || !table || !('userId' in (table as object)) || SKIP.has(name)) continue;
+    if (!is(table, PgTable) || SKIP.has(name)) continue;
+    const userIdColumn = (getTableColumns(table) as Record<string, Column | undefined>).userId;
+    if (!userIdColumn) continue;
     out[name] = await db
       .select()
-      .from(table as any)
-      .where(eq((table as any).userId, userId));
+      .from(table as PgTable)
+      .where(eq(userIdColumn, userId));
   }
-  out.integrationConnections = (out.integrationConnections ?? []).map((c: any) => ({ ...c, accessTokenEnc: undefined, refreshTokenEnc: undefined }));
+  out.integrationConnections = (out.integrationConnections ?? []).map((c) => ({ ...(c as object), accessTokenEnc: undefined, refreshTokenEnc: undefined }));
   const [user] = await db
     .select({ id: schema.users.id, email: schema.users.email, displayName: schema.users.displayName, createdAt: schema.users.createdAt })
     .from(schema.users)

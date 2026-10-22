@@ -20,7 +20,7 @@
 - [x] Arquitetura: repositórios, consultas, unit of work, casos de uso e regras de dependência verificadas na CI (ADR-001).
 - [x] Git Flow, CI (GitHub Actions), templates, CODEOWNERS, Dependabot e Prettier.
 - [ ] Dividir páginas grandes da interface (Estudos e Treinos).
-- [ ] ESLint (regras de React/hooks e segurança) além do Prettier e do dependency-cruiser.
+- [x] ESLint (TypeScript, React hooks) na CI, junto com Prettier e dependency-cruiser.
 - [ ] Auditoria de acessibilidade com leitor de tela real e axe.
 - [ ] Bloqueio distribuído do agendador, caso o app rode com mais de uma instância.
 

@@ -498,6 +498,7 @@ function humanize(key: string) {
 
 /** Metadados dos campos derivados das colunas do Drizzle (uma única fonte: o schema). */
 function fieldsOf(def: ResourceDef): FieldMeta[] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- metadados internos das colunas do Drizzle (columnType, enumValues, notNull).
   const cols = getTableColumns(def.table) as Record<string, any>;
   const out: FieldMeta[] = [];
   for (const [key, col] of Object.entries(cols)) {
@@ -572,6 +573,7 @@ export function findResourceMeta(key: string): ResourceMeta | null {
 // ------------------------------------------------------------------ Acesso genérico aos dados
 
 type Row = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- acesso dinâmico às colunas da tabela do recurso.
 const tableOf = (key: string) => RESOURCES.find((r) => r.key === key)!.table as any;
 
 export interface ResourceListQuery {

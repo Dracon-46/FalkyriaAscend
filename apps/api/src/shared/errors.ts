@@ -27,21 +27,28 @@ export const PG = {
   deadlock: '40P01',
 } as const;
 
+/** Forma mínima dos erros do driver `pg` (possivelmente encapsulados pelo Drizzle em `cause`). */
+interface DriverError {
+  code?: unknown;
+  constraint?: unknown;
+  cause?: unknown;
+}
+
 export function pgCode(err: unknown): string | undefined {
-  let e: any = err;
+  let e = err as DriverError | undefined;
   // drizzle pode encapsular o erro do driver em `cause`.
   for (let i = 0; i < 3 && e; i++) {
     if (typeof e.code === 'string' && /^[0-9A-Z]{5}$/.test(e.code)) return e.code;
-    e = e.cause;
+    e = e.cause as DriverError | undefined;
   }
   return undefined;
 }
 
 export function pgConstraint(err: unknown): string | undefined {
-  let e: any = err;
+  let e = err as DriverError | undefined;
   for (let i = 0; i < 3 && e; i++) {
-    if (e.constraint) return e.constraint;
-    e = e.cause;
+    if (typeof e.constraint === 'string') return e.constraint;
+    e = e.cause as DriverError | undefined;
   }
   return undefined;
 }

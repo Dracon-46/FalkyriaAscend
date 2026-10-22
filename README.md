@@ -50,7 +50,7 @@ createdb rpg_test && createdb rpg_e2e   # bancos de teste (usuário rpg/rpg por 
 npm test                                # arquitetura + 151 testes: motor (55), interface (3) e API com banco real (93)
 npm run test:e2e                        # 7 testes Playwright (desktop e celular)
 npm run simulate                        # regera docs/simulacoes.md
-npm run format:check && npm run typecheck && npm run lint:arch   # verificações da CI
+npm run format:check && npm run lint && npm run typecheck && npm run lint:arch   # verificações da CI
 ```
 
 ## Como contribuir
