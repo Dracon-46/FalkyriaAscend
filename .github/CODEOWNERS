@@ -1,0 +1,6 @@
+# Revisores obrigatórios por área (ativar "Require review from Code Owners" na proteção de branch).
+*                         @Dracon-46
+/packages/engine/         @Dracon-46
+/apps/api/src/persistence/ @Dracon-46
+/.github/                 @Dracon-46
+/docs/13-padroes-de-arquitetura.md @Dracon-46
