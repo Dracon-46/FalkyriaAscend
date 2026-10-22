@@ -35,7 +35,7 @@ jobs:
     steps:
       # No disparo manual, o checkout é do commit do workflow (scripts e CHANGELOG atuais);
       # o alvo informado só define onde a tag aponta.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Resolver versão
