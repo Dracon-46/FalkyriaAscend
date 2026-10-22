@@ -42,13 +42,14 @@ const RESOURCES = {
 
 export type OwnedResource = keyof typeof RESOURCES;
 /** Linha genérica: o serviço de CRUD trata os registros como dados opacos. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- colunas variam por recurso; o serviço genérico trata a linha como opaca.
 export type OwnedRow = Record<string, any> & { id: string };
 export interface Ordering {
   field: string;
   direction?: 'asc' | 'desc';
 }
 
-// Acesso dinâmico às colunas da tabela escolhida (o tipo concreto varia por recurso).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- acesso dinâmico às colunas; o tipo concreto varia por recurso.
 const table = (resource: OwnedResource) => RESOURCES[resource] as any;
 
 export function isArchivable(resource: OwnedResource): boolean {

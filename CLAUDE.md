@@ -10,6 +10,7 @@ Este arquivo é a memória do projeto para agentes de IA e vale também para pes
 - Commits seguem **Conventional Commits** em português: `tipo(escopo): descrição no imperativo`. Tipos: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`, `style`, `revert`.
 - **Nenhuma atribuição a IA** em commits, pull requests ou arquivos: sem `Co-Authored-By`, sem `Claude-Session`, sem "Generated with …", sem rodapés de ferramenta. O autor dos commits é o dono do repositório.
 - Todo pull request passa pela CI (`.github/workflows/ci.yml`) e segue o template. Nada vai para `main` ou `develop` sem PR e CI verde.
+- **Merge pelo agente, sempre:** com todos os checks verdes, sem conflito e sem pendências de revisão, o agente faz o merge sem pedir confirmação. Usa squash para `develop` e merge commit para `release/*` e `hotfix/*` em `main`. Depois apaga a branch de origem quando possível e atualiza as dependentes.
 - Releases são versionadas (SemVer), com tag `vX.Y.Z` e entrada no `CHANGELOG.md`.
 
 ## Arquitetura
@@ -19,6 +20,6 @@ Este arquivo é a memória do projeto para agentes de IA e vale também para pes
 
 ## Qualidade
 
-- Antes de qualquer push: `npm run format:check`, `npm run typecheck`, `npm run lint:arch` e `npm test`. Para mudanças de interface, rode também `npm run test:e2e`.
+- Antes de qualquer push: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run lint:arch` e `npm test`. Para mudanças de interface, rode também `npm run test:e2e`.
 - Nunca declarar algo como testado sem ter executado os testes.
 - Segredos só no servidor; nada de tokens em logs; nada de dados falsos em produção (demonstração fica separada e identificada).

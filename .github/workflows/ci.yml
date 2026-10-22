@@ -20,7 +20,7 @@ env:
 
 jobs:
   quality:
-    name: Qualidade (formatação, tipos e arquitetura)
+    name: Qualidade (formatação, lint, tipos e arquitetura)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -32,6 +32,8 @@ jobs:
       - run: npm ci
       - name: Formatação (Prettier)
         run: npm run format:check
+      - name: Lint (ESLint)
+        run: npm run lint
       - name: Typecheck (todos os pacotes)
         run: npm run typecheck
       - name: Regras de arquitetura (ADR-001)

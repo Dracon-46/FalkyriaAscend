@@ -43,6 +43,7 @@ Commits não levam rodapés de ferramentas nem coautoria automática.
 
 ```bash
 npm run format:check
+npm run lint
 npm run typecheck
 npm run lint:arch       # regras do ADR-001
 npm test                # motor + API com PostgreSQL real
@@ -55,7 +56,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 
 | Workflow | Quando | Jobs |
 |---|---|---|
-| `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright e imagem Docker |
+| `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright e imagem Docker |
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
@@ -64,7 +65,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 Isto é feito pelo dono do repositório na interface do GitHub:
 
 1. **Branch padrão:** `develop`.
-2. **Regras (Rulesets) para `main` e `develop`:** exigir PR; exigir os checks `Qualidade (formatação, tipos e arquitetura)`, `Testes do motor`, `Testes de integração da API`, `Build de produção`, `Testes ponta a ponta (Playwright)` e `Git Flow e Conventional Commits`; exigir branch atualizada; exigir revisão de Code Owners; bloquear force push e exclusão; exigir histórico linear apenas em `develop`.
+2. **Regras (Rulesets) para `main` e `develop`:** exigir PR; exigir os checks `Qualidade (formatação, lint, tipos e arquitetura)`, `Testes do motor`, `Testes de integração da API`, `Build de produção`, `Testes ponta a ponta (Playwright)` e `Git Flow e Conventional Commits`; exigir branch atualizada; exigir revisão de Code Owners; bloquear force push e exclusão; exigir histórico linear apenas em `develop`.
 3. **Merge:** permitir *squash* (padrão para `develop`) e *merge commit* (para `release/*` e `hotfix/*` em `main`); desativar *rebase merge*; apagar a branch após o merge.
 4. **Segurança:** ativar Dependabot alerts, secret scanning e push protection.
 

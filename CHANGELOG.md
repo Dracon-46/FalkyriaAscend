@@ -6,6 +6,7 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ### Adicionado
 - Git Flow (`main`/`develop`/`feature`/`release`/`hotfix`), CI no GitHub Actions (tipos, arquitetura, motor, API com PostgreSQL, build, E2E e Docker), templates de PR e issue, CODEOWNERS, Dependabot, CONTRIBUTING e SECURITY.
+- Prettier e ESLint (TypeScript e React hooks) verificados na CI.
 - ADR-001: arquitetura em camadas com regras de dependência verificadas por `npm run lint:arch`.
 
 ### Alterado
