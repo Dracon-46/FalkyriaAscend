@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+package-lock.json
+apps/api/drizzle
+docs/legacy
+docs/simulacoes.md
+apps/web/public
+*.md

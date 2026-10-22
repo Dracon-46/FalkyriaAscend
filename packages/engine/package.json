@@ -1,0 +1,23 @@
+{
+  "name": "@rpg/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Motor de gamificação puro (sem I/O): curva de XP, recompensas, penalidades, sequências, conquistas e economia.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json",
+    "simulate": "tsx scripts/simulate.ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0",
+    "vitest": "^3.2.4"
+  }
+}

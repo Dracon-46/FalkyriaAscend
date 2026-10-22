@@ -1,0 +1,42 @@
+{
+  "name": "ascend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ascend — RPG pessoal de vida real (um produto Falkyria).",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @rpg/api & npm run dev --workspace @rpg/web",
+    "build": "npm run build --workspace @rpg/web && npm run build --workspace @rpg/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:arch": "depcruise packages/engine/src packages/contracts/src apps/api/src apps/web/src --config .dependency-cruiser.cjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run lint:arch && npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e",
+    "db:migrate": "npm run db:migrate --workspace @rpg/api",
+    "db:generate": "npm run db:generate --workspace @rpg/api",
+    "seed:demo": "npm run seed:demo --workspace @rpg/api",
+    "simulate": "npm run simulate --workspace @rpg/engine"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.19.0",
+    "dependency-cruiser": "^17.4.3",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.44.1"
+  }
+}

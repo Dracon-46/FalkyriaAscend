@@ -1,0 +1,39 @@
+# Desenvolvimento: `docker compose up db` (só o banco) e `npm run dev`.
+# Produção local: `docker compose up -d` (banco + aplicação em http://localhost:3333).
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rpg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rpg}
+      POSTGRES_DB: ${POSTGRES_DB:-rpg_dev}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-rpg}']
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rpg}:${POSTGRES_PASSWORD:-rpg}@db:5432/${POSTGRES_DB:-rpg_dev}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3333}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-false}
+      INTEGRATION_ENCRYPTION_KEY: ${INTEGRATION_ENCRYPTION_KEY:-}
+      STRAVA_CLIENT_ID: ${STRAVA_CLIENT_ID:-}
+      STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET:-}
+      STRAVA_WEBHOOK_VERIFY_TOKEN: ${STRAVA_WEBHOOK_VERIFY_TOKEN:-}
+    ports:
+      - '3333:3333'
+    profiles: ['app']
+
+volumes:
+  pgdata:
