@@ -6,17 +6,22 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ### Adicionado
 - Deploy em produção com Supabase (PostgreSQL) e Render (Docker): `render.yaml`, guia em `docs/14-deploy.md`, TLS configurável na conexão com o banco (`DATABASE_SSL`, `DATABASE_CA_CERT`) e tamanho do pool (`DATABASE_POOL_MAX`).
-- Git Flow (`main`/`develop`/`feature`/`release`/`hotfix`), CI no GitHub Actions (tipos, arquitetura, motor, API com PostgreSQL, build, E2E e Docker), templates de PR e issue, CODEOWNERS, Dependabot, CONTRIBUTING e SECURITY.
-- Prettier e ESLint (TypeScript e React hooks) verificados na CI.
-- ADR-001: arquitetura em camadas com regras de dependência verificadas por `npm run lint:arch`.
 
-### Alterado
-- API reorganizada em `http/`, `application/`, `persistence/` (repositórios, consultas e unit of work), `integrations/`, `shared/` e `config/`.
+## [0.1.0] - 2026-10-22
 
-## [0.1.0]
+Primeira versão do Ascend.
 
 ### Adicionado
-- Motor de gamificação (`@rpg/engine`): curva de XP calibrada por simulação, recompensas, penalidades com tetos e proteções, sequências, conquistas e economia.
+- Motor de gamificação (`@rpg/engine`): curva de XP calibrada por simulação, recompensas com retornos decrescentes e limites diários, penalidades com tetos e proteções (descanso, doença, modo de recuperação; necessidades básicas nunca punidas), sequências, conquistas e economia com livro-razão imutável.
 - API (Fastify + PostgreSQL): missões, hábitos, metas, estudos, treinos, loja, inventário, conquistas, temporadas, estatísticas, histórico, avaliador diário, admin com CRUD completo e auditoria, integrações Strava/Lyfta/Hevy.
-- Interface (React + PWA): 15 áreas, admin, gráfico radar de atributos e cinco temas.
+- Interface (React + PWA): 15 áreas, admin, gráfico radar de atributos e cinco temas (Medieval, Vampiros, Anjos, Sistema e Personalizado).
 - Docker, backup e restauração, dados de demonstração separados, testes unitários, de integração e E2E.
+- Arquitetura em camadas (ADR-001): controllers → casos de uso (Unit of Work) → serviços de domínio → repositórios e consultas, com 17 regras de dependência verificadas por `npm run lint:arch`.
+- Git Flow, CI no GitHub Actions (formatação, lint, tipos, arquitetura, motor, API com PostgreSQL, build, E2E e Docker), validação de branch e título de PR, templates de PR e issue, CODEOWNERS, Dependabot, CONTRIBUTING e SECURITY.
+- Prettier e ESLint (TypeScript e React hooks).
+
+### Conhecido
+- Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
+
+[Não lançado]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.1.0...develop
+[0.1.0]: https://github.com/Dracon-46/Sistema-Gameficado/releases/tag/v0.1.0
