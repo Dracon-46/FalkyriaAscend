@@ -1,6 +1,6 @@
 # 07 — Catálogo inicial
 
-Criado por usuário no cadastro (`apps/api/src/services/defaults.ts`). Tudo é editável em suas telas ou no Admin. Nada disso é dado de atividade: não há XP, missões concluídas nem histórico fictício.
+Criado por usuário no cadastro (conteúdo declarativo em `apps/api/src/application/defaults.ts`, gravado pelo repositório `starter-content`). Tudo é editável e opcional, em suas telas ou no Admin. Nada disso é dado de atividade: não há XP, missões concluídas nem histórico fictício.
 
 ## Atributos
 

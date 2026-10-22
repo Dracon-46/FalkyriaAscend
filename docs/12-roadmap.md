@@ -17,8 +17,10 @@
 - [ ] Validar Lyfta com uma chave real, incluindo a unidade de peso (não documentada).
 - [ ] Decidir sobre o Strava diante da política de 2026 (consultar developers@strava.com) e validar o OAuth/webhook com um app real.
 - [ ] Notificações push (Web Push / VAPID), respeitando o horário silencioso já salvo.
-- [ ] Arquitetura: camada de repositórios e regras de dependência verificadas automaticamente (em andamento).
-- [ ] Dividir arquivos grandes (rotas de economia; páginas de Estudos e Treinos).
+- [x] Arquitetura: repositórios, consultas, unit of work, casos de uso e regras de dependência verificadas na CI (ADR-001).
+- [x] Git Flow, CI (GitHub Actions), templates, CODEOWNERS, Dependabot e Prettier.
+- [ ] Dividir páginas grandes da interface (Estudos e Treinos).
+- [ ] ESLint (regras de React/hooks e segurança) além do Prettier e do dependency-cruiser.
 - [ ] Auditoria de acessibilidade com leitor de tela real e axe.
 - [ ] Bloqueio distribuído do agendador, caso o app rode com mais de uma instância.
 

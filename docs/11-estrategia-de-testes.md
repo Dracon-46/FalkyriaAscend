@@ -5,11 +5,13 @@
 | Motor (unidade) | Vitest | `packages/engine/test` | 55 |
 | API (integração com PostgreSQL real) | Vitest + `app.inject` | `apps/api/test/api.test.ts` | 89 |
 | Normalização das integrações | Vitest | `apps/api/test/normalize.test.ts` | 4 |
+| Interface (unidade) | Vitest | `apps/web/src/**/*.test.ts` | 3 |
 | Ponta a ponta | Playwright (Chromium) | `e2e/` | 7 |
+| Arquitetura | dependency-cruiser | `.dependency-cruiser.cjs` | 17 regras |
 
 Comandos:
 
-- `npm test`: unidade e integração. Exige PostgreSQL com o banco `rpg_test`; a URL pode ser trocada com `TEST_DATABASE_URL`.
+- `npm test`: regras de arquitetura (`lint:arch`), unidade e integração. Exige PostgreSQL com o banco `rpg_test`; a URL pode ser trocada com `TEST_DATABASE_URL`.
 - `npm run test:e2e`: sobe a API na porta 3334 e a interface na 5174, sobre o banco `rpg_e2e`, recriado a cada execução.
 
 ## Cobertura dos itens exigidos
@@ -23,5 +25,9 @@ Comandos:
 - **Conquistas e atributos:** desbloqueio único e progressão de atributos (api.test).
 - **Interface:** troca e persistência de tema (api.test, E2E); persistência após recarregar (E2E); autorização entre usuários (api.test).
 - **Smoke:** os 53 endpoints de leitura respondem 200 com dados reais.
+
+## Pipeline
+
+A CI (`.github/workflows/ci.yml`) roda em todo PR para `develop`, `main` e `release/**`: formatação, tipos e arquitetura; testes do motor; testes da API com um PostgreSQL de serviço; build de produção; E2E com Playwright; e build da imagem Docker. O workflow `pr-conventions.yml` valida o Git Flow (origem e destino do PR) e o título em Conventional Commits.
 
 O relógio é injetável (`AppContext.now`), o que torna determinísticos os testes de dias, prazos e avaliação.

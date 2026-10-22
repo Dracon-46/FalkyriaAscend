@@ -1,6 +1,6 @@
 # 03 — Modelo de dados
 
-O schema está em `apps/api/src/db/schema.ts`, e as migrações versionadas ficam em `apps/api/drizzle/` (geradas com `npm run db:generate`).
+O schema está em `apps/api/src/persistence/schema.ts`, e as migrações versionadas ficam em `apps/api/drizzle/` (geradas com `npm run db:generate`).
 
 ## Convenções
 

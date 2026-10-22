@@ -5,12 +5,16 @@
 ```
 apps/web  (React 19 + Vite + Tailwind 4 + React Query + Recharts, PWA)
    │  fetch /api (cookie de sessão + x-requested-with)
-apps/api  (Fastify 5 + Drizzle ORM + Zod)
-   ├─ routes/        HTTP: validação, autorização, transações
-   ├─ admin/         CRUD genérico derivado do schema + ações sobre o livro-razão
-   ├─ services/      regras de aplicação (missões, hábitos, loja, estatísticas…)
-   ├─ integrations/  Strava / Lyfta / Hevy → normalização → deduplicação
-   └─ db/            schema Drizzle + migrações versionadas (drizzle/)
+apps/api  (Fastify 5 + Drizzle ORM + Zod) — camadas do ADR-001 (docs/13)
+   ├─ http/                     controllers finos: validam (Zod), autorizam, chamam 1 caso de uso
+   ├─ application/use-cases/    casos de uso: abrem a Unit of Work e resolvem a data local
+   ├─ application/*.ts          serviços de domínio (recompensas, missões, hábitos, penalidades…)
+   ├─ persistence/repositories/ escrita e leitura por agregado (único lugar com Drizzle de escrita)
+   ├─ persistence/queries/      read models (estatísticas, painel, histórico, métricas)
+   ├─ persistence/              schema, migrações, unit-of-work, tipos de linha (models.ts)
+   ├─ integrations/             adaptadores Strava / Lyfta / Hevy (clientes + normalização)
+   ├─ jobs/                     agendador da avaliação diária
+   └─ shared/, config/          erros, criptografia, ambiente
 packages/engine     motor de gamificação PURO (sem I/O): curva, recompensas, penalidades,
                     sequências, conquistas, economia, simulações
 packages/contracts  esquemas Zod de entrada compartilhados (API valida, interface reutiliza)
@@ -32,9 +36,9 @@ PostgreSQL 16
 ## Fluxo de uma recompensa
 
 ```
-ação do usuário → rota valida (Zod) → transação
+ação do usuário → controller valida (Zod) → caso de uso abre a transação (inTransaction)
    → serviço de domínio calcula com @rpg/engine (limites, multiplicador, retornos decrescentes)
-   → grantReward(): INSERT reward_grants (chave única) ON CONFLICT → idempotente
+   → grantReward(): repositório do livro-razão insere reward_grants (chave única) ON CONFLICT → idempotente
         → bloqueia character_progress (FOR UPDATE) → atualiza XP/nível → level_history + marcos
         → grant_attribute_xp / grant_skill_xp + projeções
         → postCoinTx(): bloqueia wallets (FOR UPDATE), grava coin_transactions (seq estrita), saldo ≥ 0
@@ -61,39 +65,41 @@ Depois disso avança as temporadas, gera as missões recorrentes do período, cr
 
 Veja a seção de requisitos não funcionais em `01-requisitos.md`. Pontos de implementação:
 
-- `plugins/auth.ts`: sessão com o token só no cookie. O banco guarda apenas o SHA-256 do token, e a renovação é deslizante.
+- `http/plugins/auth.ts` + `use-cases/auth.ts`: sessão com o token só no cookie. O banco guarda apenas o SHA-256 do token, e a renovação é deslizante.
 - `app.ts`: CSRF via cabeçalho `x-requested-with: rpg` e verificação de Origin, com exceção apenas para o webhook do Strava (protegido por um segredo no caminho). Helmet aplica CSP, e o handler de erros não vaza detalhes.
-- Autorização: toda tabela de dados de usuário tem `user_id`. Toda consulta filtra por ele, e IDs referenciados são verificados com `assertOwned()`. O Admin exige `role = admin`.
+- Autorização: toda tabela de dados de usuário tem `user_id`. Toda consulta filtra por ele, e IDs referenciados são verificados com `assertOwned()` (repositório `ownership`). O Admin exige `role = admin`.
 
 ## Estilo arquitetural, SOLID e padrões de projeto
 
-**Estilo.** O sistema é dividido em camadas e módulos, com um **núcleo funcional puro e uma casca imperativa** (*functional core, imperative shell*). As regras de jogo ficam em `@rpg/engine`, só com funções puras: entram dados, saem decisões, sem banco nem HTTP. Os serviços da API orquestram I/O e transações, e as rotas fazem a borda (validação, autorização). O código é TypeScript funcional e tipado. Não há hierarquias de classes, porque isso não traria benefício para regras que são essencialmente cálculos sobre dados.
+**Estilo.** Arquitetura em camadas (PoEAA) com um **núcleo funcional puro e uma casca imperativa** (*functional core, imperative shell*), formalizada no [ADR-001](13-padroes-de-arquitetura.md) e **verificada automaticamente** (`npm run lint:arch`, na CI). As regras de jogo ficam em `@rpg/engine`, só com funções puras: entram dados, saem decisões, sem banco nem HTTP. Os casos de uso orquestram transações, os serviços de domínio aplicam o motor, os repositórios e consultas isolam o banco e os controllers fazem a borda. O código é TypeScript funcional e tipado, organizado em módulos. Não há hierarquias de classes, porque isso não traria benefício para regras que são essencialmente cálculos sobre dados.
 
 **SOLID, aplicado a módulos e funções:**
 
 | Princípio | Como aparece | Onde |
 |---|---|---|
-| Responsabilidade única (S) | Cada módulo do motor cuida de um assunto (curva, recompensas, penalidades, sequências, conquistas, economia). Cada serviço cuida de um domínio. | `packages/engine/src/*`, `apps/api/src/services/*` |
-| Aberto/fechado (O) | Novas curvas, tipos de penalidade, métricas de conquista e recursos do Admin entram por configuração ou registro, sem mexer nos consumidores. | `curveConfigSchema`, `PENALTY_TYPES`, `ACHIEVEMENT_METRICS`, `admin/registry.ts` |
-| Substituição de Liskov (L) | Serviços aceitam `Db` ou `Tx` (`DbOrTx`), que são intercambiáveis, então a mesma função roda dentro ou fora de uma transação. | `db/client.ts` |
+| Responsabilidade única (S) | Cada módulo do motor cuida de um assunto. Na API, cada camada tem um papel: controller (borda), caso de uso (transação), serviço (regra), repositório (dados). | `packages/engine/src/*`, `apps/api/src/{http,application,persistence}` |
+| Aberto/fechado (O) | Novas curvas, tipos de penalidade, métricas de conquista e recursos do Admin entram por configuração ou registro, sem mexer nos consumidores. | `curveConfigSchema`, `PENALTY_TYPES`, `ACHIEVEMENT_METRICS`, `persistence/repositories/admin-resources.ts`, `application/crud.ts` |
+| Substituição de Liskov (L) | Serviços e repositórios aceitam `Db` ou `Tx` (`DbOrTx`), que são intercambiáveis, então a mesma função roda dentro ou fora de uma transação. Todo serviço de cadastro cumpre o mesmo contrato `CrudService`. | `persistence/unit-of-work.ts`, `application/crud.ts` |
 | Segregação de interfaces (I) | Contratos de entrada pequenos e específicos (`missionInput`, `habitCheckinInput`...). Na interface, os componentes recebem apenas as props de que precisam. | `packages/contracts` |
-| Inversão de dependência (D) | O motor não depende da API nem do banco, e a API depende do motor. Relógio (`now`), banco e ambiente são injetados no `AppContext`, o que deixa os testes determinísticos. | `context.ts`, `test/helpers.ts` |
+| Inversão de dependência (D) | As dependências só apontam para baixo e são verificadas pela CI. O motor não depende de nada; a aplicação não conhece HTTP nem o ORM. Relógio (`now`), banco e ambiente são injetados no `AppContext`, o que deixa os testes determinísticos. | `context.ts`, `.dependency-cruiser.cjs` |
 
 **Padrões de projeto usados de forma explícita:**
 
 - **Livro-razão + projeções** (event sourcing leve): `reward_grants`, `coin_transactions` e `penalty_applications` são imutáveis, com correções por estorno. As projeções (`wallets`, `character_progress`, XP de atributos) podem ser reconstruídas.
 - **Chave de idempotência**: recompensas, compras, penalidades e eventos de integração.
-- **Unit of Work**: cada caso de uso roda numa única transação do banco.
+- **Service Layer + casos de uso**: `application/use-cases/*` são os únicos pontos de entrada dos controllers.
+- **Repository / Query Object**: `persistence/repositories/*` por agregado; `persistence/queries/*` para leituras agregadas.
+- **Unit of Work**: `inTransaction()`; cada caso de uso que escreve roda numa única transação do banco.
 - **Strategy**: tipos de curva e de penalidade são uniões discriminadas resolvidas por `switch` exaustivo.
 - **Adapter**: os normalizadores de Strava, Lyfta e Hevy convertem formatos externos num formato interno único.
 - **Pipeline**: integração (normalizar → validar → deduplicar → recompensar).
 - **Specification / DSL**: critérios de conquista declarativos, validados por Zod e avaliados por um único avaliador.
 - **Registry**: o Admin deriva formulários e validação do schema do banco a partir de um registro de recursos.
 - **Observer simplificado**: `afterAction()` reavalia objetivos, metas e conquistas depois de qualquer ação que altere progresso.
-- **Template de CRUD**: `registerCrud()` padroniza validação, escopo por usuário, auditoria e arquivamento.
+- **Template Method (CRUD)**: `crudService()` padroniza escopo por usuário, auditoria e arquivamento; cada recurso só declara sua validação (`prepare`). `registerCrud()` expõe o serviço em REST.
 
 **Lacunas conhecidas, documentadas por transparência:**
 
-1. Não há camada de *Repository* com interfaces. Os serviços usam o Drizzle diretamente. Para o tamanho atual isso reduz cerimônia, mas acopla os serviços ao ORM. Se surgir necessidade (outro banco, testes sem PostgreSQL), o próximo passo é extrair repositórios por agregado.
-2. Algumas rotas e páginas ficaram grandes (ex.: `routes/economy.ts` e as páginas de Estudos e Treinos). Elas são candidatas a divisão por subdomínio.
+1. Os repositórios são módulos de funções, não interfaces com implementações trocáveis. Trocar de banco afetaria só `persistence/`, mas testes sem PostgreSQL exigiriam extrair interfaces (hoje os testes de integração usam um banco real, de propósito).
+2. Algumas páginas da interface ficaram grandes (Estudos e Treinos). Elas são candidatas a divisão por subcomponentes.
 3. O agendador é em processo. Com várias instâncias, ele precisaria de um bloqueio distribuído; a avaliação já é idempotente e trava a linha de configurações do usuário.

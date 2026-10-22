@@ -13,7 +13,7 @@
 | Testes | Vitest (unidade e integração com banco real) e Playwright (ponta a ponta) |
 
 ```
-apps/api            API, avaliador diário, admin, integrações
+apps/api            API em camadas (http → casos de uso → serviços → repositórios), avaliador diário, admin, integrações
 apps/web            interface (16 áreas + administração)
 packages/engine     regras: curva de XP, recompensas, penalidades, sequências, economia
 packages/contracts  esquemas de entrada compartilhados (Zod)
@@ -47,10 +47,15 @@ A conta de demonstração é marcada (`is_demo`), identificada na interface e nu
 
 ```bash
 createdb rpg_test && createdb rpg_e2e   # bancos de teste (usuário rpg/rpg por padrão)
-npm test                                # 148 testes: motor (55) + API com banco real (93)
+npm test                                # arquitetura + 151 testes: motor (55), interface (3) e API com banco real (93)
 npm run test:e2e                        # 7 testes Playwright (desktop e celular)
 npm run simulate                        # regera docs/simulacoes.md
+npm run format:check && npm run typecheck && npm run lint:arch   # verificações da CI
 ```
+
+## Como contribuir
+
+O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`) e **Conventional Commits**, com CI obrigatória em todo pull request. Veja [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) e o [CHANGELOG](CHANGELOG.md).
 
 ## Produção
 
@@ -63,7 +68,7 @@ Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @
 ## Documentação
 
 1. [Requisitos](docs/01-requisitos.md)
-2. [Arquitetura, SOLID e padrões](docs/02-arquitetura.md)
+2. [Arquitetura, SOLID e padrões](docs/02-arquitetura.md) e [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)
 3. [Modelo de dados e diagrama ER](docs/03-modelo-de-dados.md)
 4. [Regras de gamificação](docs/04-regras-de-gamificacao.md)
 5. [Curva de XP](docs/05-curva-de-xp.md) e [simulações](docs/simulacoes.md)
