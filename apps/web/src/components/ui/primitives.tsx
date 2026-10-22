@@ -1,5 +1,13 @@
 import clsx from 'clsx';
-import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import {
+  forwardRef,
+  useId,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react';
 import { Icon } from './Icon';
 
 export { clsx as cx };
@@ -39,7 +47,21 @@ export function IconButton({ icon, label, ...rest }: Omit<ButtonProps, 'children
 
 // ------------------------------------------------------------------ Campos
 
-export function Field({ label, hint, error, children, htmlFor, className }: { label: string; hint?: ReactNode; error?: string | null; children: ReactNode; htmlFor?: string; className?: string }) {
+export function Field({
+  label,
+  hint,
+  error,
+  children,
+  htmlFor,
+  className,
+}: {
+  label: string;
+  hint?: ReactNode;
+  error?: string | null;
+  children: ReactNode;
+  htmlFor?: string;
+  className?: string;
+}) {
   return (
     <div className={className}>
       <label className="field-label" htmlFor={htmlFor}>
@@ -56,64 +78,77 @@ export function Field({ label, hint, error, children, htmlFor, className }: { la
   );
 }
 
-export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: ReactNode; error?: string | null }>(function Input(
-  { label, hint, error, className, id, ...rest },
-  ref,
-) {
-  const auto = useId();
-  const input = <input ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest} />;
-  return label ? (
-    <Field label={label} hint={hint} error={error} htmlFor={id ?? auto}>
-      {input}
-    </Field>
-  ) : (
-    input
-  );
-});
-
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string; hint?: ReactNode; error?: string | null }>(
-  function Textarea({ label, hint, error, className, id, ...rest }, ref) {
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: ReactNode; error?: string | null }>(
+  function Input({ label, hint, error, className, id, ...rest }, ref) {
     const auto = useId();
-    const el = <textarea ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest} />;
+    const input = <input ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest} />;
     return label ? (
       <Field label={label} hint={hint} error={error} htmlFor={id ?? auto}>
-        {el}
+        {input}
       </Field>
     ) : (
-      el
+      input
     );
   },
 );
+
+export const Textarea = forwardRef<
+  HTMLTextAreaElement,
+  TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string; hint?: ReactNode; error?: string | null }
+>(function Textarea({ label, hint, error, className, id, ...rest }, ref) {
+  const auto = useId();
+  const el = <textarea ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest} />;
+  return label ? (
+    <Field label={label} hint={hint} error={error} htmlFor={id ?? auto}>
+      {el}
+    </Field>
+  ) : (
+    el
+  );
+});
 
 export interface Option {
   value: string;
   label: string;
 }
 
-export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement> & { label?: string; hint?: ReactNode; error?: string | null; options: Option[]; placeholder?: string }>(
-  function Select({ label, hint, error, options, placeholder, className, id, ...rest }, ref) {
-    const auto = useId();
-    const el = (
-      <select ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest}>
-        {placeholder !== undefined && <option value="">{placeholder}</option>}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    );
-    return label ? (
-      <Field label={label} hint={hint} error={error} htmlFor={id ?? auto}>
-        {el}
-      </Field>
-    ) : (
-      el
-    );
-  },
-);
+export const Select = forwardRef<
+  HTMLSelectElement,
+  SelectHTMLAttributes<HTMLSelectElement> & { label?: string; hint?: ReactNode; error?: string | null; options: Option[]; placeholder?: string }
+>(function Select({ label, hint, error, options, placeholder, className, id, ...rest }, ref) {
+  const auto = useId();
+  const el = (
+    <select ref={ref} id={id ?? auto} className={clsx('input', className)} aria-invalid={error ? true : undefined} {...rest}>
+      {placeholder !== undefined && <option value="">{placeholder}</option>}
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+  return label ? (
+    <Field label={label} hint={hint} error={error} htmlFor={id ?? auto}>
+      {el}
+    </Field>
+  ) : (
+    el
+  );
+});
 
-export function Checkbox({ label, hint, checked, onChange, disabled }: { label: ReactNode; hint?: ReactNode; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+export function Checkbox({
+  label,
+  hint,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: ReactNode;
+  hint?: ReactNode;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}) {
   const id = useId();
   return (
     <div className="flex items-start gap-2">
@@ -128,7 +163,21 @@ export function Checkbox({ label, hint, checked, onChange, disabled }: { label: 
 
 // ------------------------------------------------------------------ Estrutura
 
-export function Panel({ title, icon, actions, children, className, id }: { title?: ReactNode; icon?: string; actions?: ReactNode; children: ReactNode; className?: string; id?: string }) {
+export function Panel({
+  title,
+  icon,
+  actions,
+  children,
+  className,
+  id,
+}: {
+  title?: ReactNode;
+  icon?: string;
+  actions?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  id?: string;
+}) {
   return (
     <section className={clsx('panel', className)} id={id} aria-label={typeof title === 'string' ? title : undefined}>
       {(title || actions) && (
@@ -211,7 +260,17 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
   );
 }
 
-export function Badge({ children, tone, className, title }: { children: ReactNode; tone?: 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'muted'; className?: string; title?: string }) {
+export function Badge({
+  children,
+  tone,
+  className,
+  title,
+}: {
+  children: ReactNode;
+  tone?: 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
+  className?: string;
+  title?: string;
+}) {
   const style =
     tone && tone !== 'muted'
       ? {
@@ -230,7 +289,14 @@ export function Badge({ children, tone, className, title }: { children: ReactNod
 export function ProgressBar({ value, xp, label, className, color }: { value: number; xp?: boolean; label?: string; className?: string; color?: string }) {
   const v = Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
   return (
-    <div className={clsx('bar', xp && 'bar-xp', className)} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v * 100)} aria-label={label}>
+    <div
+      className={clsx('bar', xp && 'bar-xp', className)}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(v * 100)}
+      aria-label={label}
+    >
       <span style={{ width: `${v * 100}%`, ...(color ? { background: color } : {}) }} />
     </div>
   );
@@ -251,7 +317,15 @@ export function Stat({ label, value, hint, icon, tone }: { label: string; value:
   );
 }
 
-export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: Array<{ value: T; label: string; icon?: string }>; value: T; onChange: (v: T) => void }) {
+export function Tabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+}: {
+  tabs: Array<{ value: T; label: string; icon?: string }>;
+  value: T;
+  onChange: (v: T) => void;
+}) {
   return (
     <div role="tablist" className="mb-4 flex gap-1 overflow-x-auto border-b border-line" style={{ scrollbarWidth: 'none' }}>
       {tabs.map((t) => (
@@ -274,7 +348,17 @@ export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: Array<
   );
 }
 
-export function Segmented<T extends string | number>({ options, value, onChange, label }: { options: Array<{ value: T; label: string }>; value: T; onChange: (v: T) => void; label: string }) {
+export function Segmented<T extends string | number>({
+  options,
+  value,
+  onChange,
+  label,
+}: {
+  options: Array<{ value: T; label: string }>;
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+}) {
   return (
     <div className="inline-flex rounded-[var(--radius)] border border-line bg-bg-2 p-0.5" role="group" aria-label={label}>
       {options.map((o) => (
@@ -283,7 +367,10 @@ export function Segmented<T extends string | number>({ options, value, onChange,
           type="button"
           aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
-          className={clsx('rounded-[var(--radius-sm)] px-2.5 py-1 text-xs transition-colors', value === o.value ? 'bg-accent-soft text-accent' : 'text-muted hover:text-fg')}
+          className={clsx(
+            'rounded-[var(--radius-sm)] px-2.5 py-1 text-xs transition-colors',
+            value === o.value ? 'bg-accent-soft text-accent' : 'text-muted hover:text-fg',
+          )}
         >
           {o.label}
         </button>

@@ -96,40 +96,40 @@ export async function createMission(
   const weights = await validateMissionInput(tx, userId, input);
   const m = await insertMissionIfNew(tx, {
     userId,
-      title: input.title,
-      description: input.description,
-      type: input.type,
-      difficulty: input.difficulty,
-      categoryId: input.categoryId ?? null,
-      goalId: input.goalId ?? null,
-      seasonId: input.seasonId ?? null,
-      parentId: input.parentId ?? null,
-      startDate: input.startDate ?? null,
-      dueDate: input.dueDate ?? null,
-      completionMode: input.completionMode,
-      rewardXpOverride: input.rewardXpOverride ?? null,
-      rewardCoinsOverride: input.rewardCoinsOverride ?? null,
-      isSecret: input.isSecret,
-      evidenceRequired: input.evidenceRequired,
-      priority: input.priority,
-      attributeWeights: weights,
-      source: opts.source ?? 'manual',
-      templateId: opts.templateId ?? null,
+    title: input.title,
+    description: input.description,
+    type: input.type,
+    difficulty: input.difficulty,
+    categoryId: input.categoryId ?? null,
+    goalId: input.goalId ?? null,
+    seasonId: input.seasonId ?? null,
+    parentId: input.parentId ?? null,
+    startDate: input.startDate ?? null,
+    dueDate: input.dueDate ?? null,
+    completionMode: input.completionMode,
+    rewardXpOverride: input.rewardXpOverride ?? null,
+    rewardCoinsOverride: input.rewardCoinsOverride ?? null,
+    isSecret: input.isSecret,
+    evidenceRequired: input.evidenceRequired,
+    priority: input.priority,
+    attributeWeights: weights,
+    source: opts.source ?? 'manual',
+    templateId: opts.templateId ?? null,
     periodKey: opts.periodKey ?? null,
   });
   if (!m) return null; // instância recorrente já existente
   await insertObjectives(
     tx,
     input.objectives.map((o, i) => ({
-        userId,
-        missionId: m.id,
-        title: o.title,
-        metric: o.metric,
-        metricRefId: o.metricRefId ?? null,
-        target: o.target,
-        current: o.metric === 'manual' ? (o.current ?? 0) : 0,
-        unit: o.unit ?? null,
-        optional: o.optional,
+      userId,
+      missionId: m.id,
+      title: o.title,
+      metric: o.metric,
+      metricRefId: o.metricRefId ?? null,
+      target: o.target,
+      current: o.metric === 'manual' ? (o.current ?? 0) : 0,
+      unit: o.unit ?? null,
+      optional: o.optional,
       sortOrder: i,
     })),
   );
@@ -149,28 +149,31 @@ export async function updateMission(tx: DbOrTx, userId: string, id: string, inpu
   const weights = await validateMissionInput(tx, userId, input);
   const updated = await updateMissionRow(tx, id, {
     title: input.title,
-      description: input.description,
-      type: input.type,
-      difficulty: input.difficulty,
-      categoryId: input.categoryId ?? null,
-      goalId: input.goalId ?? null,
-      seasonId: input.seasonId ?? null,
-      parentId: input.parentId ?? null,
-      startDate: input.startDate ?? null,
-      dueDate: input.dueDate ?? null,
-      completionMode: input.completionMode,
-      rewardXpOverride: input.rewardXpOverride ?? null,
-      rewardCoinsOverride: input.rewardCoinsOverride ?? null,
-      isSecret: input.isSecret,
-      evidenceRequired: input.evidenceRequired,
-      priority: input.priority,
+    description: input.description,
+    type: input.type,
+    difficulty: input.difficulty,
+    categoryId: input.categoryId ?? null,
+    goalId: input.goalId ?? null,
+    seasonId: input.seasonId ?? null,
+    parentId: input.parentId ?? null,
+    startDate: input.startDate ?? null,
+    dueDate: input.dueDate ?? null,
+    completionMode: input.completionMode,
+    rewardXpOverride: input.rewardXpOverride ?? null,
+    rewardCoinsOverride: input.rewardCoinsOverride ?? null,
+    isSecret: input.isSecret,
+    evidenceRequired: input.evidenceRequired,
+    priority: input.priority,
     attributeWeights: weights,
   });
 
   // Objetivos: atualiza os existentes, cria novos e remove os ausentes.
   const existing = await listObjectives(tx, id);
   const keep = new Set(input.objectives.map((o) => o.id).filter(Boolean) as string[]);
-  await deleteObjectives(tx, existing.filter((o) => !keep.has(o.id)).map((o) => o.id));
+  await deleteObjectives(
+    tx,
+    existing.filter((o) => !keep.has(o.id)).map((o) => o.id),
+  );
   for (const [i, o] of input.objectives.entries()) {
     const values = {
       title: o.title,
@@ -225,13 +228,7 @@ export async function refreshActiveMissions(tx: DbOrTx, userId: string, today: s
   return completed;
 }
 
-export async function completeMission(
-  tx: DbOrTx,
-  userId: string,
-  id: string,
-  today: string,
-  opts: { actor?: Actor; evidence?: string | null } = {},
-) {
+export async function completeMission(tx: DbOrTx, userId: string, id: string, today: string, opts: { actor?: Actor; evidence?: string | null } = {}) {
   const m = await getMissionForUpdate(tx, userId, id);
   if (m.status === 'completed') return { mission: m, reward: null };
   if (!canTransitionMission(m.status, 'completed')) {

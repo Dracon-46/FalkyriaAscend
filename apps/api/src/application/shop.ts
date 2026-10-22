@@ -110,7 +110,13 @@ export async function purchase(tx: DbOrTx, userId: string, itemId: string, quant
     tx,
     Array.from({ length: quantity }, () => ({ userId, itemId, purchaseId: p.id, source: 'purchase' as const, slot: equippable ? item.kind : null })),
   );
-  await notify(tx, userId, { category: 'purchase', title: `Compra realizada: ${item.name}`, body: `−${total} moedas`, link: '/inventario', dedupeKey: `purchase:${p.id}` });
+  await notify(tx, userId, {
+    category: 'purchase',
+    title: `Compra realizada: ${item.name}`,
+    body: `−${total} moedas`,
+    link: '/inventario',
+    dedupeKey: `purchase:${p.id}`,
+  });
   return { purchase: p, replayed: false };
 }
 
@@ -121,7 +127,16 @@ export async function refundPurchase(tx: DbOrTx, userId: string, purchaseId: str
   if (p.status === 'refunded') throw conflict('Compra já reembolsada');
   if ((await countUsedUnitsOfPurchase(tx, p.id)) > 0) throw conflict('Itens desta compra já foram usados/resgatados; registre um ajuste em vez de reembolso.');
   if (p.total > 0) {
-    await postCoinTx(tx, { userId, amount: p.total, kind: 'refund', category: 'shop', reason: `Reembolso: ${(p.itemSnapshot as { name: string }).name} — ${reason}`, localDate: today, purchaseId: p.id, actorId });
+    await postCoinTx(tx, {
+      userId,
+      amount: p.total,
+      kind: 'refund',
+      category: 'shop',
+      reason: `Reembolso: ${(p.itemSnapshot as { name: string }).name} — ${reason}`,
+      localDate: today,
+      purchaseId: p.id,
+      actorId,
+    });
   }
   await revokeUnitsOfPurchase(tx, p.id, `Reembolso: ${reason}`);
   const u = await markPurchaseRefunded(tx, p.id, reason);
@@ -130,7 +145,13 @@ export async function refundPurchase(tx: DbOrTx, userId: string, purchaseId: str
 }
 
 /** Possuir ≠ equipar ≠ consumir ≠ resgatar: cada ação tem regras próprias. */
-export async function inventoryAction(tx: DbOrTx, userId: string, inventoryId: string, action: 'equip' | 'unequip' | 'consume' | 'redeem', note?: string | null) {
+export async function inventoryAction(
+  tx: DbOrTx,
+  userId: string,
+  inventoryId: string,
+  action: 'equip' | 'unequip' | 'consume' | 'redeem',
+  note?: string | null,
+) {
   const row = await lockInventoryWithItem(tx, userId, inventoryId);
   if (!row) throw notFound('Item do inventário');
   const { inv, item } = row;

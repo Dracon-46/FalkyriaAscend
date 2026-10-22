@@ -60,17 +60,17 @@ export async function logStudySession(
 
   const session = await insertStudySession(tx, {
     userId,
-      subjectId: subject.id,
-      resourceId: input.resourceId ?? null,
-      localDate: date,
-      minutes: input.minutes,
-      activityType: input.activityType,
-      content: input.content,
-      result: input.result ?? null,
-      notes: input.notes ?? null,
-      evidenceUrl: input.evidenceUrl ?? null,
-      unitsCompleted: input.unitsCompleted,
-      source,
+    subjectId: subject.id,
+    resourceId: input.resourceId ?? null,
+    localDate: date,
+    minutes: input.minutes,
+    activityType: input.activityType,
+    content: input.content,
+    result: input.result ?? null,
+    notes: input.notes ?? null,
+    evidenceUrl: input.evidenceUrl ?? null,
+    unitsCompleted: input.unitsCompleted,
+    source,
     externalId: opts.externalId ?? null,
   });
 
@@ -78,10 +78,7 @@ export async function logStudySession(
 
   const { config } = await getActiveConfig(tx, userId);
   const todayXp = await xpTodayBySource(tx, userId, date);
-  const reward = computeTimedReward(
-    { kind: 'study', minutes: input.minutes, attributeWeights: STUDY_WEIGHTS, alreadyToday: todayXp.study ?? 0 },
-    config,
-  );
+  const reward = computeTimedReward({ kind: 'study', minutes: input.minutes, attributeWeights: STUDY_WEIGHTS, alreadyToday: todayXp.study ?? 0 }, config);
   let masteryFromUnits = 0;
   if (input.unitsCompleted > 0) {
     masteryFromUnits = input.unitsCompleted * config.study.unitCompletionMastery;
@@ -107,9 +104,10 @@ export async function logStudySession(
 export async function deleteStudySession(tx: DbOrTx, userId: string, id: string, actorId: string) {
   const s = await findStudySession(tx, userId, id);
   if (!s) throw notFound('Sessão');
-  if (s.grantId) await reverseGrant(tx, userId, s.grantId, 'Sessão de estudo excluída', actorId).catch((e) => {
-    if (e?.status !== 409) throw e;
-  });
+  if (s.grantId)
+    await reverseGrant(tx, userId, s.grantId, 'Sessão de estudo excluída', actorId).catch((e) => {
+      if (e?.status !== 409) throw e;
+    });
   await setSessionGrant(tx, id, null);
   await deleteStudySessionRow(tx, id);
 }
@@ -119,13 +117,26 @@ export async function logAssessment(tx: DbOrTx, userId: string, input: Assessmen
   const subject = await getSubject(tx, userId, input.subjectId);
   if (input.score > input.maxScore) throw badRequest('A nota não pode exceder a nota máxima.');
   const date = input.date ?? today;
-  const row = await insertAssessment(tx, { userId, subjectId: subject.id, title: input.title, localDate: date, score: input.score, maxScore: input.maxScore, notes: input.notes ?? null });
+  const row = await insertAssessment(tx, {
+    userId,
+    subjectId: subject.id,
+    title: input.title,
+    localDate: date,
+    score: input.score,
+    maxScore: input.maxScore,
+    notes: input.notes ?? null,
+  });
   const { config } = await getActiveConfig(tx, userId);
   const pct = input.score / input.maxScore;
   const tier = pct >= 0.7 ? config.difficulty.moderate : config.difficulty.easy;
   const mastery = assessmentMastery(input.score, input.maxScore, config);
   const reward = computeFixedReward(
-    { xp: tier.xp, coins: tier.coins, attributeWeights: { INT: 1 }, label: `Avaliação ${Math.round(pct * 100)}% (${pct >= 0.7 ? 'aprovado' : 'abaixo de 70%'})` },
+    {
+      xp: tier.xp,
+      coins: tier.coins,
+      attributeWeights: { INT: 1 },
+      label: `Avaliação ${Math.round(pct * 100)}% (${pct >= 0.7 ? 'aprovado' : 'abaixo de 70%'})`,
+    },
     config,
   );
   reward.explanation.push(`Maestria por desempenho: ${mastery}`);
@@ -148,10 +159,22 @@ export async function logAssessment(tx: DbOrTx, userId: string, input: Assessmen
 export async function logSubjectMilestone(tx: DbOrTx, userId: string, input: SubjectMilestoneInput, today: string) {
   const subject = await getSubject(tx, userId, input.subjectId);
   const date = input.achievedOn ?? today;
-  const row = await insertSubjectMilestone(tx, { userId, subjectId: subject.id, title: input.title, description: input.description, evidenceUrl: input.evidenceUrl ?? null, achievedOn: date });
+  const row = await insertSubjectMilestone(tx, {
+    userId,
+    subjectId: subject.id,
+    title: input.title,
+    description: input.description,
+    evidenceUrl: input.evidenceUrl ?? null,
+    achievedOn: date,
+  });
   const { config } = await getActiveConfig(tx, userId);
   const reward = computeFixedReward(
-    { xp: config.difficulty.hard.xp, coins: config.difficulty.hard.coins, attributeWeights: { INT: 0.7, EXE: 0.3 }, label: `Domínio demonstrado em ${subject.name}` },
+    {
+      xp: config.difficulty.hard.xp,
+      coins: config.difficulty.hard.coins,
+      attributeWeights: { INT: 0.7, EXE: 0.3 },
+      label: `Domínio demonstrado em ${subject.name}`,
+    },
     config,
   );
   reward.explanation.push(`Maestria: +${config.study.milestoneMastery}`);

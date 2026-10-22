@@ -91,7 +91,15 @@ export function InventoryPage() {
       />
       {list.length === 0 ? (
         <Panel>
-          <EmptyState icon="package" title="Nada aqui ainda" action={<Link to="/loja" className="btn btn-secondary btn-sm">Ir à loja</Link>}>
+          <EmptyState
+            icon="package"
+            title="Nada aqui ainda"
+            action={
+              <Link to="/loja" className="btn btn-secondary btn-sm">
+                Ir à loja
+              </Link>
+            }
+          >
             Itens chegam por compras, conquistas, marcos de nível e temporadas.
           </EmptyState>
         </Panel>
@@ -183,7 +191,10 @@ function InventoryCard({ entry, onRedeem }: { entry: InventoryEntry; onRedeem: (
   return (
     <article className={`panel flex flex-col gap-3 ${used ? 'opacity-70' : ''}`}>
       <div className="flex items-start gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] border" style={{ borderColor: rarityColor(item.rarity), color: rarityColor(item.rarity) }}>
+        <div
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] border"
+          style={{ borderColor: rarityColor(item.rarity), color: rarityColor(item.rarity) }}
+        >
           <Icon name={item.icon} size={22} />
         </div>
         <div className="min-w-0 flex-1">
@@ -225,10 +236,14 @@ function InventoryCard({ entry, onRedeem }: { entry: InventoryEntry; onRedeem: (
               Resgatar
             </Button>
           )}
-          {!equippable && item.kind !== 'consumable' && item.kind !== 'real_reward' && <p className="text-xs text-faint">Item de coleção: permanece no inventário.</p>}
+          {!equippable && item.kind !== 'consumable' && item.kind !== 'real_reward' && (
+            <p className="text-xs text-faint">Item de coleção: permanece no inventário.</p>
+          )}
         </div>
       )}
-      {equippable && entry.state !== 'equipped' && !used && <p className="-mt-1 text-xs text-faint">Equipar substitui o item atual do espaço “{ITEM_KIND_LABELS[item.kind]}”.</p>}
+      {equippable && entry.state !== 'equipped' && !used && (
+        <p className="-mt-1 text-xs text-faint">Equipar substitui o item atual do espaço “{ITEM_KIND_LABELS[item.kind]}”.</p>
+      )}
     </article>
   );
 }

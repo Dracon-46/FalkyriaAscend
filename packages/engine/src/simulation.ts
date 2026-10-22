@@ -154,10 +154,7 @@ export function simulateProfile(profile: ActivityProfile, cfg: GameConfig, opts:
       const done = active && rand() < profile.habitCompletion;
       if (done) {
         habitsDone++;
-        const r = computeHabitReward(
-          { difficulty: 'routine', attributeWeights: {}, xpFromHabitsToday: habitXpToday, multiplier: mult },
-          cfg,
-        );
+        const r = computeHabitReward({ difficulty: 'routine', attributeWeights: {}, xpFromHabitsToday: habitXpToday, multiplier: mult }, cfg);
         habitXpToday += r.xp;
         xp += r.xp;
         coins += r.coins;

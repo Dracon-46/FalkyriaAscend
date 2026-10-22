@@ -87,7 +87,9 @@ export function SeasonsPage() {
                     <Stat label="Hábitos" value={fmt(s.summary.habitsDone)} />
                   </div>
                 )}
-                <p className="mt-2 text-xs text-faint">{s.rewards.filter((r) => r.claimedAt).length} de {s.rewards.length} recompensas sazonais obtidas</p>
+                <p className="mt-2 text-xs text-faint">
+                  {s.rewards.filter((r) => r.claimedAt).length} de {s.rewards.length} recompensas sazonais obtidas
+                </p>
               </div>
             ))}
           </div>
@@ -162,7 +164,11 @@ function ActiveSeason({ s, today, onEdit }: { s: SeasonView; today: string; onEd
               icon="flag"
               loading={close.isPending}
               onClick={async () => {
-                const c = await confirm({ title: 'Encerrar temporada', message: 'A temporada termina ontem e o resumo final é gravado. Nada do progresso vitalício é perdido.', confirmLabel: 'Encerrar' });
+                const c = await confirm({
+                  title: 'Encerrar temporada',
+                  message: 'A temporada termina ontem e o resumo final é gravado. Nada do progresso vitalício é perdido.',
+                  confirmLabel: 'Encerrar',
+                });
                 if (c.ok) close.mutate();
               }}
             >
@@ -185,8 +191,22 @@ function SeasonForm({ season, today, onClose }: { season: SeasonView | null; tod
   const items = useQuery({ queryKey: ['items'], queryFn: () => api.get<Item[]>('/api/items') });
   const plusDays = (n: number) => new Date(Date.parse(today) + n * 86_400_000).toISOString().slice(0, 10);
   const initial: SeasonInput = season
-    ? { name: season.name, description: season.description, theme: season.theme, startDate: season.startDate, endDate: season.endDate, rewards: season.rewards.map((r) => ({ id: r.id, title: r.title, thresholdXp: r.thresholdXp, coins: r.coins, itemId: r.itemId })) }
-    : { name: '', description: '', theme: null, startDate: today, endDate: plusDays(89), rewards: [{ title: 'Bronze', thresholdXp: 2000, coins: 100, itemId: null }] };
+    ? {
+        name: season.name,
+        description: season.description,
+        theme: season.theme,
+        startDate: season.startDate,
+        endDate: season.endDate,
+        rewards: season.rewards.map((r) => ({ id: r.id, title: r.title, thresholdXp: r.thresholdXp, coins: r.coins, itemId: r.itemId })),
+      }
+    : {
+        name: '',
+        description: '',
+        theme: null,
+        startDate: today,
+        endDate: plusDays(89),
+        rewards: [{ title: 'Bronze', thresholdXp: 2000, coins: 100, itemId: null }],
+      };
   const form = useForm(seasonInput, initial);
   const v = form.values;
   const save = useMutation({
@@ -200,7 +220,11 @@ function SeasonForm({ season, today, onClose }: { season: SeasonView | null; tod
   });
   const rewards = v.rewards ?? [];
   const claimed = new Set(season?.rewards.filter((r) => r.claimedAt).map((r) => r.id) ?? []);
-  const setR = (i: number, patch: Partial<(typeof rewards)[number]>) => form.set('rewards', rewards.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  const setR = (i: number, patch: Partial<(typeof rewards)[number]>) =>
+    form.set(
+      'rewards',
+      rewards.map((r, j) => (j === i ? { ...r, ...patch } : r)),
+    );
   return (
     <Modal open onClose={onClose} title={season ? 'Editar temporada' : 'Nova temporada'} size="lg">
       <form
@@ -220,7 +244,9 @@ function SeasonForm({ season, today, onClose }: { season: SeasonView | null; tod
           <Select
             label="Duração rápida"
             value=""
-            onChange={(e) => e.target.value && form.set('endDate', new Date(Date.parse(v.startDate) + (Number(e.target.value) - 1) * 86_400_000).toISOString().slice(0, 10))}
+            onChange={(e) =>
+              e.target.value && form.set('endDate', new Date(Date.parse(v.startDate) + (Number(e.target.value) - 1) * 86_400_000).toISOString().slice(0, 10))
+            }
             placeholder="Personalizada"
             options={[
               { value: '30', label: 'Mensal (30 dias)' },
@@ -236,10 +262,42 @@ function SeasonForm({ season, today, onClose }: { season: SeasonView | null; tod
             return (
               <div key={r.id ?? i} className="grid gap-2 sm:grid-cols-[1fr_7rem_6rem_10rem_auto] sm:items-end">
                 <Input label="Título" value={r.title} disabled={locked} onChange={(e) => setR(i, { title: e.target.value })} />
-                <Input label="XP sazonal" type="number" min={1} disabled={locked} value={r.thresholdXp} onChange={(e) => setR(i, { thresholdXp: Number(e.target.value) })} />
-                <Input label="Moedas" type="number" min={0} disabled={locked} value={r.coins ?? 0} onChange={(e) => setR(i, { coins: Number(e.target.value) })} />
-                <Select label="Item" disabled={locked} value={r.itemId ?? ''} onChange={(e) => setR(i, { itemId: e.target.value || null })} placeholder="Nenhum" options={(items.data ?? []).map((it) => ({ value: it.id, label: it.name }))} />
-                <Button variant="ghost" icon="trash" aria-label="Remover" disabled={locked} onClick={() => form.set('rewards', rewards.filter((_, j) => j !== i))} />
+                <Input
+                  label="XP sazonal"
+                  type="number"
+                  min={1}
+                  disabled={locked}
+                  value={r.thresholdXp}
+                  onChange={(e) => setR(i, { thresholdXp: Number(e.target.value) })}
+                />
+                <Input
+                  label="Moedas"
+                  type="number"
+                  min={0}
+                  disabled={locked}
+                  value={r.coins ?? 0}
+                  onChange={(e) => setR(i, { coins: Number(e.target.value) })}
+                />
+                <Select
+                  label="Item"
+                  disabled={locked}
+                  value={r.itemId ?? ''}
+                  onChange={(e) => setR(i, { itemId: e.target.value || null })}
+                  placeholder="Nenhum"
+                  options={(items.data ?? []).map((it) => ({ value: it.id, label: it.name }))}
+                />
+                <Button
+                  variant="ghost"
+                  icon="trash"
+                  aria-label="Remover"
+                  disabled={locked}
+                  onClick={() =>
+                    form.set(
+                      'rewards',
+                      rewards.filter((_, j) => j !== i),
+                    )
+                  }
+                />
               </div>
             );
           })}

@@ -64,20 +64,30 @@ export async function listOwnedRows(
   const t = table(resource);
   const conds: SQL[] = [eq(t.userId, userId)];
   if (isArchivable(resource) && !opts.includeArchived) conds.push(isNull(t.archivedAt));
-  let query = db.select().from(t).where(and(...conds)).$dynamic();
+  let query = db
+    .select()
+    .from(t)
+    .where(and(...conds))
+    .$dynamic();
   if (opts.orderBy?.length) query = query.orderBy(...opts.orderBy.map((o) => (o.direction === 'desc' ? desc(t[o.field]) : asc(t[o.field]))));
   return (await query) as OwnedRow[];
 }
 
 export async function findOwnedRow(db: DbOrTx, resource: OwnedResource, userId: string, id: string, opts: { lock?: boolean } = {}): Promise<OwnedRow | null> {
   const t = table(resource);
-  const query = db.select().from(t).where(and(eq(t.id, id), eq(t.userId, userId)));
+  const query = db
+    .select()
+    .from(t)
+    .where(and(eq(t.id, id), eq(t.userId, userId)));
   const rows = (opts.lock ? await query.for('update') : await query) as OwnedRow[];
   return rows[0] ?? null;
 }
 
 export async function insertOwnedRow(tx: DbOrTx, resource: OwnedResource, userId: string, values: Record<string, unknown>): Promise<OwnedRow> {
-  const rows = (await tx.insert(table(resource)).values({ ...values, userId }).returning()) as OwnedRow[];
+  const rows = (await tx
+    .insert(table(resource))
+    .values({ ...values, userId })
+    .returning()) as OwnedRow[];
   return rows[0]!;
 }
 

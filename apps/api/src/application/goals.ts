@@ -63,7 +63,12 @@ export async function maybeCompleteGoal(tx: DbOrTx, userId: string, goalId: stri
   const { config } = await getActiveConfig(tx, userId);
   const table = config.difficulty[g.difficulty];
   const reward = computeFixedReward(
-    { xp: table.xp, coins: table.coins, attributeWeights: { EXE: 0.7, ORG: 0.3 }, label: `Meta concluída (${g.difficulty}): ${table.xp} XP / ${table.coins} moedas` },
+    {
+      xp: table.xp,
+      coins: table.coins,
+      attributeWeights: { EXE: 0.7, ORG: 0.3 },
+      label: `Meta concluída (${g.difficulty}): ${table.xp} XP / ${table.coins} moedas`,
+    },
     config,
   );
   const grant = await grantReward(tx, {

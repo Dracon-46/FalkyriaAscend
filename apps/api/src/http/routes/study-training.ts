@@ -13,8 +13,29 @@ import {
   subjectMilestoneInput,
 } from '@rpg/contracts';
 import { idParam, noContent, parse, requireUser } from '../http';
-import { activitiesView, activityTypesCrud, exercisesCrud, personalRecordsOf, quickLogsOf, recordManualActivity, recordQuickLog, removeActivity } from '../../application/use-cases/activities';
-import { assessmentsOf, knowledgeAreasCrud, recordAssessment, recordStudySession, recordSubjectMilestone, removeStudySession, studyOverview, studyResourcesCrud, studySessionsOf, subjectMilestonesOf, subjectsCrud } from '../../application/use-cases/study';
+import {
+  activitiesView,
+  activityTypesCrud,
+  exercisesCrud,
+  personalRecordsOf,
+  quickLogsOf,
+  recordManualActivity,
+  recordQuickLog,
+  removeActivity,
+} from '../../application/use-cases/activities';
+import {
+  assessmentsOf,
+  knowledgeAreasCrud,
+  recordAssessment,
+  recordStudySession,
+  recordSubjectMilestone,
+  removeStudySession,
+  studyOverview,
+  studyResourcesCrud,
+  studySessionsOf,
+  subjectMilestonesOf,
+  subjectsCrud,
+} from '../../application/use-cases/study';
 import { registerCrud } from '../crud';
 import type { AppContext } from '../../context';
 

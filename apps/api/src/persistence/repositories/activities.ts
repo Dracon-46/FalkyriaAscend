@@ -6,13 +6,19 @@ import { activities, activitySets, activityTypes, attributes, exercises, persona
 type RecordSource = (typeof activities.$inferSelect)['source'];
 
 export async function findActivityType(db: DbOrTx, userId: string, id: string) {
-  const [t] = await db.select().from(activityTypes).where(and(eq(activityTypes.id, id), eq(activityTypes.userId, userId)));
+  const [t] = await db
+    .select()
+    .from(activityTypes)
+    .where(and(eq(activityTypes.id, id), eq(activityTypes.userId, userId)));
   return t ?? null;
 }
 
 export async function countOwnedExercises(db: DbOrTx, userId: string, ids: string[]): Promise<number> {
   if (ids.length === 0) return 0;
-  const rows = await db.select({ id: exercises.id }).from(exercises).where(and(eq(exercises.userId, userId), inArray(exercises.id, ids)));
+  const rows = await db
+    .select({ id: exercises.id })
+    .from(exercises)
+    .where(and(eq(exercises.userId, userId), inArray(exercises.id, ids)));
   return rows.length;
 }
 
@@ -86,7 +92,12 @@ export async function listActivitiesWithSets(db: DbOrTx, userId: string, limit: 
         .select({ s: activitySets, exercise: exercises.name })
         .from(activitySets)
         .innerJoin(exercises, eq(exercises.id, activitySets.exerciseId))
-        .where(inArray(activitySets.activityId, rows.map((r) => r.a.id)))
+        .where(
+          inArray(
+            activitySets.activityId,
+            rows.map((r) => r.a.id),
+          ),
+        )
         .orderBy(asc(activitySets.setIndex))
     : [];
   return { rows, sets };
@@ -98,7 +109,12 @@ export async function listActivitiesWithSets(db: DbOrTx, userId: string, limit: 
 export async function bestRecordValue(db: DbOrTx, userId: string, kind: string, exerciseId: string | null): Promise<number | null> {
   const conds: SQL[] = [eq(personalRecords.userId, userId), eq(personalRecords.kind, kind)];
   if (exerciseId) conds.push(eq(personalRecords.exerciseId, exerciseId));
-  const [r] = await db.select().from(personalRecords).where(and(...conds)).orderBy(desc(personalRecords.value)).limit(1);
+  const [r] = await db
+    .select()
+    .from(personalRecords)
+    .where(and(...conds))
+    .orderBy(desc(personalRecords.value))
+    .limit(1);
   return r ? Number(r.value) : null;
 }
 
@@ -123,7 +139,10 @@ export async function listPersonalRecords(db: DbOrTx, userId: string) {
 // ------------------------------------------------------------------ Registro rápido
 
 export async function findAttributeByCode(db: DbOrTx, userId: string, code: string) {
-  const [a] = await db.select().from(attributes).where(and(eq(attributes.userId, userId), eq(attributes.code, code)));
+  const [a] = await db
+    .select()
+    .from(attributes)
+    .where(and(eq(attributes.userId, userId), eq(attributes.code, code)));
   return a ?? null;
 }
 
@@ -166,12 +185,19 @@ export async function findActivityTypeByCategory(db: DbOrTx, userId: string, cat
 
 /** Exercício com o nome informado (sem diferenciar maiúsculas), criando-o se não existir. */
 export async function findOrCreateExercise(tx: DbOrTx, userId: string, name: string): Promise<string> {
-  const [e] = await tx.select({ id: exercises.id }).from(exercises).where(and(eq(exercises.userId, userId), ilike(exercises.name, name))).limit(1);
+  const [e] = await tx
+    .select({ id: exercises.id })
+    .from(exercises)
+    .where(and(eq(exercises.userId, userId), ilike(exercises.name, name)))
+    .limit(1);
   if (e) return e.id;
   const [created] = await tx.insert(exercises).values({ userId, name, muscleGroup: 'importado' }).returning({ id: exercises.id });
   return created!.id;
 }
 
 export function listActivitiesFromSource(db: DbOrTx, userId: string, source: RecordSource) {
-  return db.select().from(activities).where(and(eq(activities.userId, userId), eq(activities.source, source)));
+  return db
+    .select()
+    .from(activities)
+    .where(and(eq(activities.userId, userId), eq(activities.source, source)));
 }

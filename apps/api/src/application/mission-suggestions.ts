@@ -41,7 +41,12 @@ export async function suggestMissions(db: DbOrTx, userId: string, today: string)
   for (const c of (await neglectedCategories(db, userId, since)).slice(0, 2)) {
     suggestions.push({
       reason: `Nenhuma atividade em "${c.name}" nos últimos 14 dias.`,
-      mission: base({ title: `Retomar ${c.name.toLowerCase()}`, description: `Dedique uma sessão a ${c.name.toLowerCase()} nesta semana.`, categoryId: c.id, difficulty: 'easy' }),
+      mission: base({
+        title: `Retomar ${c.name.toLowerCase()}`,
+        description: `Dedique uma sessão a ${c.name.toLowerCase()} nesta semana.`,
+        categoryId: c.id,
+        difficulty: 'easy',
+      }),
     });
   }
 
@@ -62,7 +67,9 @@ export async function suggestMissions(db: DbOrTx, userId: string, today: string)
         difficulty: 'easy',
         completionMode: 'auto',
         attributeWeights: { DIS: 1 },
-        objectives: [{ id: null, title: `Cumprir "${h.title}" 3 vezes`, metric: 'habit_checkins', metricRefId: h.id, target: 3, unit: 'vezes', optional: false }],
+        objectives: [
+          { id: null, title: `Cumprir "${h.title}" 3 vezes`, metric: 'habit_checkins', metricRefId: h.id, target: 3, unit: 'vezes', optional: false },
+        ],
       }),
     });
   }

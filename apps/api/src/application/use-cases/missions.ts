@@ -34,11 +34,20 @@ export interface MissionListFilter {
 export async function listMissionsView(db: DbOrTx, userId: string, f: MissionListFilter) {
   const statuses = (f.status ?? '').split(',').filter((s): s is MissionStatus => (MISSION_STATUSES as readonly string[]).includes(s));
   const rows = await listMissions(db, userId, { statuses, type: f.type, goalId: f.goalId, titleContains: f.q });
-  const objs = await listObjectivesOf(db, rows.map((r) => r.id));
+  const objs = await listObjectivesOf(
+    db,
+    rows.map((r) => r.id),
+  );
   return rows.map((m) => {
     const objectives = objs.filter((o) => o.missionId === m.id);
     if (m.isSecret && m.status !== 'completed') {
-      return { ...m, title: 'Missão secreta', description: 'Revelada ao ser concluída.', objectives: objectives.map((o) => ({ ...o, title: '???' })), hidden: true };
+      return {
+        ...m,
+        title: 'Missão secreta',
+        description: 'Revelada ao ser concluída.',
+        objectives: objectives.map((o) => ({ ...o, title: '???' })),
+        hidden: true,
+      };
     }
     return { ...m, objectives, hidden: false };
   });

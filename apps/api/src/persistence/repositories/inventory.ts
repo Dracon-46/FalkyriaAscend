@@ -8,7 +8,10 @@ export type InventoryPatch = Partial<Pick<typeof inventoryItems.$inferInsert, 's
 // ------------------------------------------------------------------ Itens
 
 export async function findOwnedItem(db: DbOrTx, userId: string, itemId: string) {
-  const [item] = await db.select().from(items).where(and(eq(items.id, itemId), eq(items.userId, userId)));
+  const [item] = await db
+    .select()
+    .from(items)
+    .where(and(eq(items.id, itemId), eq(items.userId, userId)));
   return item ?? null;
 }
 
@@ -90,7 +93,10 @@ export async function purchaseTotalsOf(db: DbOrTx, userId: string, itemId: strin
 }
 
 export async function findPurchaseByKey(db: DbOrTx, userId: string, idempotencyKey: string) {
-  const [p] = await db.select().from(purchases).where(and(eq(purchases.userId, userId), eq(purchases.idempotencyKey, idempotencyKey)));
+  const [p] = await db
+    .select()
+    .from(purchases)
+    .where(and(eq(purchases.userId, userId), eq(purchases.idempotencyKey, idempotencyKey)));
   return p ?? null;
 }
 
@@ -100,7 +106,11 @@ export async function insertPurchase(tx: DbOrTx, values: typeof purchases.$infer
 }
 
 export async function lockPurchase(tx: DbOrTx, userId: string, purchaseId: string) {
-  const [p] = await tx.select().from(purchases).where(and(eq(purchases.id, purchaseId), eq(purchases.userId, userId))).for('update');
+  const [p] = await tx
+    .select()
+    .from(purchases)
+    .where(and(eq(purchases.id, purchaseId), eq(purchases.userId, userId)))
+    .for('update');
   return p ?? null;
 }
 

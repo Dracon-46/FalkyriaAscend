@@ -63,7 +63,16 @@ export function publishProgressionConfig(db: Db, userId: string, input: { config
     await updateCharacterProgress(tx, userId, { level: levelFromXp(cp.lifetimeXp, after.config.curves.character).level });
     for (const a of await listAttributes(tx, userId)) await setAttributeLevel(tx, a.id, levelFromXp(a.xp, after.config.curves.attribute).level);
     for (const s of await listSkills(tx, userId)) await setSkillLevel(tx, s.id, levelFromXp(s.xp, after.config.curves.mastery).level);
-    await audit(tx, { actorId: userId, userId, action: 'config.publish', entityType: 'game_configs', entityId: String(after.version), before: before.config, after: after.config, meta: { note: input.note } });
+    await audit(tx, {
+      actorId: userId,
+      userId,
+      action: 'config.publish',
+      entityType: 'game_configs',
+      entityId: String(after.version),
+      before: before.config,
+      after: after.config,
+      meta: { note: input.note },
+    });
     return after;
   });
 }

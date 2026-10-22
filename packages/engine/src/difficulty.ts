@@ -20,9 +20,7 @@ export function validateDifficulty(input: DifficultyCheckInput, cfg: GameConfig)
   const errors: string[] = [];
   const max = cfg.maxDifficultyByMissionType[input.type];
   if (difficultyRank(input.difficulty) > difficultyRank(max)) {
-    errors.push(
-      `Missões do tipo "${MISSION_TYPE_LABELS[input.type]}" admitem no máximo a dificuldade "${DIFFICULTY_LABELS[max]}".`,
-    );
+    errors.push(`Missões do tipo "${MISSION_TYPE_LABELS[input.type]}" admitem no máximo a dificuldade "${DIFFICULTY_LABELS[max]}".`);
   }
   const check = (rule: { minSpanDays: number; minObjectives: number }, label: string) => {
     const span = input.startDate && input.dueDate ? diffDays(input.startDate, input.dueDate) : 0;

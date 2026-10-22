@@ -34,7 +34,8 @@ const CSRF_EXEMPT = [/^\/api\/integrations\/strava\/webhook\//];
 
 export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: opts.logger === false ? false : { level: opts.env.LOG_LEVEL, redact: ['req.headers.cookie', 'req.headers.authorization', 'req.headers["api-key"]'] },
+    logger:
+      opts.logger === false ? false : { level: opts.env.LOG_LEVEL, redact: ['req.headers.cookie', 'req.headers.authorization', 'req.headers["api-key"]'] },
     trustProxy: true,
     bodyLimit: 2 * 1024 * 1024,
   });
@@ -81,7 +82,8 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     const code = pgCode(err);
     if (code === PG.uniqueViolation) return reply.status(409).send({ error: { code: 'conflict', message: 'Registro duplicado.' } });
     if (code === PG.foreignKeyViolation) return reply.status(409).send({ error: { code: 'conflict', message: 'Há registros vinculados a este item.' } });
-    if (code === PG.checkViolation) return reply.status(422).send({ error: { code: 'unprocessable', message: 'Os dados violam uma regra de integridade (ex.: saldo negativo).' } });
+    if (code === PG.checkViolation)
+      return reply.status(422).send({ error: { code: 'unprocessable', message: 'Os dados violam uma regra de integridade (ex.: saldo negativo).' } });
     req.log.error({ err }, 'Erro não tratado');
     // Nunca expõe detalhes internos ao cliente.
     return reply.status(500).send({ error: { code: 'internal', message: 'Erro interno. Tente novamente.' } });

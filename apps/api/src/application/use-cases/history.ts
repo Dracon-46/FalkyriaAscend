@@ -26,7 +26,14 @@ export const historyOf = {
 export function reverseOwnGrant(db: Db, adminId: string, grantId: string, reason: string) {
   return inTransaction(db, async (tx) => {
     const r = await reverseGrant(tx, adminId, grantId, reason, adminId);
-    await audit(tx, { actorId: adminId, userId: adminId, action: 'grant.reverse', entityType: 'reward_grants', entityId: grantId, meta: { reason, reversalId: r.grantId } });
+    await audit(tx, {
+      actorId: adminId,
+      userId: adminId,
+      action: 'grant.reverse',
+      entityType: 'reward_grants',
+      entityId: grantId,
+      meta: { reason, reversalId: r.grantId },
+    });
     return r;
   });
 }

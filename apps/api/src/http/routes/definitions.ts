@@ -1,16 +1,17 @@
 import type { FastifyInstance } from 'fastify';
-import {
-  attributeInput,
-  categoryInput,
-  levelRewardInput,
-  penaltyRuleInput,
-  rankInput,
-  skillInput,
-  templateInput,
-  unavailabilityInput,
-} from '@rpg/contracts';
+import { attributeInput, categoryInput, levelRewardInput, penaltyRuleInput, rankInput, skillInput, templateInput, unavailabilityInput } from '@rpg/contracts';
 import { requireUser } from '../http';
-import { attributesCrud, categoriesCrud, levelRewardsCrud, lookups, missionTemplatesCrud, penaltyRulesCrud, ranksCrud, skillsCrud, unavailabilityCrud } from '../../application/use-cases/catalog';
+import {
+  attributesCrud,
+  categoriesCrud,
+  levelRewardsCrud,
+  lookups,
+  missionTemplatesCrud,
+  penaltyRulesCrud,
+  ranksCrud,
+  skillsCrud,
+  unavailabilityCrud,
+} from '../../application/use-cases/catalog';
 import { registerCrud } from '../crud';
 import type { AppContext } from '../../context';
 

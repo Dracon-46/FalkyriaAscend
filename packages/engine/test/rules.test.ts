@@ -93,9 +93,7 @@ describe('penalidades', () => {
   const ctx = { consecutiveMisses: 1, coinsLostToday: 0, coinsLostThisWeek: 0, balance: 1000, allowSkillXpLoss: false };
 
   it('escalonam por falhas consecutivas até o teto', () => {
-    expect([1, 2, 3, 4, 10].map((n) => computePenalty(coinRule, { ...ctx, consecutiveMisses: n }, cfg).amount)).toEqual([
-      5, 10, 15, 20, 20,
-    ]);
+    expect([1, 2, 3, 4, 10].map((n) => computePenalty(coinRule, { ...ctx, consecutiveMisses: n }, cfg).amount)).toEqual([5, 10, 15, 20, 20]);
   });
   it('respeitam limites diário, semanal e o saldo (nunca negativo)', () => {
     expect(computePenalty(coinRule, { ...ctx, consecutiveMisses: 4, coinsLostToday: 35 }, cfg).amount).toBe(5);
@@ -139,12 +137,9 @@ describe('penalidades', () => {
 describe('dificuldade e estados de missão', () => {
   it('limita dificuldade por tipo e exige escopo para Épica/Lendária', () => {
     expect(validateDifficulty({ type: 'daily', difficulty: 'legendary', objectiveCount: 0 }, cfg).length).toBeGreaterThan(0);
-    expect(
-      validateDifficulty(
-        { type: 'project', difficulty: 'legendary', startDate: '2026-10-01', dueDate: '2026-12-01', objectiveCount: 4 },
-        cfg,
-      ),
-    ).toEqual([]);
+    expect(validateDifficulty({ type: 'project', difficulty: 'legendary', startDate: '2026-10-01', dueDate: '2026-12-01', objectiveCount: 4 }, cfg)).toEqual(
+      [],
+    );
     expect(
       validateDifficulty({ type: 'project', difficulty: 'legendary', startDate: '2026-10-01', dueDate: '2026-10-05', objectiveCount: 4 }, cfg),
     ).toHaveLength(1);
@@ -166,11 +161,24 @@ describe('progresso composto e metas', () => {
     ]);
     expect(p.complete).toBe(false);
     expect(p.progress).toBeCloseTo((1 + 1 / 3) / 2);
-    expect(compositeProgress([{ target: 2, current: 3 }, { target: 1, current: 1 }]).complete).toBe(true);
+    expect(
+      compositeProgress([
+        { target: 2, current: 3 },
+        { target: 1, current: 1 },
+      ]).complete,
+    ).toBe(true);
     expect(compositeProgress([]).complete).toBe(false);
   });
   it('metas por etapas ponderadas, missões e métrica', () => {
-    expect(goalProgress({ mode: 'milestones', milestones: [{ weight: 3, done: true }, { weight: 1, done: false }] })).toBe(0.75);
+    expect(
+      goalProgress({
+        mode: 'milestones',
+        milestones: [
+          { weight: 3, done: true },
+          { weight: 1, done: false },
+        ],
+      }),
+    ).toBe(0.75);
     expect(goalProgress({ mode: 'missions', missions: [{ status: 'completed' }, { status: 'cancelled' }, { status: 'failed' }] })).toBe(0.5);
     expect(goalProgress({ mode: 'metric', metric: { start: 80, current: 75, target: 70 } })).toBe(0.5);
   });
@@ -178,7 +186,12 @@ describe('progresso composto e metas', () => {
 
 describe('conquistas', () => {
   it('avalia todas as condições e calcula progresso', () => {
-    const crit = { all: [{ metric: 'study_sessions' as const, gte: 100 }, { metric: 'character_level' as const, gte: 10 }] };
+    const crit = {
+      all: [
+        { metric: 'study_sessions' as const, gte: 100 },
+        { metric: 'character_level' as const, gte: 10 },
+      ],
+    };
     const r = evaluateAchievement(crit, { study_sessions: 50, character_level: 12 });
     expect(r.unlocked).toBe(false);
     expect(r.progress).toBeCloseTo(0.75);

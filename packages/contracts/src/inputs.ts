@@ -25,9 +25,7 @@ const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM');
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Cor hexadecimal (#RRGGBB)');
 
 export const ATTRIBUTE_CODE_RE = /^[A-Z][A-Z0-9_]{1,7}$/;
-export const attributeWeights = z
-  .record(z.string().regex(ATTRIBUTE_CODE_RE, 'Código de atributo inválido'), z.number().min(0).max(10))
-  .default({});
+export const attributeWeights = z.record(z.string().regex(ATTRIBUTE_CODE_RE, 'Código de atributo inválido'), z.number().min(0).max(10)).default({});
 
 export const OBJECTIVE_METRIC_VALUES = [
   'manual',
@@ -90,9 +88,7 @@ export const settingsInput = z
     dashboardWidgets: z
       .object({ widgets: z.array(z.object({ id: z.string().max(40), visible: z.boolean() })).max(40), periodDays: z.number().int().min(7).max(365) })
       .nullish(),
-    notificationPrefs: z
-      .object({ categories: z.record(z.string().max(40), z.boolean()), quietStart: hhmm.optional(), quietEnd: hhmm.optional() })
-      .nullish(),
+    notificationPrefs: z.object({ categories: z.record(z.string().max(40), z.boolean()), quietStart: hhmm.optional(), quietEnd: hhmm.optional() }).nullish(),
     penaltiesEnabled: z.boolean(),
     penaltiesSuspendedUntil: optionalDate,
     recoveryModeUntil: optionalDate,
@@ -263,7 +259,10 @@ export const rankInput = z.object({
   minLevel: z.number().int().min(1).max(999),
   code: z.string().trim().min(1).max(4),
   name: z.string().trim().min(1).max(60),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullish(),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .nullish(),
 });
 
 export const levelRewardInput = z.object({

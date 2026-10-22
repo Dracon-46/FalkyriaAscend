@@ -8,7 +8,10 @@ export type SeasonPatch = Partial<Omit<NewSeason, 'id' | 'userId'>>;
 export type SeasonRewardValues = Pick<typeof seasonRewards.$inferInsert, 'title' | 'thresholdXp' | 'coins' | 'itemId'>;
 
 export async function findSeason(db: DbOrTx, userId: string, id: string) {
-  const [s] = await db.select().from(seasons).where(and(eq(seasons.id, id), eq(seasons.userId, userId)));
+  const [s] = await db
+    .select()
+    .from(seasons)
+    .where(and(eq(seasons.id, id), eq(seasons.userId, userId)));
   return s ?? null;
 }
 
@@ -81,5 +84,8 @@ export async function markSeasonRewardClaimed(tx: DbOrTx, id: string, grantId: s
 }
 
 export function listActiveSeasons(db: DbOrTx, userId: string) {
-  return db.select().from(seasons).where(and(eq(seasons.userId, userId), eq(seasons.status, 'active')));
+  return db
+    .select()
+    .from(seasons)
+    .where(and(eq(seasons.userId, userId), eq(seasons.status, 'active')));
 }

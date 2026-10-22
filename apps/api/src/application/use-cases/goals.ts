@@ -56,14 +56,25 @@ export async function saveGoal(db: Db, userId: string, data: GoalInput, existing
     await replaceDependencies(tx, userId, row.id, dependsOn);
     const existing = await listMilestones(tx, row.id);
     const keep = new Set(milestones.map((m) => m.id).filter(Boolean) as string[]);
-    await deleteMilestones(tx, existing.filter((e) => !keep.has(e.id)).map((e) => e.id));
+    await deleteMilestones(
+      tx,
+      existing.filter((e) => !keep.has(e.id)).map((e) => e.id),
+    );
     for (const [i, m] of milestones.entries()) {
       const prev = existing.find((e) => e.id === m.id);
       const values = { title: m.title, weight: m.weight, dueDate: m.dueDate ?? null, sortOrder: i, doneAt: m.done ? (prev?.doneAt ?? new Date()) : null };
       if (prev) await updateMilestone(tx, prev.id, values);
       else await insertMilestone(tx, { ...values, userId, goalId: row.id });
     }
-    await audit(tx, { actorId: userId, userId, action: existingId ? 'update' : 'create', entityType: 'goals', entityId: row.id, before, after: { ...row, milestones, dependsOn } });
+    await audit(tx, {
+      actorId: userId,
+      userId,
+      action: existingId ? 'update' : 'create',
+      entityType: 'goals',
+      entityId: row.id,
+      before,
+      after: { ...row, milestones, dependsOn },
+    });
     await maybeCompleteGoal(tx, userId, row.id, today);
     await afterAction(tx, userId, today);
     return row;

@@ -57,7 +57,8 @@ export function DashboardPage() {
         icon="dashboard"
         subtitle={
           <>
-            {fmtDate(d.today, { weekday: 'long', day: 'numeric', month: 'long' })} · hoje: <span className="num text-accent">{signed(d.todayTotals.xp)} XP</span> ·{' '}
+            {fmtDate(d.today, { weekday: 'long', day: 'numeric', month: 'long' })} · hoje:{' '}
+            <span className="num text-accent">{signed(d.todayTotals.xp)} XP</span> ·{' '}
             <span className="num" style={{ color: 'var(--coin)' }}>
               {signed(d.todayTotals.coins)} moedas
             </span>
@@ -88,7 +89,10 @@ function CharacterWidget({ d }: { d: Dashboard }) {
   return (
     <Panel title="Personagem" icon="user" className="h-full">
       <div className="flex items-center gap-4">
-        <div className="avatar-frame grid h-20 w-20 shrink-0 place-items-center rounded-full border-2" style={{ borderColor: c.equipped.frame?.color ?? 'var(--accent)', boxShadow: 'var(--glow)' }}>
+        <div
+          className="avatar-frame grid h-20 w-20 shrink-0 place-items-center rounded-full border-2"
+          style={{ borderColor: c.equipped.frame?.color ?? 'var(--accent)', boxShadow: 'var(--glow)' }}
+        >
           <div className="text-center leading-none">
             <span className="block text-[0.6rem] text-faint uppercase">nível</span>
             <span className="num text-3xl text-accent">{c.level.level}</span>
@@ -132,7 +136,13 @@ function CharacterWidget({ d }: { d: Dashboard }) {
 
 function AlertsWidget({ d }: { d: Dashboard }) {
   const label: Record<string, string> = { due_today: 'Prazo hoje', due_tomorrow: 'Prazo amanhã', failed: 'Falhou', expired: 'Expirou', penalty: 'Penalidade' };
-  const tone: Record<string, 'warning' | 'danger' | 'muted' | 'info'> = { due_today: 'warning', due_tomorrow: 'info', failed: 'danger', expired: 'muted', penalty: 'danger' };
+  const tone: Record<string, 'warning' | 'danger' | 'muted' | 'info'> = {
+    due_today: 'warning',
+    due_tomorrow: 'info',
+    failed: 'danger',
+    expired: 'muted',
+    penalty: 'danger',
+  };
   return (
     <Panel title="Alertas" icon="alert-triangle" className="h-full">
       {d.alerts.length === 0 ? (
@@ -190,9 +200,26 @@ function TodayWidget({ d }: { d: Dashboard }) {
   const pending = d.todayMissions.filter((m) => m.status !== 'completed');
   const done = d.todayMissions.filter((m) => m.status === 'completed');
   return (
-    <Panel title="Missões de hoje" icon="swords" className="h-full" actions={<Link to="/missoes?nova=1" className="btn btn-ghost btn-sm" aria-label="Nova missão"><Icon name="plus" size={14} /></Link>}>
+    <Panel
+      title="Missões de hoje"
+      icon="swords"
+      className="h-full"
+      actions={
+        <Link to="/missoes?nova=1" className="btn btn-ghost btn-sm" aria-label="Nova missão">
+          <Icon name="plus" size={14} />
+        </Link>
+      }
+    >
       {d.todayMissions.length === 0 ? (
-        <EmptyState icon="map" title="Nenhuma missão para hoje" action={<Link className="btn btn-secondary btn-sm" to="/missoes?nova=1">Criar missão</Link>}>
+        <EmptyState
+          icon="map"
+          title="Nenhuma missão para hoje"
+          action={
+            <Link className="btn btn-secondary btn-sm" to="/missoes?nova=1">
+              Criar missão
+            </Link>
+          }
+        >
           Missões diárias e com prazo hoje aparecem aqui.
         </EmptyState>
       ) : (
@@ -214,7 +241,10 @@ function TodayWidget({ d }: { d: Dashboard }) {
 export function HabitCheck({ h }: { h: Habit }) {
   const toast = useToast();
   const check = useMutation({
-    mutationFn: () => api.post<{ reward: RewardOutcome | null; after: AfterAction; streak: { current: number; milestones: number[] } | null }>(`/api/habits/${h.id}/checkins`, { status: 'done' }),
+    mutationFn: () =>
+      api.post<{ reward: RewardOutcome | null; after: AfterAction; streak: { current: number; milestones: number[] } | null }>(`/api/habits/${h.id}/checkins`, {
+        status: 'done',
+      }),
     onSuccess: (r) => {
       toast.reward(r.reward, r.after, h.title);
       for (const m of r.streak?.milestones ?? []) toast.success(`Marco de sequência: ${m} seguidas em "${h.title}"`);
@@ -241,9 +271,26 @@ function HabitsWidget({ habits }: { habits: Habit[] }) {
   const today = habits.filter((h) => h.scheduledToday && h.status === 'active');
   const done = today.filter((h) => h.todayStatus === 'done').length;
   return (
-    <Panel title="Hábitos do dia" icon="flame" className="h-full" actions={<Link to="/habitos" className="btn btn-ghost btn-sm">Todos</Link>}>
+    <Panel
+      title="Hábitos do dia"
+      icon="flame"
+      className="h-full"
+      actions={
+        <Link to="/habitos" className="btn btn-ghost btn-sm">
+          Todos
+        </Link>
+      }
+    >
       {today.length === 0 ? (
-        <EmptyState icon="flame" title="Nenhum hábito programado hoje" action={<Link className="btn btn-secondary btn-sm" to="/habitos?novo=1">Criar hábito</Link>} />
+        <EmptyState
+          icon="flame"
+          title="Nenhum hábito programado hoje"
+          action={
+            <Link className="btn btn-secondary btn-sm" to="/habitos?novo=1">
+              Criar hábito
+            </Link>
+          }
+        />
       ) : (
         <>
           <div className="mb-2 flex items-center gap-2">
@@ -315,7 +362,16 @@ function WeeklyWidget({ missions }: { missions: Mission[] }) {
 
 function RadarWidget({ d }: { d: Dashboard }) {
   return (
-    <Panel title="Atributos" icon="git-branch" className="h-full" actions={<Link to="/atributos" className="btn btn-ghost btn-sm">Detalhes</Link>}>
+    <Panel
+      title="Atributos"
+      icon="git-branch"
+      className="h-full"
+      actions={
+        <Link to="/atributos" className="btn btn-ghost btn-sm">
+          Detalhes
+        </Link>
+      }
+    >
       <AttributeRadar
         height={260}
         compareLabel={`Há 30 dias (${fmtDate(d.radar.compareDate)})`}
@@ -356,9 +412,26 @@ function EffortWidget({ d }: { d: Dashboard }) {
 function GoalsWidget({ d }: { d: Dashboard }) {
   const label: Record<string, string> = { critical: 'Crítica', high: 'Alta', medium: 'Média', low: 'Baixa' };
   return (
-    <Panel title="Metas prioritárias" icon="target" className="h-full" actions={<Link to="/metas" className="btn btn-ghost btn-sm">Todas</Link>}>
+    <Panel
+      title="Metas prioritárias"
+      icon="target"
+      className="h-full"
+      actions={
+        <Link to="/metas" className="btn btn-ghost btn-sm">
+          Todas
+        </Link>
+      }
+    >
       {d.priorityGoals.length === 0 ? (
-        <EmptyState icon="target" title="Nenhuma meta ativa" action={<Link className="btn btn-secondary btn-sm" to="/metas?nova=1">Criar meta</Link>} />
+        <EmptyState
+          icon="target"
+          title="Nenhuma meta ativa"
+          action={
+            <Link className="btn btn-secondary btn-sm" to="/metas?nova=1">
+              Criar meta
+            </Link>
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {d.priorityGoals.map((g) => (
@@ -410,9 +483,26 @@ function StreaksWidget({ d }: { d: Dashboard }) {
 function SeasonWidget({ d }: { d: Dashboard }) {
   const s = d.season;
   return (
-    <Panel title="Temporada" icon="hourglass" className="h-full" actions={<Link to="/temporadas" className="btn btn-ghost btn-sm">Ver</Link>}>
+    <Panel
+      title="Temporada"
+      icon="hourglass"
+      className="h-full"
+      actions={
+        <Link to="/temporadas" className="btn btn-ghost btn-sm">
+          Ver
+        </Link>
+      }
+    >
       {!s ? (
-        <EmptyState icon="hourglass" title="Nenhuma temporada ativa" action={<Link className="btn btn-secondary btn-sm" to="/temporadas">Criar temporada</Link>} />
+        <EmptyState
+          icon="hourglass"
+          title="Nenhuma temporada ativa"
+          action={
+            <Link className="btn btn-secondary btn-sm" to="/temporadas">
+              Criar temporada
+            </Link>
+          }
+        />
       ) : (
         <>
           <p className="font-display">{s.name}</p>
@@ -448,7 +538,16 @@ function SeasonWidget({ d }: { d: Dashboard }) {
 
 function RecentWidget({ d }: { d: Dashboard }) {
   return (
-    <Panel title="Recompensas recentes" icon="history" className="h-full" actions={<Link to="/historico" className="btn btn-ghost btn-sm">Histórico</Link>}>
+    <Panel
+      title="Recompensas recentes"
+      icon="history"
+      className="h-full"
+      actions={
+        <Link to="/historico" className="btn btn-ghost btn-sm">
+          Histórico
+        </Link>
+      }
+    >
       {d.recent.length === 0 ? (
         <EmptyState icon="sparkles" title="Nenhuma recompensa ainda">
           Conclua uma missão, cumpra um hábito ou registre um estudo para começar.
@@ -461,7 +560,11 @@ function RecentWidget({ d }: { d: Dashboard }) {
                 <summary className="flex cursor-pointer list-none items-center gap-3">
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {g.title}
-                    {g.reversedAt && <Badge tone="muted" className="ml-2">estornada</Badge>}
+                    {g.reversedAt && (
+                      <Badge tone="muted" className="ml-2">
+                        estornada
+                      </Badge>
+                    )}
                   </span>
                   <span className="hidden text-xs text-faint sm:inline">{XP_SOURCE_LABELS[g.xpSource]}</span>
                   <span className={`num text-sm ${g.xp < 0 ? 'text-danger' : 'text-accent'}`}>{signed(g.xp)} XP</span>
@@ -488,7 +591,16 @@ function RecentWidget({ d }: { d: Dashboard }) {
 
 function AchievementsWidget({ d }: { d: Dashboard }) {
   return (
-    <Panel title="Próximas conquistas" icon="trophy" className="h-full" actions={<Link to="/conquistas" className="btn btn-ghost btn-sm">Todas</Link>}>
+    <Panel
+      title="Próximas conquistas"
+      icon="trophy"
+      className="h-full"
+      actions={
+        <Link to="/conquistas" className="btn btn-ghost btn-sm">
+          Todas
+        </Link>
+      }
+    >
       {d.nextAchievements.length === 0 ? (
         <EmptyState icon="trophy" title="Todas as conquistas visíveis foram desbloqueadas" />
       ) : (
@@ -514,7 +626,16 @@ function AchievementsWidget({ d }: { d: Dashboard }) {
 
 function RecordsWidget({ d }: { d: Dashboard }) {
   return (
-    <Panel title="Recordes recentes" icon="medal" className="h-full" actions={<Link to="/treinos?aba=recordes" className="btn btn-ghost btn-sm">Todos</Link>}>
+    <Panel
+      title="Recordes recentes"
+      icon="medal"
+      className="h-full"
+      actions={
+        <Link to="/treinos?aba=recordes" className="btn btn-ghost btn-sm">
+          Todos
+        </Link>
+      }
+    >
       {d.records.length === 0 ? (
         <EmptyState icon="medal" title="Nenhum recorde nos últimos 30 dias" />
       ) : (

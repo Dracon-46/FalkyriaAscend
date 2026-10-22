@@ -31,7 +31,10 @@ export async function insertLevelReachedIfNew(tx: DbOrTx, values: typeof levelHi
 }
 
 export async function findLevelReward(db: DbOrTx, userId: string, level: number) {
-  const [row] = await db.select().from(levelRewards).where(and(eq(levelRewards.userId, userId), eq(levelRewards.level, level)));
+  const [row] = await db
+    .select()
+    .from(levelRewards)
+    .where(and(eq(levelRewards.userId, userId), eq(levelRewards.level, level)));
   return row ?? null;
 }
 

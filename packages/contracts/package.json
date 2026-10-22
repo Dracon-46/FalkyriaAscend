@@ -4,7 +4,14 @@
   "private": true,
   "type": "module",
   "description": "Esquemas de entrada (Zod) e tipos de resposta compartilhados entre API e interface.",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc -p tsconfig.json" },
-  "dependencies": { "@rpg/engine": "*", "zod": "^4.1.0" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@rpg/engine": "*",
+    "zod": "^4.1.0"
+  }
 }

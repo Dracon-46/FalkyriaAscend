@@ -19,7 +19,16 @@ export async function currentAccount(db: Db, userId: string, now: Date) {
   const today = await todayFor(db, userId, now);
   const u = (await findUser(db, userId))!;
   return {
-    user: { id: u.id, email: u.email, displayName: u.displayName, role: u.role, characterClass: u.characterClass, bio: u.bio, isDemo: u.isDemo, createdAt: u.createdAt },
+    user: {
+      id: u.id,
+      email: u.email,
+      displayName: u.displayName,
+      role: u.role,
+      characterClass: u.characterClass,
+      bio: u.bio,
+      isDemo: u.isDemo,
+      createdAt: u.createdAt,
+    },
     settings: await findSettings(db, userId),
     today,
     character: await characterSummary(db, userId, today),

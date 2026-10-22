@@ -86,12 +86,7 @@ export async function sumCoinsEarned(db: DbOrTx, userId: string, from: string, t
     .select({ total: sql<number>`coalesce(sum(${coinTransactions.amount}), 0)::int` })
     .from(coinTransactions)
     .where(
-      and(
-        eq(coinTransactions.userId, userId),
-        eq(coinTransactions.kind, 'earn'),
-        gte(coinTransactions.localDate, from),
-        lte(coinTransactions.localDate, to),
-      ),
+      and(eq(coinTransactions.userId, userId), eq(coinTransactions.kind, 'earn'), gte(coinTransactions.localDate, from), lte(coinTransactions.localDate, to)),
     );
   return r?.total ?? 0;
 }
@@ -103,11 +98,17 @@ export async function overwriteWalletTotals(
   totals: { balance: number; totalEarned: number; totalSpent: number; totalPenalties: number },
 ): Promise<void> {
   await tx.insert(wallets).values({ userId }).onConflictDoNothing();
-  await tx.update(wallets).set({ ...totals, updatedAt: new Date() }).where(eq(wallets.userId, userId));
+  await tx
+    .update(wallets)
+    .set({ ...totals, updatedAt: new Date() })
+    .where(eq(wallets.userId, userId));
 }
 
 export async function findCoinTx(db: DbOrTx, userId: string, id: string) {
-  const [row] = await db.select().from(coinTransactions).where(and(eq(coinTransactions.id, id), eq(coinTransactions.userId, userId)));
+  const [row] = await db
+    .select()
+    .from(coinTransactions)
+    .where(and(eq(coinTransactions.id, id), eq(coinTransactions.userId, userId)));
   return row ?? null;
 }
 

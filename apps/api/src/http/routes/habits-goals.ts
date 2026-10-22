@@ -3,7 +3,17 @@ import { z } from 'zod';
 import { goalInput, goalStatusInput, habitCheckinInput, habitInput, habitStatusInput, localDate } from '@rpg/contracts';
 import { idParam, noContent, parse, requireUser } from '../http';
 import { deleteGoal, listGoalsView, saveGoal, setGoalStatus, toggleMilestone } from '../../application/use-cases/goals';
-import { deleteHabit, habitDetail, listHabitsView, recomputeStreak, recordCheckin, reorderHabits, saveHabit, setHabitStatus, undoCheckinFor } from '../../application/use-cases/habits';
+import {
+  deleteHabit,
+  habitDetail,
+  listHabitsView,
+  recomputeStreak,
+  recordCheckin,
+  reorderHabits,
+  saveHabit,
+  setHabitStatus,
+  undoCheckinFor,
+} from '../../application/use-cases/habits';
 import type { AppContext } from '../../context';
 
 export async function registerHabitGoalRoutes(app: FastifyInstance, ctx: AppContext) {

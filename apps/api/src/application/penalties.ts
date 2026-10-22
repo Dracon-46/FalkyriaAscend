@@ -63,21 +63,21 @@ export async function applyPenalties(tx: DbOrTx, input: ApplyPenaltiesInput) {
 
     const app = await insertApplicationIfNew(tx, {
       userId: input.userId,
-        ruleId: rule.id,
-        ruleSnapshot: rule,
-        idempotencyKey: `${input.keyBase}:rule:${rule.id}`,
-        sourceType: input.sourceType,
-        sourceId: input.sourceId,
-        sourceTitle: input.sourceTitle,
-        localDate: input.localDate,
-        type: rule.type,
-        step: effect.step,
-        amount: effect.amount,
-        durationDays: effect.durationDays,
-        reductionPct: effect.reductionPct,
-        expiresOn: rule.type === 'multiplier_reduction' || rule.type === 'reward_lock' ? expiresOn : null,
-        targetItemId: rule.type === 'reward_lock' ? rule.targetItemId : null,
-        targetSkillId: rule.type === 'skill_xp_loss' ? rule.targetSkillId : null,
+      ruleId: rule.id,
+      ruleSnapshot: rule,
+      idempotencyKey: `${input.keyBase}:rule:${rule.id}`,
+      sourceType: input.sourceType,
+      sourceId: input.sourceId,
+      sourceTitle: input.sourceTitle,
+      localDate: input.localDate,
+      type: rule.type,
+      step: effect.step,
+      amount: effect.amount,
+      durationDays: effect.durationDays,
+      reductionPct: effect.reductionPct,
+      expiresOn: rule.type === 'multiplier_reduction' || rule.type === 'reward_lock' ? expiresOn : null,
+      targetItemId: rule.type === 'reward_lock' ? rule.targetItemId : null,
+      targetSkillId: rule.type === 'skill_xp_loss' ? rule.targetSkillId : null,
       explanation: effect.explanation,
     });
     if (!app) continue;
@@ -176,6 +176,15 @@ export async function revertPenalty(tx: DbOrTx, userId: string, penaltyId: strin
   if (skillGrant) await reverseGrant(tx, userId, skillGrant.id, reason, actorId);
 
   const updated = await markApplicationReversed(tx, app.id, reason);
-  await audit(tx, { actorId, userId, action: 'penalty.revert', entityType: 'penalty_applications', entityId: app.id, before: app, after: updated, meta: { reason } });
+  await audit(tx, {
+    actorId,
+    userId,
+    action: 'penalty.revert',
+    entityType: 'penalty_applications',
+    entityId: app.id,
+    before: app,
+    after: updated,
+    meta: { reason },
+  });
   return updated;
 }

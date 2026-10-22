@@ -155,7 +155,11 @@ function ProgressionTab({ days, granularity }: { days: number; granularity: Gran
     <div className="grid gap-4 lg:grid-cols-3">
       <Panel title="Resumo do período" icon="sparkles" className="lg:col-span-3">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="XP no período" value={fmt(d.total)} hint={<span style={{ color: `var(--${cmp.tone === 'muted' ? 'text-faint' : cmp.tone})` }}>{cmp.label}</span>} />
+          <Stat
+            label="XP no período"
+            value={fmt(d.total)}
+            hint={<span style={{ color: `var(--${cmp.tone === 'muted' ? 'text-faint' : cmp.tone})` }}>{cmp.label}</span>}
+          />
           <Stat label="Período anterior" value={fmt(d.previousTotal)} hint={`mesma duração (${days} dias)`} />
           <Stat label="Média diária" value={`${fmt1(avg)} XP`} />
           <Stat label="Níveis alcançados" value={fmt(levelsInRange.length)} hint="no período" />
@@ -178,7 +182,13 @@ function ProgressionTab({ days, granularity }: { days: number; granularity: Gran
         <DonutChart data={d.bySource.map((s) => ({ label: s.label, value: s.xp }))} height={200} />
       </Panel>
       <Panel title="XP vitalício acumulado" icon="chevrons-up" className="lg:col-span-2">
-        <TimeSeriesChart data={d.series} granularity={granularity} height={220} yUnit="XP" series={[{ key: 'cumulativeXp', label: 'XP acumulado', type: 'area' }]} />
+        <TimeSeriesChart
+          data={d.series}
+          granularity={granularity}
+          height={220}
+          yUnit="XP"
+          series={[{ key: 'cumulativeXp', label: 'XP acumulado', type: 'area' }]}
+        />
       </Panel>
       <Panel title="Níveis alcançados" icon="crown">
         {d.levels.length === 0 ? (
@@ -230,7 +240,11 @@ function ProductivityTab({ days, granularity }: { days: number; granularity: Gra
           <Stat label="Missões concluídas" value={fmt(d.totals.completed)} tone="success" />
           <Stat label="Missões falhadas/expiradas" value={fmt(d.totals.failed)} tone="danger" />
           <Stat label="Taxa de conclusão" value={pct(d.totals.missionCompletionRate)} hint="concluídas ÷ (concluídas + falhas)" />
-          <Stat label="Adesão a hábitos" value={pct(d.totals.habitRate)} hint={`${fmt(d.totals.habitsDone)} cumpridos · ${fmt(d.totals.habitsMissed)} falhas`} />
+          <Stat
+            label="Adesão a hábitos"
+            value={pct(d.totals.habitRate)}
+            hint={`${fmt(d.totals.habitsDone)} cumpridos · ${fmt(d.totals.habitsMissed)} falhas`}
+          />
         </div>
       </Panel>
       <Panel title="Missões: concluídas × falhadas" icon="swords">
@@ -361,7 +375,12 @@ function EconomyTab({ days, granularity }: { days: number; granularity: Granular
         <DonutChart data={d.spending.map((s) => ({ label: s.category, value: s.total }))} unit="moedas" />
       </Panel>
       <Panel title="Emissão de moedas (inflação virtual)" icon="refresh">
-        <TimeSeriesChart data={d.inflation} granularity={granularity} yUnit="moedas" series={[{ key: 'coinsPerActiveDay', label: 'Moedas por dia ativo', type: 'line' }]} />
+        <TimeSeriesChart
+          data={d.inflation}
+          granularity={granularity}
+          yUnit="moedas"
+          series={[{ key: 'coinsPerActiveDay', label: 'Moedas por dia ativo', type: 'line' }]}
+        />
         <p className="mt-1 text-xs text-faint">Ritmo médio de moedas ganhas por dia com atividade. Alta contínua com preços fixos indica inflação.</p>
       </Panel>
       <Panel title="Efeito das penalidades" icon="skull">
@@ -435,7 +454,15 @@ function EconomyTab({ days, granularity }: { days: number; granularity: Granular
                     <td>
                       <Coins value={i.price} />
                     </td>
-                    <td className="text-sm">{i.days === 0 ? <Badge tone="success">disponível agora</Badge> : i.days === null ? <span className="text-faint">sem ritmo para estimar</span> : `≈ ${i.days} dia(s)`}</td>
+                    <td className="text-sm">
+                      {i.days === 0 ? (
+                        <Badge tone="success">disponível agora</Badge>
+                      ) : i.days === null ? (
+                        <span className="text-faint">sem ritmo para estimar</span>
+                      ) : (
+                        `≈ ${i.days} dia(s)`
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

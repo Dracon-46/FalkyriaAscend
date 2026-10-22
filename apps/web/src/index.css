@@ -132,7 +132,9 @@
 
   /* Vampiros: filete prateado superior em arco e sombra interna. */
   [data-theme='vampire'] .panel {
-    box-shadow: var(--shadow), inset 0 1px 0 rgb(255 255 255 / 0.03);
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgb(255 255 255 / 0.03);
   }
   [data-theme='vampire'] .panel::before {
     content: '';
@@ -185,7 +187,10 @@
   }
 
   .panel-hover {
-    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    transition:
+      border-color 0.2s,
+      transform 0.2s,
+      background 0.2s;
   }
   .panel-hover:hover {
     border-color: var(--border-strong);
@@ -207,7 +212,12 @@
     text-transform: var(--title-transform);
     cursor: pointer;
     user-select: none;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s,
+      box-shadow 0.15s,
+      opacity 0.15s;
     white-space: nowrap;
   }
   .btn:disabled,
@@ -275,7 +285,9 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
   .input::placeholder {
     color: var(--text-faint);
@@ -302,7 +314,9 @@
   select.input {
     appearance: none;
     background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
-    background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
+    background-position:
+      calc(100% - 16px) 55%,
+      calc(100% - 11px) 55%;
     background-size: 5px 5px;
     background-repeat: no-repeat;
     padding-right: 2rem;

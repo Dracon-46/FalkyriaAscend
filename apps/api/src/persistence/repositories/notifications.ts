@@ -22,8 +22,6 @@ export async function countUnreadNotifications(db: DbOrTx, userId: string): Prom
 }
 
 export async function markNotificationsRead(db: DbOrTx, userId: string, id?: string): Promise<void> {
-  const where = id
-    ? and(eq(notifications.userId, userId), eq(notifications.id, id))
-    : and(eq(notifications.userId, userId), isNull(notifications.readAt));
+  const where = id ? and(eq(notifications.userId, userId), eq(notifications.id, id)) : and(eq(notifications.userId, userId), isNull(notifications.readAt));
   await db.update(notifications).set({ readAt: new Date() }).where(where);
 }

@@ -89,7 +89,9 @@ export function computePenalty(rule: PenaltyRule, ctx: PenaltyContext, cfg: Game
         if (amount === dailyLeft && dailyLeft < requested) explanation.push(`Limite diário de penalidades: ${cfg.penalties.dailyCoinCap} moedas`);
         if (amount === weeklyLeft && weeklyLeft < requested) explanation.push(`Limite semanal de penalidades: ${cfg.penalties.weeklyCoinCap} moedas`);
         if (amount === shareLeft && shareLeft < requested)
-          explanation.push(`Teto proporcional: multas da semana limitadas a ${Math.round(cfg.penalties.maxShareOfWeeklyEarnings * 100)}% das moedas ganhas na semana`);
+          explanation.push(
+            `Teto proporcional: multas da semana limitadas a ${Math.round(cfg.penalties.maxShareOfWeeklyEarnings * 100)}% das moedas ganhas na semana`,
+          );
       }
       return { ...base, amount, limited, recordOnly: amount === 0 };
     }

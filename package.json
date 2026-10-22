@@ -16,6 +16,8 @@
     "build": "npm run build --workspace @rpg/web && npm run build --workspace @rpg/api",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint:arch": "depcruise packages/engine/src packages/contracts/src apps/api/src apps/web/src --config .dependency-cruiser.cjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "npm run lint:arch && npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
     "test:all": "npm test && npm run test:e2e",
@@ -28,6 +30,7 @@
     "@playwright/test": "1.56.1",
     "@types/node": "^22.19.0",
     "dependency-cruiser": "^17.4.3",
+    "prettier": "^3.6.2",
     "typescript": "5.9.3"
   }
 }

@@ -59,7 +59,10 @@ test('hábito cumprido no dia gera recompensa e aparece como cumprido', async ({
   await page.goto('/habitos?novo=1');
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Nome', { exact: false }).first().fill('Leitura noturna');
-  await dialog.getByRole('button', { name: /Salvar|Criar/ }).last().click();
+  await dialog
+    .getByRole('button', { name: /Salvar|Criar/ })
+    .last()
+    .click();
   await expect(page.getByText('Leitura noturna').first()).toBeVisible();
   await page.goto('/');
   await page.getByRole('button', { name: 'Marcar Leitura noturna como cumprido' }).click();
@@ -92,7 +95,11 @@ test('ajuste administrativo auditado e compra na loja debitam corretamente', asy
   await page.goto('/loja');
   const item = page.locator('article', { hasText: '1 hora de lazer livre' }).first();
   await item.getByRole('button', { name: /Comprar/ }).click();
-  await page.getByRole('dialog').getByRole('button', { name: /Confirmar|Comprar/ }).last().click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /Confirmar|Comprar/ })
+    .last()
+    .click();
   await expect(page.getByText(/Compra/).first()).toBeVisible();
   await page.goto('/historico?aba=moedas');
   await expect(page.getByText('Compra: 1 hora de lazer livre')).toBeVisible();

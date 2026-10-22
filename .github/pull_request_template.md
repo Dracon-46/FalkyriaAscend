@@ -14,6 +14,7 @@
 
 <!-- Liste os comandos executados e o resultado real. Não marque o que não foi executado. -->
 
+- [ ] `npm run format:check`
 - [ ] `npm run typecheck`
 - [ ] `npm run lint:arch`
 - [ ] `npm test` (motor + API com banco real)

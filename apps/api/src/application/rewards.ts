@@ -78,17 +78,17 @@ export async function grantReward(tx: DbOrTx, input: GrantInput): Promise<GrantO
 
   const grant = await insertGrantIfNew(tx, {
     userId: input.userId,
-      idempotencyKey: input.idempotencyKey,
-      sourceType: input.sourceType,
-      sourceId: input.sourceId ?? null,
-      xpSource: input.xpSource,
-      categoryId: input.categoryId ?? null,
-      title: input.title,
-      xp: input.reward.xp,
-      coins: input.reward.coins,
-      localDate: input.localDate,
-      configVersion: version,
-      explanation: input.reward.explanation,
+    idempotencyKey: input.idempotencyKey,
+    sourceType: input.sourceType,
+    sourceId: input.sourceId ?? null,
+    xpSource: input.xpSource,
+    categoryId: input.categoryId ?? null,
+    title: input.title,
+    xp: input.reward.xp,
+    coins: input.reward.coins,
+    localDate: input.localDate,
+    configVersion: version,
+    explanation: input.reward.explanation,
     actorId: input.actorId ?? null,
   });
 
@@ -214,13 +214,7 @@ export async function giveItem(
  * Estorna uma recompensa: cria um lançamento espelhado (XP, atributos, habilidades e moedas negativos).
  * O registro original permanece intacto e é marcado como estornado.
  */
-export async function reverseGrant(
-  tx: DbOrTx,
-  userId: string,
-  grantId: string,
-  reason: string,
-  actorId: string | null,
-): Promise<GrantOutcome> {
+export async function reverseGrant(tx: DbOrTx, userId: string, grantId: string, reason: string, actorId: string | null): Promise<GrantOutcome> {
   const g = await lockGrant(tx, userId, grantId);
   if (!g) throw notFound('Recompensa');
   if (g.reversalOf) throw conflict('Um estorno não pode ser estornado; registre um ajuste.');
@@ -232,18 +226,18 @@ export async function reverseGrant(
 
   const rev = await insertGrant(tx, {
     userId,
-      idempotencyKey: `reversal:${g.id}`,
-      sourceType: 'reversal',
-      sourceId: g.sourceId,
-      xpSource: g.xpSource,
-      categoryId: g.categoryId,
-      title: `Estorno: ${g.title}`,
-      xp: -g.xp,
-      coins: -g.coins,
-      localDate: g.localDate,
-      configVersion: g.configVersion,
-      explanation: [`Estorno de "${g.title}"`, `Motivo: ${reason}`],
-      reversalOf: g.id,
+    idempotencyKey: `reversal:${g.id}`,
+    sourceType: 'reversal',
+    sourceId: g.sourceId,
+    xpSource: g.xpSource,
+    categoryId: g.categoryId,
+    title: `Estorno: ${g.title}`,
+    xp: -g.xp,
+    coins: -g.coins,
+    localDate: g.localDate,
+    configVersion: g.configVersion,
+    explanation: [`Estorno de "${g.title}"`, `Motivo: ${reason}`],
+    reversalOf: g.id,
     actorId,
   });
   await markGrantReversed(tx, g.id);

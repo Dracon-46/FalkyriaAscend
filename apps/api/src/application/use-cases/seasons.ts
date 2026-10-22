@@ -29,7 +29,11 @@ export async function seasonsView(db: Db, userId: string, now: Date) {
   const list = await listSeasons(db, userId);
   const rewards = await listRewardsOfUser(db, userId);
   return Promise.all(
-    list.map(async (s) => ({ ...s, stats: s.status === 'closed' ? s.summary : await seasonStats(db, s, today), rewards: rewards.filter((r) => r.seasonId === s.id) })),
+    list.map(async (s) => ({
+      ...s,
+      stats: s.status === 'closed' ? s.summary : await seasonStats(db, s, today),
+      rewards: rewards.filter((r) => r.seasonId === s.id),
+    })),
   );
 }
 
@@ -50,7 +54,10 @@ export async function saveSeason(db: Db, userId: string, data: SeasonInput, id: 
     }
     const existing = await listRewardsOfSeason(tx, row.id);
     const keep = new Set(rewards.map((r) => r.id).filter(Boolean) as string[]);
-    await deleteSeasonRewards(tx, existing.filter((e) => !keep.has(e.id) && !e.claimedAt).map((e) => e.id));
+    await deleteSeasonRewards(
+      tx,
+      existing.filter((e) => !keep.has(e.id) && !e.claimedAt).map((e) => e.id),
+    );
     for (const r of rewards) {
       await assertOwned(tx, 'items', r.itemId, userId, 'Item');
       const prev = existing.find((e) => e.id === r.id);

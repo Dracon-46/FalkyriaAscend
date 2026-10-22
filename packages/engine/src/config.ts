@@ -80,9 +80,7 @@ export const gameConfigSchema = z.object({
     assessmentMasteryMax: z.number().int().min(0),
     milestoneMastery: z.number().int().min(0),
   }),
-  streakMilestones: z.array(
-    z.object({ days: z.number().int().min(2), xp: z.number().int().min(0), coins: z.number().int().min(0) }),
-  ),
+  streakMilestones: z.array(z.object({ days: z.number().int().min(2), xp: z.number().int().min(0), coins: z.number().int().min(0) })),
 });
 export type GameConfig = z.infer<typeof gameConfigSchema>;
 

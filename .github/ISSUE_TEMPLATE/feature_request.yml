@@ -1,6 +1,6 @@
 name: Funcionalidade
 description: Proponha uma melhoria ou uma ideia nova.
-title: "feat: "
+title: 'feat: '
 labels: [melhoria, triagem]
 body:
   - type: textarea

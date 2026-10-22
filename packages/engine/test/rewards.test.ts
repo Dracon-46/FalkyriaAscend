@@ -39,10 +39,7 @@ describe('distribuição por pesos', () => {
 
 describe('recompensa de missão', () => {
   it('usa a tabela de dificuldade', () => {
-    const r = computeMissionReward(
-      { difficulty: 'hard', attributeWeights: { EXE: 1 }, hardCompletedToday: 0, xpFromMissionsToday: 0, multiplier: 1 },
-      cfg,
-    );
+    const r = computeMissionReward({ difficulty: 'hard', attributeWeights: { EXE: 1 }, hardCompletedToday: 0, xpFromMissionsToday: 0, multiplier: 1 }, cfg);
     expect(r.xp).toBe(80);
     expect(r.coins).toBe(16);
     expect(r.attributeXp).toEqual({ EXE: 80 });
@@ -50,23 +47,14 @@ describe('recompensa de missão', () => {
   });
 
   it('aplica retorno decrescente para muitas missões difíceis no mesmo dia', () => {
-    const fourth = computeMissionReward(
-      { difficulty: 'hard', attributeWeights: {}, hardCompletedToday: 3, xpFromMissionsToday: 0, multiplier: 1 },
-      cfg,
-    );
+    const fourth = computeMissionReward({ difficulty: 'hard', attributeWeights: {}, hardCompletedToday: 3, xpFromMissionsToday: 0, multiplier: 1 }, cfg);
     expect(fourth.xp).toBe(40);
-    const tenth = computeMissionReward(
-      { difficulty: 'hard', attributeWeights: {}, hardCompletedToday: 9, xpFromMissionsToday: 0, multiplier: 1 },
-      cfg,
-    );
+    const tenth = computeMissionReward({ difficulty: 'hard', attributeWeights: {}, hardCompletedToday: 9, xpFromMissionsToday: 0, multiplier: 1 }, cfg);
     expect(tenth.xp).toBe(20);
   });
 
   it('missões fáceis não sofrem a redução de missões difíceis', () => {
-    const r = computeMissionReward(
-      { difficulty: 'easy', attributeWeights: {}, hardCompletedToday: 10, xpFromMissionsToday: 0, multiplier: 1 },
-      cfg,
-    );
+    const r = computeMissionReward({ difficulty: 'easy', attributeWeights: {}, hardCompletedToday: 10, xpFromMissionsToday: 0, multiplier: 1 }, cfg);
     expect(r.xp).toBe(20);
   });
 
@@ -104,10 +92,7 @@ describe('recompensa de missão', () => {
   });
 
   it('multiplicador de consistência afeta XP geral e moedas, não atributos', () => {
-    const r = computeMissionReward(
-      { difficulty: 'hard', attributeWeights: { EXE: 1 }, hardCompletedToday: 0, xpFromMissionsToday: 0, multiplier: 1.1 },
-      cfg,
-    );
+    const r = computeMissionReward({ difficulty: 'hard', attributeWeights: { EXE: 1 }, hardCompletedToday: 0, xpFromMissionsToday: 0, multiplier: 1.1 }, cfg);
     expect(r.xp).toBe(88);
     expect(r.coins).toBe(18);
     expect(r.attributeXp.EXE).toBe(80);
@@ -150,9 +135,7 @@ describe('recompensa por tempo', () => {
 
 describe('registro rápido', () => {
   it('repetições do mesmo registro no dia decrescem até zero', () => {
-    const xs = [0, 1, 2, 3, 4, 5].map(
-      (i) => computeQuickReward({ repeatIndex: i, xpFromQuickToday: 0, attributeWeights: {} }, cfg).xp,
-    );
+    const xs = [0, 1, 2, 3, 4, 5].map((i) => computeQuickReward({ repeatIndex: i, xpFromQuickToday: 0, attributeWeights: {} }, cfg).xp);
     expect(xs).toEqual([10, 10, 5, 3, 0, 0]);
   });
 });

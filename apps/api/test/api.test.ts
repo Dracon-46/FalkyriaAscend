@@ -347,7 +347,9 @@ describe('integrações: deduplicação e webhooks', () => {
     expect(records.some((r: { kind: string }) => r.kind === 'longest_run_km')).toBe(true);
   });
   it('handshake do webhook Strava exige segredo e verify_token', async () => {
-    const ok = await admin.get('/api/integrations/strava/webhook/segredo-webhook-teste?hub.mode=subscribe&hub.challenge=abc&hub.verify_token=segredo-webhook-teste');
+    const ok = await admin.get(
+      '/api/integrations/strava/webhook/segredo-webhook-teste?hub.mode=subscribe&hub.challenge=abc&hub.verify_token=segredo-webhook-teste',
+    );
     expect(ok.body).toEqual({ 'hub.challenge': 'abc' });
     const bad = await admin.get('/api/integrations/strava/webhook/errado?hub.mode=subscribe&hub.challenge=abc&hub.verify_token=segredo-webhook-teste');
     expect(bad.status).toBe(403);
@@ -366,16 +368,59 @@ describe('integrações: deduplicação e webhooks', () => {
 
 describe('leitura: todos os endpoints respondem com dados reais', () => {
   it.each([
-    '/api/dashboard', '/api/me', '/api/settings', '/api/config', '/api/notifications', '/api/lookups',
-    '/api/categories', '/api/attributes', '/api/skills', '/api/ranks', '/api/level-rewards', '/api/penalty-rules',
-    '/api/mission-templates', '/api/unavailability', '/api/missions', '/api/missions/suggestions', '/api/habits', '/api/goals',
-    '/api/knowledge-areas', '/api/subjects', '/api/study-resources', '/api/study/overview', '/api/study/sessions',
-    '/api/study/assessments', '/api/study/milestones', '/api/activity-types', '/api/exercises', '/api/activities', '/api/records',
-    '/api/quick-log', '/api/items', '/api/shop', '/api/purchases', '/api/inventory', '/api/achievements', '/api/achievement-definitions',
-    '/api/seasons', '/api/stats/progression?granularity=week&days=90', '/api/stats/attributes/radar', '/api/stats/attributes/history?granularity=week&days=60',
-    '/api/stats/productivity?granularity=month&days=120', '/api/stats/economy?granularity=week&days=60', '/api/stats/mastery',
-    '/api/history/grants', '/api/history/coins', '/api/history/penalties', '/api/history/missions', '/api/history/audit',
-    '/api/integrations', '/api/admin/users', '/api/admin/integrity', '/api/admin/r/missions?q=a', '/api/export',
+    '/api/dashboard',
+    '/api/me',
+    '/api/settings',
+    '/api/config',
+    '/api/notifications',
+    '/api/lookups',
+    '/api/categories',
+    '/api/attributes',
+    '/api/skills',
+    '/api/ranks',
+    '/api/level-rewards',
+    '/api/penalty-rules',
+    '/api/mission-templates',
+    '/api/unavailability',
+    '/api/missions',
+    '/api/missions/suggestions',
+    '/api/habits',
+    '/api/goals',
+    '/api/knowledge-areas',
+    '/api/subjects',
+    '/api/study-resources',
+    '/api/study/overview',
+    '/api/study/sessions',
+    '/api/study/assessments',
+    '/api/study/milestones',
+    '/api/activity-types',
+    '/api/exercises',
+    '/api/activities',
+    '/api/records',
+    '/api/quick-log',
+    '/api/items',
+    '/api/shop',
+    '/api/purchases',
+    '/api/inventory',
+    '/api/achievements',
+    '/api/achievement-definitions',
+    '/api/seasons',
+    '/api/stats/progression?granularity=week&days=90',
+    '/api/stats/attributes/radar',
+    '/api/stats/attributes/history?granularity=week&days=60',
+    '/api/stats/productivity?granularity=month&days=120',
+    '/api/stats/economy?granularity=week&days=60',
+    '/api/stats/mastery',
+    '/api/history/grants',
+    '/api/history/coins',
+    '/api/history/penalties',
+    '/api/history/missions',
+    '/api/history/audit',
+    '/api/integrations',
+    '/api/admin/users',
+    '/api/admin/integrity',
+    '/api/admin/r/missions?q=a',
+    '/api/export',
   ])('GET %s', async (url) => {
     const r = await admin.get(url);
     expect(r.status, JSON.stringify(r.body)).toBe(200);
@@ -400,7 +445,12 @@ describe('configurações, temporadas, estatísticas e conta', () => {
     expect(eco.series.length).toBe(30);
   });
   it('temporada concede recompensa sazonal ao atingir o limiar', async () => {
-    const s = await admin.post('/api/seasons', { name: 'Teste', startDate: '2026-10-21', endDate: '2026-12-31', rewards: [{ title: 'Bronze', thresholdXp: 10, coins: 25 }] });
+    const s = await admin.post('/api/seasons', {
+      name: 'Teste',
+      startDate: '2026-10-21',
+      endDate: '2026-12-31',
+      rewards: [{ title: 'Bronze', thresholdXp: 10, coins: 25 }],
+    });
     expect(s.status).toBe(201);
     const list = (await admin.get('/api/seasons')).body;
     const season = list.find((x: { id: string }) => x.id === s.body.id);

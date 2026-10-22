@@ -13,11 +13,31 @@ import { StatusStrip } from '../../components/charts/Charts';
 import { AttrWeights } from '../../components/ui/domain';
 import { Icon } from '../../components/ui/Icon';
 import { Modal, useConfirm } from '../../components/ui/Modal';
-import { Badge, Button, Checkbox, EmptyState, ErrorState, Input, Loading, PageHeader, Panel, ProgressBar, Select, Textarea } from '../../components/ui/primitives';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  EmptyState,
+  ErrorState,
+  Input,
+  Loading,
+  PageHeader,
+  Panel,
+  ProgressBar,
+  Select,
+  Textarea,
+} from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 
 type HabitForm = z.input<typeof habitInput>;
-type Unavailability = { id: string; startDate: string; endDate: string; reason: (typeof UNAVAILABILITY_REASONS)[number]; note: string | null; categoryId: string | null };
+type Unavailability = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  reason: (typeof UNAVAILABILITY_REASONS)[number];
+  note: string | null;
+  categoryId: string | null;
+};
 type HabitsResponse = { today: string; habits: Habit[]; archived: Habit[] };
 type HabitDetail = Habit & {
   history: Array<{ id: string; localDate: string; status: keyof typeof CHECKIN_STATUS_LABELS; note: string | null; source: string; grantId: string | null }>;
@@ -28,7 +48,13 @@ type HabitDetail = Habit & {
 const WEEKDAY_NAMES = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 const SUGGESTIONS: Array<Partial<HabitForm> & { title: string }> = [
-  { title: 'Planejar o dia', description: 'Definir as 3 prioridades do dia.', attributeWeights: { ORG: 1 }, timeOfDay: '08:00', completionCriteria: 'Lista de prioridades escrita' },
+  {
+    title: 'Planejar o dia',
+    description: 'Definir as 3 prioridades do dia.',
+    attributeWeights: { ORG: 1 },
+    timeOfDay: '08:00',
+    completionCriteria: 'Lista de prioridades escrita',
+  },
   { title: 'Leitura (20 páginas)', attributeWeights: { INT: 0.7, DIS: 0.3 }, completionCriteria: '20 páginas lidas' },
   { title: 'Arrumar o ambiente', attributeWeights: { ORG: 0.6, DIS: 0.4 }, completionCriteria: 'Mesa e quarto organizados' },
   { title: 'Registrar despesas', attributeWeights: { ORG: 1 }, timeOfDay: '21:00', completionCriteria: 'Gastos do dia lançados' },
@@ -81,7 +107,9 @@ function habitToForm(h: Habit): HabitForm {
 function scheduleText(h: Habit) {
   if (h.frequency === 'daily') return 'Todos os dias';
   if (h.frequency === 'times_per_week') return `${h.timesPerWeek}× por semana`;
-  return daysFromMask(h.weekdaysMask).map((d) => WEEKDAY_NAMES[d]).join(', ');
+  return daysFromMask(h.weekdaysMask)
+    .map((d) => WEEKDAY_NAMES[d])
+    .join(', ');
 }
 
 export function HabitsPage() {
@@ -147,7 +175,11 @@ export function HabitsPage() {
               </div>
             )}
             {habits.length === 0 ? (
-              <EmptyState icon="flame" title="Nenhum hábito cadastrado" action={<Button onClick={() => setEditing({ key: 'new', initial: emptyHabit(today) })}>Criar hábito</Button>}>
+              <EmptyState
+                icon="flame"
+                title="Nenhum hábito cadastrado"
+                action={<Button onClick={() => setEditing({ key: 'new', initial: emptyHabit(today) })}>Criar hábito</Button>}
+              >
                 Comece com poucos hábitos essenciais. Use as sugestões ao lado para preencher o formulário.
               </EmptyState>
             ) : (
@@ -169,7 +201,15 @@ export function HabitsPage() {
           </Panel>
 
           {q.data.archived.length > 0 && (
-            <Panel title="Arquivados" icon="archive" actions={<Button size="sm" variant="ghost" onClick={() => setShowArchived((v) => !v)}>{showArchived ? 'Ocultar' : `Mostrar (${q.data.archived.length})`}</Button>}>
+            <Panel
+              title="Arquivados"
+              icon="archive"
+              actions={
+                <Button size="sm" variant="ghost" onClick={() => setShowArchived((v) => !v)}>
+                  {showArchived ? 'Ocultar' : `Mostrar (${q.data.archived.length})`}
+                </Button>
+              }
+            >
               {showArchived ? (
                 <ul className="divide-y divide-line">
                   {q.data.archived.map((h) => (
@@ -218,13 +258,31 @@ export function HabitsPage() {
   );
 }
 
-function HabitRow({ h, today, first, last, onMove, onEdit, onDetail }: { h: Habit; today: string; first: boolean; last: boolean; onMove: (d: -1 | 1) => void; onEdit: () => void; onDetail: () => void }) {
+function HabitRow({
+  h,
+  today,
+  first,
+  last,
+  onMove,
+  onEdit,
+  onDetail,
+}: {
+  h: Habit;
+  today: string;
+  first: boolean;
+  last: boolean;
+  onMove: (d: -1 | 1) => void;
+  onEdit: () => void;
+  onDetail: () => void;
+}) {
   const toast = useToast();
   const qc = useQueryClient();
   const confirm = useConfirm();
   const checkin = useMutation({
     mutationFn: (status: 'done' | 'rest' | 'excused') =>
-      api.post<{ reward: RewardOutcome | null; after: AfterAction; streak: { current: number; milestones: number[] } | null }>(`/api/habits/${h.id}/checkins`, { status }),
+      api.post<{ reward: RewardOutcome | null; after: AfterAction; streak: { current: number; milestones: number[] } | null }>(`/api/habits/${h.id}/checkins`, {
+        status,
+      }),
     onSuccess: (r, status) => {
       if (status === 'done') toast.reward(r.reward, r.after, h.title);
       else {
@@ -281,7 +339,11 @@ function HabitRow({ h, today, first, last, onMove, onEdit, onDetail }: { h: Habi
               {h.title}
             </button>
             {h.status === 'paused' && <Badge tone="warning">Pausado{h.pausedUntil ? ` até ${fmtDate(h.pausedUntil)}` : ''}</Badge>}
-            {h.isBasicNeed && <Badge tone="info" title="Necessidade básica: nunca gera penalidade">Necessidade básica</Badge>}
+            {h.isBasicNeed && (
+              <Badge tone="info" title="Necessidade básica: nunca gera penalidade">
+                Necessidade básica
+              </Badge>
+            )}
             {h.todayStatus && h.todayStatus !== 'done' && <Badge>{CHECKIN_STATUS_LABELS[h.todayStatus]}</Badge>}
             {!h.scheduledToday && h.status === 'active' && <Badge>Não programado hoje</Badge>}
           </div>
@@ -338,7 +400,11 @@ function HabitRow({ h, today, first, last, onMove, onEdit, onDetail }: { h: Habi
               variant="ghost"
               icon="archive"
               onClick={async () => {
-                const r = await confirm({ title: 'Arquivar hábito', message: `Arquivar "${h.title}"? O histórico e as sequências são preservados.`, confirmLabel: 'Arquivar' });
+                const r = await confirm({
+                  title: 'Arquivar hábito',
+                  message: `Arquivar "${h.title}"? O histórico e as sequências são preservados.`,
+                  confirmLabel: 'Arquivar',
+                });
                 if (r.ok) status.mutate({ status: 'archived' });
               }}
             >
@@ -349,7 +415,12 @@ function HabitRow({ h, today, first, last, onMove, onEdit, onDetail }: { h: Habi
               variant="ghost"
               icon="trash"
               onClick={async () => {
-                const r = await confirm({ title: 'Excluir hábito', message: `Excluir "${h.title}"? Só é possível se não houver histórico; caso contrário, arquive.`, danger: true, confirmLabel: 'Excluir' });
+                const r = await confirm({
+                  title: 'Excluir hábito',
+                  message: `Excluir "${h.title}"? Só é possível se não houver histórico; caso contrário, arquive.`,
+                  danger: true,
+                  confirmLabel: 'Excluir',
+                });
                 if (r.ok) remove.mutate();
               }}
             >
@@ -420,7 +491,13 @@ function PauseModal({ title, onClose, onConfirm }: { title: string; onClose: () 
       }
     >
       <p className="mb-3 text-sm text-muted">Dias pausados ficam como "dispensado": sem falha, sem penalidade e sem quebrar a sequência.</p>
-      <Input label="Pausar até (opcional)" type="date" value={until} onChange={(e) => setUntil(e.target.value)} hint="Sem data, o hábito fica pausado até você retomá-lo." />
+      <Input
+        label="Pausar até (opcional)"
+        type="date"
+        value={until}
+        onChange={(e) => setUntil(e.target.value)}
+        hint="Sem data, o hábito fica pausado até você retomá-lo."
+      />
     </Modal>
   );
 }
@@ -467,7 +544,13 @@ function HabitFormModal({ habitId, initial, onClose }: { habitId?: string; initi
             options={(['routine', 'easy', 'moderate'] as const).map((d) => ({ value: d, label: DIFFICULTY_LABELS[d] }))}
             hint="Hábitos admitem até Moderada."
           />
-          <Input label="Horário (opcional)" type="time" value={v.timeOfDay ?? ''} onChange={(e) => form.set('timeOfDay', e.target.value || null)} error={form.errors.timeOfDay} />
+          <Input
+            label="Horário (opcional)"
+            type="time"
+            value={v.timeOfDay ?? ''}
+            onChange={(e) => form.set('timeOfDay', e.target.value || null)}
+            error={form.errors.timeOfDay}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Select
@@ -499,10 +582,21 @@ function HabitFormModal({ habitId, initial, onClose }: { habitId?: string; initi
             />
           )}
         </div>
-        <Input label="Critério de conclusão" value={v.completionCriteria ?? ''} onChange={(e) => form.set('completionCriteria', e.target.value)} placeholder="Ex.: 20 páginas lidas" />
+        <Input
+          label="Critério de conclusão"
+          value={v.completionCriteria ?? ''}
+          onChange={(e) => form.set('completionCriteria', e.target.value)}
+          placeholder="Ex.: 20 páginas lidas"
+        />
         <div className="grid gap-3 sm:grid-cols-3">
           <Input label="Início" type="date" value={v.startDate} onChange={(e) => form.set('startDate', e.target.value)} error={form.errors.startDate} />
-          <Input label="Fim (opcional)" type="date" value={v.endDate ?? ''} onChange={(e) => form.set('endDate', e.target.value || null)} error={form.errors.endDate} />
+          <Input
+            label="Fim (opcional)"
+            type="date"
+            value={v.endDate ?? ''}
+            onChange={(e) => form.set('endDate', e.target.value || null)}
+            error={form.errors.endDate}
+          />
           <Input
             label="Tolerância (falhas/semana)"
             type="number"
@@ -538,7 +632,14 @@ function HabitDetailModal({ id, onClose }: { id: string; onClose: () => void }) 
   const lookups = useLookups();
   const h = q.data;
   const rules = (lookups.data?.penaltyRules ?? []).filter((r) => h?.penaltyRuleIds?.includes(r.id));
-  const tone: Record<string, 'success' | 'danger' | 'warning' | 'info' | 'muted'> = { done: 'success', missed: 'danger', tolerated: 'warning', excused: 'info', rest: 'info', skipped: 'muted' };
+  const tone: Record<string, 'success' | 'danger' | 'warning' | 'info' | 'muted'> = {
+    done: 'success',
+    missed: 'danger',
+    tolerated: 'warning',
+    excused: 'info',
+    rest: 'info',
+    skipped: 'muted',
+  };
   return (
     <Modal open onClose={onClose} title={h?.title ?? 'Hábito'} size="lg">
       {q.isLoading ? (
@@ -572,7 +673,11 @@ function HabitDetailModal({ id, onClose }: { id: string; onClose: () => void }) 
           </div>
           <div>
             <p className="field-label">Penalidades configuradas</p>
-            {rules.length === 0 ? <p className="text-sm text-faint">Nenhuma: falhas são apenas registradas.</p> : <p className="text-sm">{rules.map((r) => `${r.name} (${PENALTY_TYPE_LABELS[r.type]})`).join(' · ')}</p>}
+            {rules.length === 0 ? (
+              <p className="text-sm text-faint">Nenhuma: falhas são apenas registradas.</p>
+            ) : (
+              <p className="text-sm">{rules.map((r) => `${r.name} (${PENALTY_TYPE_LABELS[r.type]})`).join(' · ')}</p>
+            )}
           </div>
           {h.streak.interruptions.length > 0 && (
             <div>
@@ -658,8 +763,18 @@ function UnavailabilityPanel({ today }: { today: string }) {
   });
   const list = [...(q.data ?? [])].sort((a, b) => b.startDate.localeCompare(a.startDate));
   return (
-    <Panel title="Indisponibilidade e descanso" icon="bed" actions={<Button size="sm" icon="plus" onClick={() => setAdding(true)}>Registrar</Button>}>
-      <p className="mb-3 text-sm text-muted">Doença, lesão, viagem, emergência ou descanso planejado: os dias do período ficam dispensados, sem falha nem penalidade.</p>
+    <Panel
+      title="Indisponibilidade e descanso"
+      icon="bed"
+      actions={
+        <Button size="sm" icon="plus" onClick={() => setAdding(true)}>
+          Registrar
+        </Button>
+      }
+    >
+      <p className="mb-3 text-sm text-muted">
+        Doença, lesão, viagem, emergência ou descanso planejado: os dias do período ficam dispensados, sem falha nem penalidade.
+      </p>
       {q.isLoading ? (
         <Loading />
       ) : q.isError ? (
@@ -688,7 +803,12 @@ function UnavailabilityPanel({ today }: { today: string }) {
                   icon="trash"
                   aria-label="Remover período"
                   onClick={async () => {
-                    const r = await confirm({ title: 'Remover período', message: 'Dias já avaliados permanecem como estão; apenas avaliações futuras são afetadas.', danger: true, confirmLabel: 'Remover' });
+                    const r = await confirm({
+                      title: 'Remover período',
+                      message: 'Dias já avaliados permanecem como estão; apenas avaliações futuras são afetadas.',
+                      danger: true,
+                      confirmLabel: 'Remover',
+                    });
                     if (r.ok) remove.mutate(u.id);
                   }}
                 />
@@ -730,7 +850,12 @@ function UnavailabilityForm({ today, onClose }: { today: string; onClose: () => 
           if (data) save.mutate(data);
         }}
       >
-        <Select label="Motivo" value={v.reason} onChange={(e) => form.set('reason', e.target.value as typeof v.reason)} options={UNAVAILABILITY_REASONS.map((r) => ({ value: r, label: UNAVAILABILITY_REASON_LABELS[r] }))} />
+        <Select
+          label="Motivo"
+          value={v.reason}
+          onChange={(e) => form.set('reason', e.target.value as typeof v.reason)}
+          options={UNAVAILABILITY_REASONS.map((r) => ({ value: r, label: UNAVAILABILITY_REASON_LABELS[r] }))}
+        />
         <div className="grid grid-cols-2 gap-3">
           <Input label="De" type="date" value={v.startDate} onChange={(e) => form.set('startDate', e.target.value)} error={form.errors.startDate} />
           <Input label="Até" type="date" value={v.endDate} onChange={(e) => form.set('endDate', e.target.value)} error={form.errors.endDate} />
@@ -743,4 +868,3 @@ function UnavailabilityForm({ today, onClose }: { today: string; onClose: () => 
     </Modal>
   );
 }
-

@@ -10,7 +10,10 @@ export type NewCheckin = typeof habitCheckins.$inferInsert;
 // ------------------------------------------------------------------ Hábitos
 
 export async function findHabit(db: DbOrTx, userId: string, id: string) {
-  const [h] = await db.select().from(habits).where(and(eq(habits.id, id), eq(habits.userId, userId)));
+  const [h] = await db
+    .select()
+    .from(habits)
+    .where(and(eq(habits.id, id), eq(habits.userId, userId)));
   return h ?? null;
 }
 
@@ -33,7 +36,10 @@ export function listCurrentHabits(db: DbOrTx, userId: string) {
 }
 
 export function listArchivedHabits(db: DbOrTx, userId: string) {
-  return db.select().from(habits).where(and(eq(habits.userId, userId), eq(habits.status, 'archived')));
+  return db
+    .select()
+    .from(habits)
+    .where(and(eq(habits.userId, userId), eq(habits.status, 'archived')));
 }
 
 export function listHabits(db: DbOrTx, userId: string) {
@@ -59,7 +65,10 @@ export async function setHabitStreak(tx: DbOrTx, id: string, current: number, be
 }
 
 export async function setHabitOrder(tx: DbOrTx, userId: string, id: string, sortOrder: number): Promise<void> {
-  await tx.update(habits).set({ sortOrder }).where(and(eq(habits.id, id), eq(habits.userId, userId)));
+  await tx
+    .update(habits)
+    .set({ sortOrder })
+    .where(and(eq(habits.id, id), eq(habits.userId, userId)));
 }
 
 export async function deleteHabit(db: DbOrTx, id: string): Promise<void> {
@@ -152,5 +161,8 @@ export async function deleteCheckin(tx: DbOrTx, checkinId: string): Promise<void
 }
 
 export function listNonArchivedHabits(db: DbOrTx, userId: string) {
-  return db.select().from(habits).where(and(eq(habits.userId, userId), ne(habits.status, 'archived')));
+  return db
+    .select()
+    .from(habits)
+    .where(and(eq(habits.userId, userId), ne(habits.status, 'archived')));
 }

@@ -1,13 +1,7 @@
 import type { AreaInput, AssessmentInput, ResourceInput, StudySessionInput, SubjectInput, SubjectMilestoneInput } from '@rpg/contracts';
 import { levelFromXp } from '@rpg/engine';
 import { studyOverviewRows } from '../../persistence/queries/study-overview';
-import {
-  countOwnedSubjects,
-  listAssessments,
-  listStudySessions,
-  listSubjectMilestones,
-  replacePrerequisites,
-} from '../../persistence/repositories/study';
+import { countOwnedSubjects, listAssessments, listStudySessions, listSubjectMilestones, replacePrerequisites } from '../../persistence/repositories/study';
 import { inTransaction, type Db, type DbOrTx } from '../../persistence/unit-of-work';
 import { notFound } from '../../shared/errors';
 import { getActiveConfig } from '../config';
@@ -19,7 +13,12 @@ import { deleteStudySession, ensureSubjectSkill, logAssessment, logStudySession,
 
 // ------------------------------------------------------------------ Cadastros
 
-export const knowledgeAreasCrud = crudService<AreaInput>({ resource: 'knowledgeAreas', entity: 'knowledge_areas', label: 'Área de conhecimento', orderBy: [{ field: 'name' }] });
+export const knowledgeAreasCrud = crudService<AreaInput>({
+  resource: 'knowledgeAreas',
+  entity: 'knowledge_areas',
+  label: 'Área de conhecimento',
+  orderBy: [{ field: 'name' }],
+});
 
 export const subjectsCrud = crudService<SubjectInput>({
   resource: 'studySubjects',

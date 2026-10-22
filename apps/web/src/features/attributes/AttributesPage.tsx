@@ -21,7 +21,10 @@ export function AttributesPage() {
   const radar = useQuery({ queryKey: ['radar', 30], queryFn: () => api.get<RadarData>('/api/stats/attributes/radar?compareDays=30') });
   const history = useQuery({
     queryKey: ['attr-history'],
-    queryFn: () => api.get<{ attributes: Array<{ code: string; name: string; color: string }>; series: SeriesPoint[] }>('/api/stats/attributes/history?granularity=week&days=180'),
+    queryFn: () =>
+      api.get<{ attributes: Array<{ code: string; name: string; color: string }>; series: SeriesPoint[] }>(
+        '/api/stats/attributes/history?granularity=week&days=180',
+      ),
   });
   const [editAttr, setEditAttr] = useState<Attribute | 'new' | null>(null);
   const [editSkill, setEditSkill] = useState<Skill | 'new' | null>(null);
@@ -53,7 +56,11 @@ export function AttributesPage() {
       />
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Radar de atributos" icon="git-branch">
-          <AttributeRadar height={340} compareLabel="Há 30 dias" data={(radar.data?.attributes ?? []).map((a) => ({ code: a.code, name: a.name, level: a.level, previousLevel: a.previousLevel, xp: a.xp }))} />
+          <AttributeRadar
+            height={340}
+            compareLabel="Há 30 dias"
+            data={(radar.data?.attributes ?? []).map((a) => ({ code: a.code, name: a.name, level: a.level, previousLevel: a.previousLevel, xp: a.xp }))}
+          />
         </Panel>
         <Panel title="Evolução (últimas 26 semanas)" icon="trending-up">
           {history.data && (
@@ -72,7 +79,10 @@ export function AttributesPage() {
         {list.map((a) => (
           <article key={a.id} className={cx('panel flex flex-col gap-2', a.archivedAt && 'opacity-60')}>
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-full" style={{ background: `color-mix(in srgb, ${a.color} 18%, transparent)`, color: a.color }}>
+              <span
+                className="grid h-10 w-10 place-items-center rounded-full"
+                style={{ background: `color-mix(in srgb, ${a.color} 18%, transparent)`, color: a.color }}
+              >
                 <Icon name={a.icon} size={20} />
               </span>
               <div className="min-w-0 flex-1">
@@ -106,19 +116,21 @@ export function AttributesPage() {
         </Panel>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
-          {attrs.data!.filter((a) => !a.archivedAt).map((a) => {
-            const roots = skillList.filter((s) => s.attributeId === a.id && !s.parentId);
-            if (roots.length === 0) return null;
-            return (
-              <Panel key={a.id} title={`${a.name} (${a.code})`} icon={a.icon}>
-                <ul className="space-y-3">
-                  {roots.map((r) => (
-                    <SkillNode key={r.id} skill={r} all={skillList} depth={0} onEdit={setEditSkill} />
-                  ))}
-                </ul>
-              </Panel>
-            );
-          })}
+          {attrs
+            .data!.filter((a) => !a.archivedAt)
+            .map((a) => {
+              const roots = skillList.filter((s) => s.attributeId === a.id && !s.parentId);
+              if (roots.length === 0) return null;
+              return (
+                <Panel key={a.id} title={`${a.name} (${a.code})`} icon={a.icon}>
+                  <ul className="space-y-3">
+                    {roots.map((r) => (
+                      <SkillNode key={r.id} skill={r} all={skillList} depth={0} onEdit={setEditSkill} />
+                    ))}
+                  </ul>
+                </Panel>
+              );
+            })}
           {skillList.some((s) => !s.parentId && !attrs.data!.some((a) => a.id === s.attributeId && !a.archivedAt)) && (
             <Panel title="Sem atributo" icon="circle">
               <ul className="space-y-3">
@@ -132,9 +144,13 @@ export function AttributesPage() {
           )}
         </div>
       )}
-      <p className="mt-3 text-xs text-faint">As árvores representam o histórico de progresso dentro do sistema; não atribuem benefícios reais a valores virtuais.</p>
+      <p className="mt-3 text-xs text-faint">
+        As árvores representam o histórico de progresso dentro do sistema; não atribuem benefícios reais a valores virtuais.
+      </p>
       {editAttr && <AttributeForm attr={editAttr === 'new' ? null : editAttr} onClose={() => setEditAttr(null)} />}
-      {editSkill && <SkillForm skill={editSkill === 'new' ? null : editSkill} attrs={attrs.data!} skills={skills.data ?? []} onClose={() => setEditSkill(null)} />}
+      {editSkill && (
+        <SkillForm skill={editSkill === 'new' ? null : editSkill} attrs={attrs.data!} skills={skills.data ?? []} onClose={() => setEditSkill(null)} />
+      )}
     </>
   );
 }
@@ -187,7 +203,10 @@ function ArchiveButton({ path, archived }: { path: string; archived: boolean }) 
 function AttributeForm({ attr, onClose }: { attr: Attribute | null; onClose: () => void }) {
   const toast = useToast();
   const qc = useQueryClient();
-  const form = useForm(attributeInput, (attr ?? { code: '', name: '', description: '', category: 'geral', color: '#c9a84c', icon: 'shield', progressionCriteria: '', sortOrder: 0 }) as AttrInput);
+  const form = useForm(
+    attributeInput,
+    (attr ?? { code: '', name: '', description: '', category: 'geral', color: '#c9a84c', icon: 'shield', progressionCriteria: '', sortOrder: 0 }) as AttrInput,
+  );
   const v = form.values;
   const save = useMutation({
     mutationFn: (d: unknown) => (attr ? api.put(`/api/attributes/${attr.id}`, d) : api.post('/api/attributes', d)),
@@ -210,14 +229,32 @@ function AttributeForm({ attr, onClose }: { attr: Attribute | null; onClose: () 
         }}
       >
         <div className="grid gap-3 sm:grid-cols-3">
-          <Input label="Código" value={v.code} disabled={Boolean(attr)} onChange={(e) => form.set('code', e.target.value.toUpperCase())} error={form.errors.code} hint={attr ? 'Imutável (usado nos pesos).' : '2–8 letras, ex.: CAR'} />
+          <Input
+            label="Código"
+            value={v.code}
+            disabled={Boolean(attr)}
+            onChange={(e) => form.set('code', e.target.value.toUpperCase())}
+            error={form.errors.code}
+            hint={attr ? 'Imutável (usado nos pesos).' : '2–8 letras, ex.: CAR'}
+          />
           <Input className="sm:col-span-2" label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} />
           <Input label="Categoria" value={v.category ?? ''} onChange={(e) => form.set('category', e.target.value)} />
           <Input label="Cor" type="color" className="!h-10 !p-1" value={v.color ?? '#c9a84c'} onChange={(e) => form.set('color', e.target.value)} />
-          <Select label="Ícone" value={v.icon ?? 'shield'} onChange={(e) => form.set('icon', e.target.value)} options={ICON_NAMES.map((n) => ({ value: n, label: n }))} />
+          <Select
+            label="Ícone"
+            value={v.icon ?? 'shield'}
+            onChange={(e) => form.set('icon', e.target.value)}
+            options={ICON_NAMES.map((n) => ({ value: n, label: n }))}
+          />
         </div>
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
-        <Textarea label="Critérios de progressão" value={v.progressionCriteria ?? ''} onChange={(e) => form.set('progressionCriteria', e.target.value)} rows={2} hint="Quais atividades registradas devem alimentar este atributo." />
+        <Textarea
+          label="Critérios de progressão"
+          value={v.progressionCriteria ?? ''}
+          onChange={(e) => form.set('progressionCriteria', e.target.value)}
+          rows={2}
+          hint="Quais atividades registradas devem alimentar este atributo."
+        />
         <Input label="Ordem" type="number" value={v.sortOrder ?? 0} onChange={(e) => form.set('sortOrder', Number(e.target.value))} />
         <FormActions onCancel={onClose} loading={save.isPending} />
       </form>
@@ -231,7 +268,15 @@ function SkillForm({ skill, attrs, skills, onClose }: { skill: Skill | null; att
   const form = useForm(
     skillInput,
     (skill
-      ? { name: skill.name, description: skill.description, attributeId: skill.attributeId, parentId: skill.parentId, icon: skill.icon, unlockLevel: skill.unlockLevel, sortOrder: skill.sortOrder }
+      ? {
+          name: skill.name,
+          description: skill.description,
+          attributeId: skill.attributeId,
+          parentId: skill.parentId,
+          icon: skill.icon,
+          unlockLevel: skill.unlockLevel,
+          sortOrder: skill.sortOrder,
+        }
       : { name: '', description: '', attributeId: null, parentId: null, icon: 'sparkles', unlockLevel: 1, sortOrder: 0 }) as SkillInput,
   );
   const v = form.values;
@@ -258,10 +303,33 @@ function SkillForm({ skill, attrs, skills, onClose }: { skill: Skill | null; att
         <Input label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} />
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Select label="Atributo" value={v.attributeId ?? ''} onChange={(e) => form.set('attributeId', e.target.value || null)} placeholder="Nenhum" options={attrs.filter((a) => !a.archivedAt).map((a) => ({ value: a.id, label: `${a.name} (${a.code})` }))} />
-          <Select label="Habilidade-mãe" value={v.parentId ?? ''} onChange={(e) => form.set('parentId', e.target.value || null)} placeholder="Raiz do ramo" options={skills.filter((s) => s.id !== skill?.id).map((s) => ({ value: s.id, label: s.name }))} />
-          <Select label="Ícone" value={v.icon ?? 'sparkles'} onChange={(e) => form.set('icon', e.target.value)} options={ICON_NAMES.map((n) => ({ value: n, label: n }))} />
-          <Input label="Nível do personagem para o ramo" type="number" min={1} value={v.unlockLevel ?? 1} onChange={(e) => form.set('unlockLevel', Number(e.target.value))} />
+          <Select
+            label="Atributo"
+            value={v.attributeId ?? ''}
+            onChange={(e) => form.set('attributeId', e.target.value || null)}
+            placeholder="Nenhum"
+            options={attrs.filter((a) => !a.archivedAt).map((a) => ({ value: a.id, label: `${a.name} (${a.code})` }))}
+          />
+          <Select
+            label="Habilidade-mãe"
+            value={v.parentId ?? ''}
+            onChange={(e) => form.set('parentId', e.target.value || null)}
+            placeholder="Raiz do ramo"
+            options={skills.filter((s) => s.id !== skill?.id).map((s) => ({ value: s.id, label: s.name }))}
+          />
+          <Select
+            label="Ícone"
+            value={v.icon ?? 'sparkles'}
+            onChange={(e) => form.set('icon', e.target.value)}
+            options={ICON_NAMES.map((n) => ({ value: n, label: n }))}
+          />
+          <Input
+            label="Nível do personagem para o ramo"
+            type="number"
+            min={1}
+            value={v.unlockLevel ?? 1}
+            onChange={(e) => form.set('unlockLevel', Number(e.target.value))}
+          />
         </div>
         {skill && (
           <p className="text-xs text-faint">

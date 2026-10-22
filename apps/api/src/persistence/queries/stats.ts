@@ -43,7 +43,11 @@ const grantsBetween = (userId: string, r: DateRange) =>
 export function xpByPeriod(db: DbOrTx, userId: string, r: DateRange, g: Granularity) {
   const p = bucket(rewardGrants.localDate, g);
   return db
-    .select({ period: p, xp: sql<number>`coalesce(sum(${rewardGrants.xp}),0)::int`, coins: sql<number>`coalesce(sum(greatest(${rewardGrants.coins},0)),0)::int` })
+    .select({
+      period: p,
+      xp: sql<number>`coalesce(sum(${rewardGrants.xp}),0)::int`,
+      coins: sql<number>`coalesce(sum(greatest(${rewardGrants.coins},0)),0)::int`,
+    })
     .from(rewardGrants)
     .where(and(grantsBetween(userId, r), isNull(rewardGrants.reversedAt), isNull(rewardGrants.reversalOf)))
     .groupBy(p);
@@ -252,11 +256,14 @@ export async function coinBalanceBefore(db: DbOrTx, userId: string, date: string
 
 /** Totais por categoria de lançamento de um tipo (ganhos positivos; gastos como valor positivo). */
 export function coinsByCategory(db: DbOrTx, userId: string, r: DateRange, kind: 'earn' | 'spend') {
-  const total = kind === 'earn' ? sql<number>`coalesce(sum(${coinTransactions.amount}),0)::int` : sql<number>`coalesce(-sum(${coinTransactions.amount}),0)::int`;
+  const total =
+    kind === 'earn' ? sql<number>`coalesce(sum(${coinTransactions.amount}),0)::int` : sql<number>`coalesce(-sum(${coinTransactions.amount}),0)::int`;
   return db
     .select({ category: coinTransactions.category, total })
     .from(coinTransactions)
-    .where(and(eq(coinTransactions.userId, userId), eq(coinTransactions.kind, kind), gte(coinTransactions.localDate, r.from), lte(coinTransactions.localDate, r.to)))
+    .where(
+      and(eq(coinTransactions.userId, userId), eq(coinTransactions.kind, kind), gte(coinTransactions.localDate, r.from), lte(coinTransactions.localDate, r.to)),
+    )
     .groupBy(coinTransactions.category);
 }
 
@@ -288,7 +295,14 @@ export function penaltyEffectByType(db: DbOrTx, userId: string, r: DateRange) {
   return db
     .select({ type: penaltyApplications.type, count: sql<number>`count(*)::int`, amount: sql<number>`coalesce(sum(${penaltyApplications.amount}),0)::int` })
     .from(penaltyApplications)
-    .where(and(eq(penaltyApplications.userId, userId), eq(penaltyApplications.status, 'applied'), gte(penaltyApplications.localDate, r.from), lte(penaltyApplications.localDate, r.to)))
+    .where(
+      and(
+        eq(penaltyApplications.userId, userId),
+        eq(penaltyApplications.status, 'applied'),
+        gte(penaltyApplications.localDate, r.from),
+        lte(penaltyApplications.localDate, r.to),
+      ),
+    )
     .groupBy(penaltyApplications.type);
 }
 

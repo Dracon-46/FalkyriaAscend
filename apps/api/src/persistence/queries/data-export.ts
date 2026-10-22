@@ -10,7 +10,10 @@ export async function exportUserData(db: DbOrTx, userId: string) {
   const out: Record<string, unknown[]> = {};
   for (const [name, table] of Object.entries(schema)) {
     if (typeof table !== 'object' || !table || !('userId' in (table as object)) || SKIP.has(name)) continue;
-    out[name] = await db.select().from(table as any).where(eq((table as any).userId, userId));
+    out[name] = await db
+      .select()
+      .from(table as any)
+      .where(eq((table as any).userId, userId));
   }
   out.integrationConnections = (out.integrationConnections ?? []).map((c: any) => ({ ...c, accessTokenEnc: undefined, refreshTokenEnc: undefined }));
   const [user] = await db

@@ -51,7 +51,10 @@ export async function setUnlockGrant(tx: DbOrTx, unlockId: string, grantId: stri
 }
 
 export async function findUnlock(db: DbOrTx, userId: string, unlockId: string) {
-  const [ua] = await db.select().from(userAchievements).where(and(eq(userAchievements.id, unlockId), eq(userAchievements.userId, userId)));
+  const [ua] = await db
+    .select()
+    .from(userAchievements)
+    .where(and(eq(userAchievements.id, unlockId), eq(userAchievements.userId, userId)));
   return ua ?? null;
 }
 

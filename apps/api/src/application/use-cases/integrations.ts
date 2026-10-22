@@ -50,7 +50,15 @@ export async function integrationsOverview(db: DbOrTx, userId: string, env: Env)
   const safe = (p: Provider) => {
     const c = rows.find((r) => r.provider === p);
     return c
-      ? { provider: p, status: c.status, externalAccountId: c.externalAccountId, scopes: c.scopes, lastSyncAt: c.lastSyncAt, lastError: c.lastError, settings: c.settings }
+      ? {
+          provider: p,
+          status: c.status,
+          externalAccountId: c.externalAccountId,
+          scopes: c.scopes,
+          lastSyncAt: c.lastSyncAt,
+          lastError: c.lastError,
+          settings: c.settings,
+        }
       : { provider: p, status: 'disconnected' as const };
   };
   return {
@@ -234,7 +242,8 @@ async function processStravaEvent(db: Db, env: Env, userId: string, eventId: str
     if (ev.object_type === 'athlete' && ev.updates?.authorized === 'false') {
       // Desautorização: remove credenciais; os dados derivados devem ser excluídos (política Strava §7.4).
       await inTransaction(db, async (tx) => {
-        for (const a of await listActivitiesFromSource(tx, userId, 'strava')) if (a.externalId) await removeExternalActivity(tx, userId, 'strava', a.externalId);
+        for (const a of await listActivitiesFromSource(tx, userId, 'strava'))
+          if (a.externalId) await removeExternalActivity(tx, userId, 'strava', a.externalId);
         await updateConnectionOf(tx, userId, 'strava', { status: 'revoked', accessTokenEnc: null, refreshTokenEnc: null });
       });
       return markEvent(db, eventId, 'processed');

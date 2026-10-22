@@ -19,6 +19,6 @@ Este arquivo é a memória do projeto para agentes de IA e vale também para pes
 
 ## Qualidade
 
-- Antes de qualquer push: `npm run typecheck`, `npm run lint:arch` e `npm test`. Para mudanças de interface, rode também `npm run test:e2e`.
+- Antes de qualquer push: `npm run format:check`, `npm run typecheck`, `npm run lint:arch` e `npm test`. Para mudanças de interface, rode também `npm run test:e2e`.
 - Nunca declarar algo como testado sem ter executado os testes.
 - Segredos só no servidor; nada de tokens em logs; nada de dados falsos em produção (demonstração fica separada e identificada).

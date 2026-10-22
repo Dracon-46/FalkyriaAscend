@@ -4,7 +4,20 @@ import { ACTIVITY_CATEGORIES } from '@rpg/engine';
 import { randomToken } from '../../shared/crypto';
 import { badRequest } from '../../shared/errors';
 import { noContent, parse, requireUser } from '../http';
-import { assertWebhookSecret, completeStravaAuthorization, connectWithApiKey, disconnectProvider, importActivities, integrationsOverview, receiveStravaEvent, stateMatches, stravaAuthorization, syncProvider, updateIntegrationSettings, verifyStravaSubscription } from '../../application/use-cases/integrations';
+import {
+  assertWebhookSecret,
+  completeStravaAuthorization,
+  connectWithApiKey,
+  disconnectProvider,
+  importActivities,
+  integrationsOverview,
+  receiveStravaEvent,
+  stateMatches,
+  stravaAuthorization,
+  syncProvider,
+  updateIntegrationSettings,
+  verifyStravaSubscription,
+} from '../../application/use-cases/integrations';
 import type { AppContext } from '../../context';
 
 const STATE_COOKIE = 'rpg_strava_state';
@@ -103,7 +116,10 @@ export async function registerIntegrationRoutes(app: FastifyInstance, ctx: AppCo
 
   app.get('/api/integrations/strava/callback', async (req, reply) => {
     const me = requireUser(req);
-    const q = parse(z.object({ code: z.string().optional(), state: z.string().optional(), scope: z.string().optional(), error: z.string().optional() }), req.query);
+    const q = parse(
+      z.object({ code: z.string().optional(), state: z.string().optional(), scope: z.string().optional(), error: z.string().optional() }),
+      req.query,
+    );
     const expected = req.cookies[STATE_COOKIE];
     reply.clearCookie(STATE_COOKIE, { path: STATE_PATH });
     if (q.error) return reply.redirect('/configuracoes?aba=integracoes&strava=negado');

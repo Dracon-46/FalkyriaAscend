@@ -80,7 +80,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <Icon
                 name={ICON[t.tone]}
                 className="mt-0.5 shrink-0"
-                style={{ color: `var(--${t.tone === 'error' || t.tone === 'penalty' ? 'danger' : t.tone === 'reward' ? 'accent' : t.tone === 'success' ? 'success' : 'info'})` }}
+                style={{
+                  color: `var(--${t.tone === 'error' || t.tone === 'penalty' ? 'danger' : t.tone === 'reward' ? 'accent' : t.tone === 'success' ? 'success' : 'info'})`,
+                }}
               />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-fg">{t.title}</p>
@@ -101,11 +103,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 /** Anúncio de subida de nível. Respeita movimento reduzido (as animações são neutralizadas via CSS). */
 function LevelUpOverlay({ level, onClose }: { level: number; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={`Nível ${level} alcançado`} onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Nível ${level} alcançado`}
+      onClick={onClose}
+    >
       <div className="relative">
         <div
           className="animate-rays pointer-events-none absolute -inset-24 rounded-full opacity-40"
-          style={{ background: 'conic-gradient(from 0deg, transparent 0 20deg, var(--accent) 20deg 24deg, transparent 24deg 60deg, var(--accent) 60deg 64deg, transparent 64deg 120deg, var(--accent) 120deg 124deg, transparent 124deg 200deg, var(--accent) 200deg 204deg, transparent 204deg 280deg, var(--accent) 280deg 284deg, transparent 284deg)', maskImage: 'radial-gradient(circle, black 30%, transparent 70%)' }}
+          style={{
+            background:
+              'conic-gradient(from 0deg, transparent 0 20deg, var(--accent) 20deg 24deg, transparent 24deg 60deg, var(--accent) 60deg 64deg, transparent 64deg 120deg, var(--accent) 120deg 124deg, transparent 124deg 200deg, var(--accent) 200deg 204deg, transparent 204deg 280deg, var(--accent) 280deg 284deg, transparent 284deg)',
+            maskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
+          }}
         />
         <div className="panel animate-levelup relative px-10 py-8 text-center" style={{ boxShadow: 'var(--glow), var(--shadow)' }}>
           <p className="panel-title justify-center">Ascensão</p>

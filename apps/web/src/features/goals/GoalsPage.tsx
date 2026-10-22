@@ -11,7 +11,20 @@ import { CategorySelect, FormActions, useForm } from '../../components/forms';
 import { DifficultyBadge, StatusBadge } from '../../components/ui/domain';
 import { Icon } from '../../components/ui/Icon';
 import { Modal, useConfirm } from '../../components/ui/Modal';
-import { Badge, Button, Checkbox, EmptyState, ErrorState, Input, Loading, PageHeader, Panel, ProgressBar, Select, Textarea } from '../../components/ui/primitives';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  EmptyState,
+  ErrorState,
+  Input,
+  Loading,
+  PageHeader,
+  Panel,
+  ProgressBar,
+  Select,
+  Textarea,
+} from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 
 type GoalInput = z.input<typeof goalInput>;
@@ -162,7 +175,11 @@ function GoalCard({ g, all, onEdit }: { g: Goal; all: Goal[]; onEdit: () => void
               <Checkbox
                 label={
                   <span className={m.doneAt ? 'text-faint line-through' : ''}>
-                    {m.title} <span className="text-xs text-faint">(peso {m.weight}{m.dueDate ? ` · ${fmtDate(m.dueDate)}` : ''})</span>
+                    {m.title}{' '}
+                    <span className="text-xs text-faint">
+                      (peso {m.weight}
+                      {m.dueDate ? ` · ${fmtDate(m.dueDate)}` : ''})
+                    </span>
                   </span>
                 }
                 checked={Boolean(m.doneAt)}
@@ -175,7 +192,8 @@ function GoalCard({ g, all, onEdit }: { g: Goal; all: Goal[]; onEdit: () => void
       )}
       {g.progressMode === 'metric' && (
         <p className="text-sm text-muted">
-          {OBJECTIVE_METRIC_LABELS[g.metric ?? 'manual']}: <span className="num">{fmt(Number(g.metricCurrent ?? 0))}</span> de <span className="num">{fmt(Number(g.metricTarget ?? 0))}</span> {g.unit ?? ''}
+          {OBJECTIVE_METRIC_LABELS[g.metric ?? 'manual']}: <span className="num">{fmt(Number(g.metricCurrent ?? 0))}</span> de{' '}
+          <span className="num">{fmt(Number(g.metricTarget ?? 0))}</span> {g.unit ?? ''}
           {g.metric === 'manual' && ' (atualize editando a meta)'}
         </p>
       )}
@@ -200,7 +218,9 @@ function GoalCard({ g, all, onEdit }: { g: Goal; all: Goal[]; onEdit: () => void
           Só pode ser concluída após: {g.blockedBy.map((b) => b.title).join(', ')}
         </p>
       )}
-      {g.dependsOn.length > 0 && g.blockedBy.length === 0 && <p className="text-xs text-faint">Dependências concluídas: {g.dependsOn.map((d) => all.find((x) => x.id === d)?.title).join(', ')}</p>}
+      {g.dependsOn.length > 0 && g.blockedBy.length === 0 && (
+        <p className="text-xs text-faint">Dependências concluídas: {g.dependsOn.map((d) => all.find((x) => x.id === d)?.title).join(', ')}</p>
+      )}
       {g.status !== 'completed' && (
         <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-3">
           <Button size="sm" variant="ghost" icon="pencil" onClick={onEdit}>
@@ -220,7 +240,11 @@ function GoalCard({ g, all, onEdit }: { g: Goal; all: Goal[]; onEdit: () => void
             variant="ghost"
             icon="x"
             onClick={async () => {
-              const c = await confirm({ title: 'Abandonar meta', message: 'A meta fica no histórico como abandonada (sem penalidade).', confirmLabel: 'Abandonar' });
+              const c = await confirm({
+                title: 'Abandonar meta',
+                message: 'A meta fica no histórico como abandonada (sem penalidade).',
+                confirmLabel: 'Abandonar',
+              });
               if (c.ok) status.mutate('abandoned');
             }}
           >
@@ -231,7 +255,12 @@ function GoalCard({ g, all, onEdit }: { g: Goal; all: Goal[]; onEdit: () => void
             variant="danger"
             icon="trash"
             onClick={async () => {
-              const c = await confirm({ title: 'Excluir meta', message: `Excluir "${g.title}" permanentemente? Missões vinculadas permanecem.`, danger: true, confirmLabel: 'Excluir' });
+              const c = await confirm({
+                title: 'Excluir meta',
+                message: `Excluir "${g.title}" permanentemente? Missões vinculadas permanecem.`,
+                danger: true,
+                confirmLabel: 'Excluir',
+              });
               if (c.ok) remove.mutate();
             }}
           >
@@ -265,7 +294,18 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
         milestones: goal.milestones.map((m) => ({ id: m.id, title: m.title, weight: m.weight, dueDate: m.dueDate, done: Boolean(m.doneAt) })),
         dependsOn: goal.dependsOn,
       }
-    : { title: '', description: '', categoryId: null, priority: 'medium', difficulty: 'hard', startDate: null, deadline: null, progressMode: 'milestones', milestones: [{ title: '', weight: 1, dueDate: null, done: false }], dependsOn: [] };
+    : {
+        title: '',
+        description: '',
+        categoryId: null,
+        priority: 'medium',
+        difficulty: 'hard',
+        startDate: null,
+        deadline: null,
+        progressMode: 'milestones',
+        milestones: [{ title: '', weight: 1, dueDate: null, done: false }],
+        dependsOn: [],
+      };
   const form = useForm(goalInput, initial);
   const v = form.values;
   const save = useMutation({
@@ -281,7 +321,11 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
     },
   });
   const milestones = v.milestones ?? [];
-  const setMs = (i: number, patch: Partial<(typeof milestones)[number]>) => form.set('milestones', milestones.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+  const setMs = (i: number, patch: Partial<(typeof milestones)[number]>) =>
+    form.set(
+      'milestones',
+      milestones.map((m, j) => (j === i ? { ...m, ...patch } : m)),
+    );
   const others = all.filter((g) => g.id !== goal?.id);
   return (
     <Modal open onClose={onClose} title={goal ? 'Editar meta' : 'Nova meta'} size="lg">
@@ -298,12 +342,27 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
         <Input label="Nome" value={v.title} onChange={(e) => form.set('title', e.target.value)} error={form.errors.title} autoFocus />
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <div className="grid gap-3 sm:grid-cols-3">
-          <Select label="Prioridade" value={v.priority ?? 'medium'} onChange={(e) => form.set('priority', e.target.value as GoalInput['priority'])} options={Object.entries(PRIORITY).map(([value, label]) => ({ value, label }))} />
-          <Select label="Dificuldade (recompensa)" value={v.difficulty ?? 'hard'} onChange={(e) => form.set('difficulty', e.target.value as GoalInput['difficulty'])} options={DIFFICULTIES.map((d) => ({ value: d, label: DIFFICULTY_LABELS[d] }))} />
+          <Select
+            label="Prioridade"
+            value={v.priority ?? 'medium'}
+            onChange={(e) => form.set('priority', e.target.value as GoalInput['priority'])}
+            options={Object.entries(PRIORITY).map(([value, label]) => ({ value, label }))}
+          />
+          <Select
+            label="Dificuldade (recompensa)"
+            value={v.difficulty ?? 'hard'}
+            onChange={(e) => form.set('difficulty', e.target.value as GoalInput['difficulty'])}
+            options={DIFFICULTIES.map((d) => ({ value: d, label: DIFFICULTY_LABELS[d] }))}
+          />
           <CategorySelect value={v.categoryId} onChange={(c) => form.set('categoryId', c)} />
           <Input label="Início" type="date" value={v.startDate ?? ''} onChange={(e) => form.set('startDate', e.target.value || null)} />
           <Input label="Prazo" type="date" value={v.deadline ?? ''} onChange={(e) => form.set('deadline', e.target.value || null)} />
-          <Select label="Como medir o progresso" value={v.progressMode ?? 'milestones'} onChange={(e) => form.set('progressMode', e.target.value as GoalInput['progressMode'])} options={Object.entries(MODE).map(([value, label]) => ({ value, label }))} />
+          <Select
+            label="Como medir o progresso"
+            value={v.progressMode ?? 'milestones'}
+            onChange={(e) => form.set('progressMode', e.target.value as GoalInput['progressMode'])}
+            options={Object.entries(MODE).map(([value, label]) => ({ value, label }))}
+          />
         </div>
 
         {v.progressMode === 'milestones' && (
@@ -317,7 +376,17 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
                 <div className="pb-2">
                   <Checkbox label="Feita" checked={m.done ?? false} onChange={(c) => setMs(i, { done: c })} />
                 </div>
-                <Button variant="ghost" icon="trash" aria-label="Remover etapa" onClick={() => form.set('milestones', milestones.filter((_, j) => j !== i))} />
+                <Button
+                  variant="ghost"
+                  icon="trash"
+                  aria-label="Remover etapa"
+                  onClick={() =>
+                    form.set(
+                      'milestones',
+                      milestones.filter((_, j) => j !== i),
+                    )
+                  }
+                />
               </div>
             ))}
             <Button size="sm" icon="plus" onClick={() => form.set('milestones', [...milestones, { title: '', weight: 1, dueDate: null, done: false }])}>
@@ -325,15 +394,44 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
             </Button>
           </fieldset>
         )}
-        {v.progressMode === 'missions' && <p className="text-sm text-muted">Vincule missões a esta meta pelo campo “Meta vinculada” no formulário de cada missão. O progresso é a fração de missões concluídas, ignorando as canceladas.</p>}
+        {v.progressMode === 'missions' && (
+          <p className="text-sm text-muted">
+            Vincule missões a esta meta pelo campo “Meta vinculada” no formulário de cada missão. O progresso é a fração de missões concluídas, ignorando as
+            canceladas.
+          </p>
+        )}
         {v.progressMode === 'metric' && (
           <div className="grid gap-3 sm:grid-cols-4">
-            <Select label="Métrica" value={v.metric ?? 'manual'} onChange={(e) => form.set('metric', e.target.value as GoalInput['metric'])} options={OBJECTIVE_METRIC_VALUES.map((m) => ({ value: m, label: OBJECTIVE_METRIC_LABELS[m] }))} />
-            <Input label="Valor inicial" type="number" value={v.metricStart ?? ''} onChange={(e) => form.set('metricStart', e.target.value === '' ? null : Number(e.target.value))} />
-            <Input label="Alvo" type="number" value={v.metricTarget ?? ''} onChange={(e) => form.set('metricTarget', e.target.value === '' ? null : Number(e.target.value))} />
+            <Select
+              label="Métrica"
+              value={v.metric ?? 'manual'}
+              onChange={(e) => form.set('metric', e.target.value as GoalInput['metric'])}
+              options={OBJECTIVE_METRIC_VALUES.map((m) => ({ value: m, label: OBJECTIVE_METRIC_LABELS[m] }))}
+            />
+            <Input
+              label="Valor inicial"
+              type="number"
+              value={v.metricStart ?? ''}
+              onChange={(e) => form.set('metricStart', e.target.value === '' ? null : Number(e.target.value))}
+            />
+            <Input
+              label="Alvo"
+              type="number"
+              value={v.metricTarget ?? ''}
+              onChange={(e) => form.set('metricTarget', e.target.value === '' ? null : Number(e.target.value))}
+            />
             <Input label="Unidade" value={v.unit ?? ''} onChange={(e) => form.set('unit', e.target.value || null)} />
-            {v.metric === 'manual' && <Input label="Valor atual (manual)" type="number" value={v.metricCurrent ?? ''} onChange={(e) => form.set('metricCurrent', e.target.value === '' ? null : Number(e.target.value))} />}
-            <p className="text-xs text-faint sm:col-span-4">Métricas automáticas (estudo, treino, distância, hábitos) são somadas dos registros entre o início e o prazo da meta.</p>
+            {v.metric === 'manual' && (
+              <Input
+                label="Valor atual (manual)"
+                type="number"
+                value={v.metricCurrent ?? ''}
+                onChange={(e) => form.set('metricCurrent', e.target.value === '' ? null : Number(e.target.value))}
+              />
+            )}
+            <p className="text-xs text-faint sm:col-span-4">
+              Métricas automáticas (estudo, treino, distância, hábitos) são somadas dos registros entre o início e o prazo da meta.
+            </p>
           </div>
         )}
 
@@ -344,7 +442,13 @@ function GoalForm({ goal, all, onClose }: { goal: Goal | null; all: Goal[]; onCl
               {others.map((o) => {
                 const on = (v.dependsOn ?? []).includes(o.id);
                 return (
-                  <button key={o.id} type="button" aria-pressed={on} className={`badge !py-1 ${on ? '!border-accent !text-accent' : ''}`} onClick={() => form.set('dependsOn', on ? (v.dependsOn ?? []).filter((x) => x !== o.id) : [...(v.dependsOn ?? []), o.id])}>
+                  <button
+                    key={o.id}
+                    type="button"
+                    aria-pressed={on}
+                    className={`badge !py-1 ${on ? '!border-accent !text-accent' : ''}`}
+                    onClick={() => form.set('dependsOn', on ? (v.dependsOn ?? []).filter((x) => x !== o.id) : [...(v.dependsOn ?? []), o.id])}
+                  >
                     <Icon name={on ? 'check' : 'plus'} size={12} />
                     {o.title}
                   </button>

@@ -54,9 +54,7 @@ export function distributeByWeights(total: number, weights: AttributeWeights): R
     out[r.k] = Math.floor(r.exact);
     assigned += out[r.k]!;
   }
-  const rest = raw
-    .map((r) => ({ k: r.k, frac: r.exact - Math.floor(r.exact) }))
-    .sort((a, b) => b.frac - a.frac || a.k.localeCompare(b.k));
+  const rest = raw.map((r) => ({ k: r.k, frac: r.exact - Math.floor(r.exact) })).sort((a, b) => b.frac - a.frac || a.k.localeCompare(b.k));
   for (let i = 0; i < total - assigned; i++) {
     const key = rest[i % rest.length]!.k;
     out[key] = (out[key] ?? 0) + 1;
@@ -69,10 +67,7 @@ export function distributeByWeights(total: number, weights: AttributeWeights): R
  * Multiplicador de consistência baseado na taxa de cumprimento de hábitos na janela.
  * `dampening` é a redução ativa vinda de penalidades (ex.: 0.05) — nunca abaixo de 1.0.
  */
-export function consistencyMultiplier(
-  input: { completed: number; scheduled: number; dampening?: number },
-  cfg: GameConfig['consistency'],
-): number {
+export function consistencyMultiplier(input: { completed: number; scheduled: number; dampening?: number }, cfg: GameConfig['consistency']): number {
   if (input.scheduled < cfg.minScheduled) return 1;
   const rate = input.completed / input.scheduled;
   const tier = [...cfg.tiers].sort((a, b) => b.minRate - a.minRate).find((t) => rate >= t.minRate);
@@ -143,9 +138,7 @@ export function computeMissionReward(input: MissionRewardInput, cfg: GameConfig)
   const maxCoins = table.coins * 2;
   const baseXp = Math.min(input.override?.xp ?? table.xp, maxXp);
   const baseCoins = Math.min(input.override?.coins ?? table.coins, maxCoins);
-  const explanation = [
-    `Missão ${DIFFICULTY_LABELS[input.difficulty]}: base ${table.xp} XP / ${table.coins} moedas`,
-  ];
+  const explanation = [`Missão ${DIFFICULTY_LABELS[input.difficulty]}: base ${table.xp} XP / ${table.coins} moedas`];
   if (input.override?.xp != null || input.override?.coins != null) {
     explanation.push(`Recompensa personalizada: ${baseXp} XP / ${baseCoins} moedas (máximo 2× a tabela)`);
   }
@@ -271,10 +264,7 @@ export function computeQuickReward(input: QuickRewardInput, cfg: GameConfig): Re
 }
 
 /** Recompensa fixa (conquistas, marcos, metas). Sem limite diário. */
-export function computeFixedReward(
-  input: { xp: number; coins: number; attributeWeights?: AttributeWeights; label: string },
-  cfg: GameConfig,
-): RewardResult {
+export function computeFixedReward(input: { xp: number; coins: number; attributeWeights?: AttributeWeights; label: string }, cfg: GameConfig): RewardResult {
   return finalize(
     {
       baseXp: Math.max(0, Math.round(input.xp)),

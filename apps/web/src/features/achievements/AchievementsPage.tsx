@@ -10,7 +10,22 @@ import { FormActions, useForm } from '../../components/forms';
 import { RarityBadge, rarityColor } from '../../components/ui/domain';
 import { Icon, ICON_NAMES } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
-import { Button, Checkbox, EmptyState, ErrorState, Input, Loading, PageHeader, Panel, ProgressBar, Segmented, Select, Tabs, Textarea, cx } from '../../components/ui/primitives';
+import {
+  Button,
+  Checkbox,
+  EmptyState,
+  ErrorState,
+  Input,
+  Loading,
+  PageHeader,
+  Panel,
+  ProgressBar,
+  Segmented,
+  Select,
+  Tabs,
+  Textarea,
+  cx,
+} from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 
 type AchInput = z.input<typeof achievementInput>;
@@ -59,7 +74,16 @@ function Collection() {
           </p>
           <ProgressBar value={unlocked / Math.max(1, all.length)} className="mt-1 max-w-sm" label="Conquistas desbloqueadas" />
         </div>
-        <Segmented label="Filtrar" value={filter} onChange={setFilter} options={[{ value: 'all', label: 'Todas' }, { value: 'unlocked', label: 'Desbloqueadas' }, { value: 'locked', label: 'Bloqueadas' }]} />
+        <Segmented
+          label="Filtrar"
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: 'all', label: 'Todas' },
+            { value: 'unlocked', label: 'Desbloqueadas' },
+            { value: 'locked', label: 'Bloqueadas' },
+          ]}
+        />
       </div>
       {categories.length === 0 && (
         <Panel>
@@ -73,10 +97,18 @@ function Collection() {
             {list
               .filter((a) => a.category === cat)
               .map((a) => (
-                <article key={a.id} className={cx('panel flex gap-3', !a.unlockedAt && 'opacity-80')} style={a.unlockedAt ? { borderColor: `color-mix(in srgb, ${rarityColor(a.rarity)} 55%, transparent)` } : undefined}>
+                <article
+                  key={a.id}
+                  className={cx('panel flex gap-3', !a.unlockedAt && 'opacity-80')}
+                  style={a.unlockedAt ? { borderColor: `color-mix(in srgb, ${rarityColor(a.rarity)} 55%, transparent)` } : undefined}
+                >
                   <span
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-full border"
-                    style={{ color: a.unlockedAt ? rarityColor(a.rarity) : 'var(--text-faint)', borderColor: a.unlockedAt ? rarityColor(a.rarity) : 'var(--border)', boxShadow: a.unlockedAt ? 'var(--glow)' : undefined }}
+                    style={{
+                      color: a.unlockedAt ? rarityColor(a.rarity) : 'var(--text-faint)',
+                      borderColor: a.unlockedAt ? rarityColor(a.rarity) : 'var(--border)',
+                      boxShadow: a.unlockedAt ? 'var(--glow)' : undefined,
+                    }}
                   >
                     <Icon name={a.icon} size={22} />
                   </span>
@@ -161,7 +193,10 @@ function Definitions() {
                     <Icon name={d.icon ?? 'trophy'} size={16} />
                     {d.name}
                   </span>
-                  <p className="font-mono text-xs text-faint">{d.key}{d.secret ? ' · secreta' : ''}</p>
+                  <p className="font-mono text-xs text-faint">
+                    {d.key}
+                    {d.secret ? ' · secreta' : ''}
+                  </p>
                 </td>
                 <td className="text-xs">{d.criteria.all.map((c) => `${ACHIEVEMENT_METRIC_LABELS[c.metric]} ≥ ${c.gte}`).join(' e ')}</td>
                 <td>
@@ -189,7 +224,20 @@ function DefinitionForm({ def, items, onClose }: { def: Definition | null; items
   const qc = useQueryClient();
   const form = useForm(
     achievementInput,
-    def ?? { key: '', name: '', description: '', category: 'Consistência', icon: 'trophy', rarity: 'common', criteria: { all: [{ metric: 'missions_completed', gte: 10 }] }, secret: false, rewardXp: 50, rewardCoins: 20, rewardItemId: null, sortOrder: 0 },
+    def ?? {
+      key: '',
+      name: '',
+      description: '',
+      category: 'Consistência',
+      icon: 'trophy',
+      rarity: 'common',
+      criteria: { all: [{ metric: 'missions_completed', gte: 10 }] },
+      secret: false,
+      rewardXp: 50,
+      rewardCoins: 20,
+      rewardItemId: null,
+      sortOrder: 0,
+    },
   );
   const v = form.values;
   const save = useMutation({
@@ -215,14 +263,31 @@ function DefinitionForm({ def, items, onClose }: { def: Definition | null; items
         }}
       >
         <div className="grid gap-3 sm:grid-cols-3">
-          <Input label="Chave" value={v.key} disabled={Boolean(def)} onChange={(e) => form.set('key', e.target.value)} error={form.errors.key} hint="Imutável. Ex.: leitura_50" />
+          <Input
+            label="Chave"
+            value={v.key}
+            disabled={Boolean(def)}
+            onChange={(e) => form.set('key', e.target.value)}
+            error={form.errors.key}
+            hint="Imutável. Ex.: leitura_50"
+          />
           <Input className="sm:col-span-2" label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} />
         </div>
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <div className="grid gap-3 sm:grid-cols-4">
           <Input label="Categoria" value={v.category ?? ''} onChange={(e) => form.set('category', e.target.value)} />
-          <Select label="Ícone" value={v.icon ?? 'trophy'} onChange={(e) => form.set('icon', e.target.value)} options={ICON_NAMES.map((n) => ({ value: n, label: n }))} />
-          <Select label="Raridade" value={v.rarity ?? 'common'} onChange={(e) => form.set('rarity', e.target.value as AchInput['rarity'])} options={RARITIES.map((r) => ({ value: r, label: RARITY_LABELS[r] }))} />
+          <Select
+            label="Ícone"
+            value={v.icon ?? 'trophy'}
+            onChange={(e) => form.set('icon', e.target.value)}
+            options={ICON_NAMES.map((n) => ({ value: n, label: n }))}
+          />
+          <Select
+            label="Raridade"
+            value={v.rarity ?? 'common'}
+            onChange={(e) => form.set('rarity', e.target.value as AchInput['rarity'])}
+            options={RARITIES.map((r) => ({ value: r, label: RARITY_LABELS[r] }))}
+          />
           <div className="flex items-end pb-2">
             <Checkbox label="Secreta" checked={v.secret ?? false} onChange={(c) => form.set('secret', c)} />
           </div>
@@ -231,9 +296,20 @@ function DefinitionForm({ def, items, onClose }: { def: Definition | null; items
           <legend className="field-label">Critérios (todos precisam ser atendidos)</legend>
           {conds.map((c, i) => (
             <div key={i} className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end">
-              <Select label="Métrica" value={c.metric} onChange={(e) => setCond(i, { metric: e.target.value as AchievementMetric })} options={ACHIEVEMENT_METRICS.map((m) => ({ value: m, label: ACHIEVEMENT_METRIC_LABELS[m] }))} />
+              <Select
+                label="Métrica"
+                value={c.metric}
+                onChange={(e) => setCond(i, { metric: e.target.value as AchievementMetric })}
+                options={ACHIEVEMENT_METRICS.map((m) => ({ value: m, label: ACHIEVEMENT_METRIC_LABELS[m] }))}
+              />
               <Input label="Mínimo" type="number" min={0} step="any" value={c.gte} onChange={(e) => setCond(i, { gte: Number(e.target.value) })} />
-              <Button variant="ghost" icon="trash" aria-label="Remover critério" disabled={conds.length === 1} onClick={() => form.set('criteria', { all: conds.filter((_, j) => j !== i) })} />
+              <Button
+                variant="ghost"
+                icon="trash"
+                aria-label="Remover critério"
+                disabled={conds.length === 1}
+                onClick={() => form.set('criteria', { all: conds.filter((_, j) => j !== i) })}
+              />
             </div>
           ))}
           {conds.length < 5 && (
@@ -245,8 +321,20 @@ function DefinitionForm({ def, items, onClose }: { def: Definition | null; items
         </fieldset>
         <div className="grid gap-3 sm:grid-cols-3">
           <Input label="XP de recompensa" type="number" min={0} value={v.rewardXp ?? 0} onChange={(e) => form.set('rewardXp', Number(e.target.value))} />
-          <Input label="Moedas de recompensa" type="number" min={0} value={v.rewardCoins ?? 0} onChange={(e) => form.set('rewardCoins', Number(e.target.value))} />
-          <Select label="Item de recompensa" value={v.rewardItemId ?? ''} onChange={(e) => form.set('rewardItemId', e.target.value || null)} placeholder="Nenhum" options={items.map((i) => ({ value: i.id, label: i.name }))} />
+          <Input
+            label="Moedas de recompensa"
+            type="number"
+            min={0}
+            value={v.rewardCoins ?? 0}
+            onChange={(e) => form.set('rewardCoins', Number(e.target.value))}
+          />
+          <Select
+            label="Item de recompensa"
+            value={v.rewardItemId ?? ''}
+            onChange={(e) => form.set('rewardItemId', e.target.value || null)}
+            placeholder="Nenhum"
+            options={items.map((i) => ({ value: i.id, label: i.name }))}
+          />
         </div>
         <FormActions onCancel={onClose} loading={save.isPending} />
       </form>

@@ -3,15 +3,7 @@
  * Uso: npm run simulate -- [--out ../../docs/simulacoes.md] [--years 10]
  */
 import { writeFileSync } from 'node:fs';
-import {
-  DEFAULT_GAME_CONFIG,
-  DEFAULT_PROFILES,
-  curveTable,
-  formatDuration,
-  simulateProfile,
-  type CurveConfig,
-  type GameConfig,
-} from '../src/index';
+import { DEFAULT_GAME_CONFIG, DEFAULT_PROFILES, curveTable, formatDuration, simulateProfile, type CurveConfig, type GameConfig } from '../src/index';
 
 const args = process.argv.slice(2);
 const outIdx = args.indexOf('--out');
@@ -77,7 +69,9 @@ for (const prof of DEFAULT_PROFILES) {
   const r = simulateProfile(prof, DEFAULT_GAME_CONFIG, { days: 365, penalty: { base: 5, step: 5, max: 20 } });
   const net = r.avgCoinsPerDay - r.avgPenaltyCoinsPerDay;
   const d = (price: number) => (net > 0 ? `${Math.ceil(price / net)} d` : '—');
-  p(`| ${r.label} | ${r.avgCoinsPerDay.toFixed(1)} | ${r.avgPenaltyCoinsPerDay.toFixed(1)} | ${(net * 7).toFixed(0)} | ${d(60)} | ${d(250)} | ${d(1000)} | ${d(3000)} |`);
+  p(
+    `| ${r.label} | ${r.avgCoinsPerDay.toFixed(1)} | ${r.avgPenaltyCoinsPerDay.toFixed(1)} | ${(net * 7).toFixed(0)} | ${d(60)} | ${d(250)} | ${d(1000)} | ${d(3000)} |`,
+  );
 }
 p();
 p('Leitura: “dias para” assume que todo o saldo líquido é poupado para aquele item. Na prática o usuário gasta em itens comuns,');

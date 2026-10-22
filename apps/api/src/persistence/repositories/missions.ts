@@ -22,7 +22,10 @@ export interface MissionFilter {
 // ------------------------------------------------------------------ Leitura
 
 export async function findMission(db: DbOrTx, userId: string, id: string) {
-  const [m] = await db.select().from(missions).where(and(eq(missions.id, id), eq(missions.userId, userId)));
+  const [m] = await db
+    .select()
+    .from(missions)
+    .where(and(eq(missions.id, id), eq(missions.userId, userId)));
   return m ?? null;
 }
 
@@ -81,10 +84,7 @@ export async function activeMissionIdsInCategory(db: DbOrTx, userId: string, cat
 }
 
 export function listMissionsOfGoal(db: DbOrTx, goalId: string) {
-  return db
-    .select({ id: missions.id, title: missions.title, status: missions.status })
-    .from(missions)
-    .where(eq(missions.goalId, goalId));
+  return db.select({ id: missions.id, title: missions.title, status: missions.status }).from(missions).where(eq(missions.goalId, goalId));
 }
 
 /** Últimos desfechos (concluída/falha/expirada) de uma série recorrente, do mais recente ao mais antigo. */
@@ -122,11 +122,7 @@ export function listObjectives(db: DbOrTx, missionId: string) {
 
 export async function listObjectivesOf(db: DbOrTx, missionIds: string[]) {
   if (missionIds.length === 0) return [];
-  return db
-    .select()
-    .from(missionObjectives)
-    .where(inArray(missionObjectives.missionId, missionIds))
-    .orderBy(asc(missionObjectives.sortOrder));
+  return db.select().from(missionObjectives).where(inArray(missionObjectives.missionId, missionIds)).orderBy(asc(missionObjectives.sortOrder));
 }
 
 export async function findObjective(db: DbOrTx, missionId: string, objectiveId: string) {

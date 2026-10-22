@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { COIN_TX_KIND_LABELS, MISSION_STATUS_LABELS, PENALTY_TYPE_LABELS, XP_SOURCE_LABELS, XP_SOURCES, type CoinTxKind, type MissionStatus } from '@rpg/engine';
+import {
+  COIN_TX_KIND_LABELS,
+  MISSION_STATUS_LABELS,
+  PENALTY_TYPE_LABELS,
+  XP_SOURCE_LABELS,
+  XP_SOURCES,
+  type CoinTxKind,
+  type MissionStatus,
+} from '@rpg/engine';
 import { api, qs } from '../../lib/api';
 import { fmt, fmtDate, fmtDateTime, signed } from '../../lib/format';
 import type { Grant, PenaltyApplication } from '../../lib/types';
@@ -38,7 +46,11 @@ export function HistoryPage() {
   const tab = (params.get('aba') as Tab) ?? 'recompensas';
   return (
     <>
-      <PageHeader title="Histórico e auditoria" icon="history" subtitle="Cada ganho, gasto, penalidade, estorno e alteração fica registrado de forma imutável, com origem, data e motivo." />
+      <PageHeader
+        title="Histórico e auditoria"
+        icon="history"
+        subtitle="Cada ganho, gasto, penalidade, estorno e alteração fica registrado de forma imutável, com origem, data e motivo."
+      />
       <Tabs
         value={tab}
         onChange={(t) => setParams({ aba: t }, { replace: true })}
@@ -77,7 +89,14 @@ function Grants() {
   return (
     <Panel>
       <div className="mb-3 flex flex-wrap gap-2">
-        <Select className="!w-48" value={f.source} onChange={(e) => setF({ ...f, source: e.target.value })} placeholder="Todas as origens" options={XP_SOURCES.map((s) => ({ value: s, label: XP_SOURCE_LABELS[s] }))} aria-label="Origem" />
+        <Select
+          className="!w-48"
+          value={f.source}
+          onChange={(e) => setF({ ...f, source: e.target.value })}
+          placeholder="Todas as origens"
+          options={XP_SOURCES.map((s) => ({ value: s, label: XP_SOURCE_LABELS[s] }))}
+          aria-label="Origem"
+        />
         <Input className="!w-40" type="date" value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} aria-label="De" />
         <Input className="!w-40" type="date" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} aria-label="Até" />
       </div>
@@ -97,7 +116,11 @@ function Grants() {
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {g.title}
                     {g.reversedAt && <Badge className="ml-2">estornada</Badge>}
-                    {g.reversalOf && <Badge tone="warning" className="ml-2">estorno</Badge>}
+                    {g.reversalOf && (
+                      <Badge tone="warning" className="ml-2">
+                        estorno
+                      </Badge>
+                    )}
                   </span>
                   <span className="text-xs text-faint">{XP_SOURCE_LABELS[g.xpSource]}</span>
                   <span className={`num w-20 text-right text-sm ${g.xp < 0 ? 'text-danger' : 'text-accent'}`}>{signed(g.xp)} XP</span>
@@ -111,7 +134,9 @@ function Grants() {
                       <li key={i}>• {e}</li>
                     ))}
                   </ul>
-                  {(g.attributes?.length ?? 0) > 0 && <p className="text-xs">Atributos: {g.attributes!.map((a) => `${a.code} ${signed(a.amount)}`).join(' · ')}</p>}
+                  {(g.attributes?.length ?? 0) > 0 && (
+                    <p className="text-xs">Atributos: {g.attributes!.map((a) => `${a.code} ${signed(a.amount)}`).join(' · ')}</p>
+                  )}
                   {(g.skills?.length ?? 0) > 0 && <p className="text-xs">Maestria: {g.skills!.map((s) => `${s.name} ${signed(s.amount)}`).join(' · ')}</p>}
                   <p className="text-xs text-faint">
                     Regras v{g.configVersion} · {fmtDateTime(g.createdAt)} · chave {g.idempotencyKey}
@@ -121,7 +146,12 @@ function Grants() {
                       size="sm"
                       icon="undo"
                       onClick={async () => {
-                        const c = await confirm({ title: 'Estornar recompensa', message: `Criar um estorno de ${signed(-g.xp)} XP e ${signed(-g.coins)} moedas? O registro original permanece.`, requireReason: true, confirmLabel: 'Estornar' });
+                        const c = await confirm({
+                          title: 'Estornar recompensa',
+                          message: `Criar um estorno de ${signed(-g.xp)} XP e ${signed(-g.coins)} moedas? O registro original permanece.`,
+                          requireReason: true,
+                          confirmLabel: 'Estornar',
+                        });
                         if (c.ok) reverse.mutate({ id: g.id, reason: c.reason });
                       }}
                     >
@@ -176,7 +206,9 @@ function Coins() {
                 <tr key={t.id}>
                   <td className="whitespace-nowrap">{fmtDateTime(t.createdAt)}</td>
                   <td>
-                    <Badge tone={t.kind === 'earn' ? 'success' : t.kind === 'penalty' ? 'danger' : t.kind === 'spend' ? 'info' : 'warning'}>{COIN_TX_KIND_LABELS[t.kind]}</Badge>
+                    <Badge tone={t.kind === 'earn' ? 'success' : t.kind === 'penalty' ? 'danger' : t.kind === 'spend' ? 'info' : 'warning'}>
+                      {COIN_TX_KIND_LABELS[t.kind]}
+                    </Badge>
                   </td>
                   <td className="max-w-md">
                     {t.reason}
@@ -250,7 +282,12 @@ function Penalties() {
                   className="mt-2"
                   icon="rotate-ccw"
                   onClick={async () => {
-                    const c = await confirm({ title: 'Reverter penalidade', message: 'Os efeitos (moedas, XP de habilidade) serão devolvidos por lançamento de estorno.', requireReason: true, confirmLabel: 'Reverter' });
+                    const c = await confirm({
+                      title: 'Reverter penalidade',
+                      message: 'Os efeitos (moedas, XP de habilidade) serão devolvidos por lançamento de estorno.',
+                      requireReason: true,
+                      confirmLabel: 'Reverter',
+                    });
                     if (c.ok) revert.mutate({ id: p.id, reason: c.reason });
                   }}
                 >

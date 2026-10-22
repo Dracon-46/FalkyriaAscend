@@ -1,6 +1,6 @@
 name: Bug
 description: Algo não funciona como deveria.
-title: "fix: "
+title: 'fix: '
 labels: [bug, triagem]
 body:
   - type: textarea
@@ -37,7 +37,7 @@ body:
     id: ambiente
     attributes:
       label: Ambiente
-      placeholder: "ex.: v0.1.0, Chrome 140, Android"
+      placeholder: 'ex.: v0.1.0, Chrome 140, Android'
   - type: checkboxes
     id: dados
     attributes:

@@ -46,7 +46,12 @@ export async function inventoryView(db: DbOrTx, userId: string) {
 }
 
 /** Caso de uso: ação sobre um item do inventário, com auditoria. */
-export function useInventoryItem(db: Db, userId: string, inventoryId: string, input: { action: 'equip' | 'unequip' | 'consume' | 'redeem'; note?: string | null }) {
+export function useInventoryItem(
+  db: Db,
+  userId: string,
+  inventoryId: string,
+  input: { action: 'equip' | 'unequip' | 'consume' | 'redeem'; note?: string | null },
+) {
   return inTransaction(db, async (tx) => {
     const r = await inventoryAction(tx, userId, inventoryId, input.action, input.note);
     await audit(tx, { actorId: userId, userId, action: `inventory.${input.action}`, entityType: 'inventory_items', entityId: inventoryId, after: r });

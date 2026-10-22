@@ -2,7 +2,24 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { adjustmentInput, registerInput, reversalInput } from '@rpg/contracts';
 import { noContent, parse, requireAdmin } from '../http';
-import { adjustProgress, adminCatalog, createResourceRow, createUserAsAdmin, deleteResourceRowAsAdmin, evaluateNow, getResourceRow, integrityReport, listAllUsers, listResource, rebuildUserProjections, resetPassword, reverseCoinTransaction, reverseGrantAsAdmin, revokeAchievement, updateResourceRowAsAdmin } from '../../application/use-cases/admin';
+import {
+  adjustProgress,
+  adminCatalog,
+  createResourceRow,
+  createUserAsAdmin,
+  deleteResourceRowAsAdmin,
+  evaluateNow,
+  getResourceRow,
+  integrityReport,
+  listAllUsers,
+  listResource,
+  rebuildUserProjections,
+  resetPassword,
+  reverseCoinTransaction,
+  reverseGrantAsAdmin,
+  revokeAchievement,
+  updateResourceRowAsAdmin,
+} from '../../application/use-cases/admin';
 import type { AppContext } from '../../context';
 
 const listQuery = z.object({

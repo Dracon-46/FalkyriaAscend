@@ -10,7 +10,10 @@ export function coinLedgerInOrder(db: DbOrTx, userId: string) {
 
 /** Soma de XP de todas as recompensas (estornos incluídos, que já são negativos). */
 export async function totalGrantedXp(db: DbOrTx, userId: string): Promise<number> {
-  const [xp] = await db.select({ total: sql<number>`coalesce(sum(${rewardGrants.xp}),0)::int` }).from(rewardGrants).where(eq(rewardGrants.userId, userId));
+  const [xp] = await db
+    .select({ total: sql<number>`coalesce(sum(${rewardGrants.xp}),0)::int` })
+    .from(rewardGrants)
+    .where(eq(rewardGrants.userId, userId));
   return xp?.total ?? 0;
 }
 

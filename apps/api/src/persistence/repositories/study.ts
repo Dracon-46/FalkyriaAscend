@@ -8,13 +8,19 @@ type RecordSource = (typeof studySessions.$inferSelect)['source'];
 // ------------------------------------------------------------------ Disciplinas
 
 export async function findSubject(db: DbOrTx, userId: string, id: string) {
-  const [s] = await db.select().from(studySubjects).where(and(eq(studySubjects.id, id), eq(studySubjects.userId, userId)));
+  const [s] = await db
+    .select()
+    .from(studySubjects)
+    .where(and(eq(studySubjects.id, id), eq(studySubjects.userId, userId)));
   return s ?? null;
 }
 
 export async function countOwnedSubjects(db: DbOrTx, userId: string, ids: string[]): Promise<number> {
   if (ids.length === 0) return 0;
-  const rows = await db.select({ id: studySubjects.id }).from(studySubjects).where(and(eq(studySubjects.userId, userId), inArray(studySubjects.id, ids)));
+  const rows = await db
+    .select({ id: studySubjects.id })
+    .from(studySubjects)
+    .where(and(eq(studySubjects.userId, userId), inArray(studySubjects.id, ids)));
   return rows.length;
 }
 
@@ -25,7 +31,10 @@ export async function replacePrerequisites(tx: DbOrTx, userId: string, subjectId
 
 /** Habilidade com o nome dado (o ramo "Conhecimento" ou a maestria de uma disciplina). */
 export async function findSkillByName(db: DbOrTx, userId: string, name: string) {
-  const [s] = await db.select().from(skills).where(and(eq(skills.userId, userId), eq(skills.name, name)));
+  const [s] = await db
+    .select()
+    .from(skills)
+    .where(and(eq(skills.userId, userId), eq(skills.name, name)));
   return s ?? null;
 }
 
@@ -37,7 +46,10 @@ export async function insertSkill(tx: DbOrTx, values: typeof skills.$inferInsert
 // ------------------------------------------------------------------ Recursos
 
 export async function findResource(db: DbOrTx, userId: string, id: string) {
-  const [r] = await db.select().from(studyResources).where(and(eq(studyResources.id, id), eq(studyResources.userId, userId)));
+  const [r] = await db
+    .select()
+    .from(studyResources)
+    .where(and(eq(studyResources.id, id), eq(studyResources.userId, userId)));
   return r ?? null;
 }
 
@@ -91,7 +103,10 @@ export async function setSessionGrant(tx: DbOrTx, sessionId: string, grantId: st
 }
 
 export async function findStudySession(db: DbOrTx, userId: string, id: string) {
-  const [s] = await db.select().from(studySessions).where(and(eq(studySessions.id, id), eq(studySessions.userId, userId)));
+  const [s] = await db
+    .select()
+    .from(studySessions)
+    .where(and(eq(studySessions.id, id), eq(studySessions.userId, userId)));
   return s ?? null;
 }
 

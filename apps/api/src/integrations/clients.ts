@@ -13,7 +13,8 @@ async function request<T>(url: string, init: RequestInit & { label: string }): P
   try {
     const res = await fetch(url, { ...init, signal: controller.signal });
     if (res.status === 429) throw new AppError(429, 'rate_limited', `${init.label}: limite de requisições atingido. Tente mais tarde.`);
-    if (res.status === 401 || res.status === 403) throw new AppError(502, 'integration_auth', `${init.label}: credencial recusada (${res.status}). Reconecte a integração.`);
+    if (res.status === 401 || res.status === 403)
+      throw new AppError(502, 'integration_auth', `${init.label}: credencial recusada (${res.status}). Reconecte a integração.`);
     if (!res.ok) throw new AppError(502, 'integration_error', `${init.label}: resposta ${res.status}.`);
     if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
@@ -41,7 +42,14 @@ export const STRAVA_REVOKE_URL = 'https://www.strava.com/oauth/revoke';
 export const STRAVA_SCOPES = 'read,activity:read_all';
 
 export function stravaAuthorizeUrl(clientId: string, redirectUri: string, state: string) {
-  const p = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', approval_prompt: 'auto', scope: STRAVA_SCOPES, state });
+  const p = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    approval_prompt: 'auto',
+    scope: STRAVA_SCOPES,
+    state,
+  });
   return `${STRAVA_AUTHORIZE_URL}?${p.toString()}`;
 }
 
@@ -74,7 +82,10 @@ export function stravaRevoke(clientId: string, clientSecret: string, token: stri
 }
 
 export function stravaGetActivity(base: string, accessToken: string, id: string) {
-  return request<StravaActivityPayload>(`${base}/activities/${encodeURIComponent(id)}`, { label: 'Strava', headers: { authorization: `Bearer ${accessToken}` } });
+  return request<StravaActivityPayload>(`${base}/activities/${encodeURIComponent(id)}`, {
+    label: 'Strava',
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
 }
 
 export function stravaListActivities(base: string, accessToken: string, afterEpoch: number, page: number) {

@@ -1,15 +1,4 @@
-import type {
-  CheckinStatus,
-  Difficulty,
-  HabitFrequency,
-  ItemKind,
-  LevelState,
-  MissionStatus,
-  MissionType,
-  PenaltyType,
-  Rarity,
-  XpSource,
-} from '@rpg/engine';
+import type { CheckinStatus, Difficulty, HabitFrequency, ItemKind, LevelState, MissionStatus, MissionType, PenaltyType, Rarity, XpSource } from '@rpg/engine';
 
 /** Tipos das respostas da API usados pela interface. */
 
@@ -52,7 +41,16 @@ export interface CharacterSummary {
 }
 
 export interface Me {
-  user: { id: string; email: string; displayName: string; role: 'admin' | 'user'; characterClass: string | null; bio: string | null; isDemo: boolean; createdAt: string };
+  user: {
+    id: string;
+    email: string;
+    displayName: string;
+    role: 'admin' | 'user';
+    characterClass: string | null;
+    bio: string | null;
+    isDemo: boolean;
+    createdAt: string;
+  };
   settings: Settings;
   today: string;
   character: CharacterSummary;
@@ -325,7 +323,18 @@ export interface SeriesPoint {
 
 export interface RadarData {
   compareDate: string;
-  attributes: Array<{ id: string; code: string; name: string; color: string; xp: number; level: number; progress: number; xpToNext: number; previousXp: number; previousLevel: number }>;
+  attributes: Array<{
+    id: string;
+    code: string;
+    name: string;
+    color: string;
+    xp: number;
+    level: number;
+    progress: number;
+    xpToNext: number;
+    previousXp: number;
+    previousLevel: number;
+  }>;
 }
 
 export interface Dashboard {
@@ -341,7 +350,15 @@ export interface Dashboard {
   habitsToday: Habit[];
   streaks: Array<{ id: string; title: string; current: number; best: number; frequency: string }>;
   recent: Grant[];
-  nextAchievements: Array<{ id: string; name: string; description: string; icon: string; rarity: Rarity; progress: number; conditions: AchievementView['conditions'] }>;
+  nextAchievements: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    rarity: Rarity;
+    progress: number;
+    conditions: AchievementView['conditions'];
+  }>;
   weeklyXp: SeriesPoint[];
   dailySeries: SeriesPoint[];
   projection: { assumption: string; daysToNextLevel: number | null };

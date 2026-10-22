@@ -45,7 +45,12 @@ const PAGE = 25;
 /** Ações auditadas específicas do livro-razão (nunca edição direta). */
 const LEDGER_ACTIONS: Record<string, { label: string; icon: string; url: (id: string) => string; danger?: boolean; when?: (r: Row) => boolean }> = {
   reward_grants: { label: 'Estornar', icon: 'undo', url: (id) => `/api/admin/grants/${id}/reverse`, when: (r) => !r.reversedAt && !r.reversalOf },
-  coin_transactions: { label: 'Estornar', icon: 'undo', url: (id) => `/api/admin/coins/${id}/reverse`, when: (r) => r.kind !== 'reversal' && !r.grantId && !r.purchaseId && !r.penaltyId },
+  coin_transactions: {
+    label: 'Estornar',
+    icon: 'undo',
+    url: (id) => `/api/admin/coins/${id}/reverse`,
+    when: (r) => r.kind !== 'reversal' && !r.grantId && !r.purchaseId && !r.penaltyId,
+  },
   penalty_applications: { label: 'Reverter', icon: 'rotate-ccw', url: (id) => `/api/history/penalties/${id}/revert`, when: (r) => r.status === 'applied' },
   purchases: { label: 'Reembolsar', icon: 'rotate-ccw', url: (id) => `/api/purchases/${id}/refund`, when: (r) => r.status === 'completed' },
   user_achievements: { label: 'Revogar', icon: 'x', url: (id) => `/api/admin/user-achievements/${id}/revoke`, danger: true },
@@ -93,13 +98,18 @@ export function AdminPage() {
           label="Usuário gerenciado"
           className="!w-72"
           value={targetUser}
-          onChange={(e) => setParams((p) => {
-            const n = new URLSearchParams(p);
-            if (e.target.value === me.user.id) n.delete('usuario');
-            else n.set('usuario', e.target.value);
-            return n;
-          })}
-          options={(users.data ?? []).map((u) => ({ value: u.id, label: `${u.displayName} — ${u.email}${u.isDemo ? ' (demo)' : ''}${u.id === me.user.id ? ' (você)' : ''}` }))}
+          onChange={(e) =>
+            setParams((p) => {
+              const n = new URLSearchParams(p);
+              if (e.target.value === me.user.id) n.delete('usuario');
+              else n.set('usuario', e.target.value);
+              return n;
+            })
+          }
+          options={(users.data ?? []).map((u) => ({
+            value: u.id,
+            label: `${u.displayName} — ${u.email}${u.isDemo ? ' (demo)' : ''}${u.id === me.user.id ? ' (você)' : ''}`,
+          }))}
         />
         <AdminTools userId={targetUser} isSelf={targetUser === me.user.id} />
       </div>
@@ -116,7 +126,10 @@ export function AdminPage() {
                     <li key={r.key}>
                       <Link
                         to={`/admin/${r.key}${targetUser !== me.user.id ? `?usuario=${targetUser}` : ''}`}
-                        className={cx('flex items-center justify-between gap-2 rounded-[var(--radius-sm)] px-2 py-1 text-sm', r.key === resource ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-surface-hover hover:text-fg')}
+                        className={cx(
+                          'flex items-center justify-between gap-2 rounded-[var(--radius-sm)] px-2 py-1 text-sm',
+                          r.key === resource ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-surface-hover hover:text-fg',
+                        )}
                       >
                         <span className="truncate">{r.label}</span>
                         {r.mode === 'readonly' && <Icon name="lock" size={12} className="shrink-0 text-faint" />}
@@ -149,13 +162,17 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
   const confirm = useConfirm();
   const qc = useQueryClient();
   const [q, setQ] = useState('');
-  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: meta.fields.some((f) => f.key === 'createdAt') ? 'createdAt' : meta.fields[0]!.key, dir: 'desc' });
+  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' }>({
+    key: meta.fields.some((f) => f.key === 'createdAt') ? 'createdAt' : meta.fields[0]!.key,
+    dir: 'desc',
+  });
   const [offset, setOffset] = useState(0);
   const [editing, setEditing] = useState<Row | 'new' | null>(null);
   const userQs = { userId };
   const list = useQuery({
     queryKey: ['admin', meta.key, userId, q, sort, offset],
-    queryFn: () => api.get<{ total: number; rows: Row[] }>(`/api/admin/r/${meta.key}${qs({ ...userQs, q, sort: sort.key, dir: sort.dir, limit: PAGE, offset })}`),
+    queryFn: () =>
+      api.get<{ total: number; rows: Row[] }>(`/api/admin/r/${meta.key}${qs({ ...userQs, q, sort: sort.key, dir: sort.dir, limit: PAGE, offset })}`),
   });
   const columns = useMemo(() => {
     const pref = [meta.display, 'title', 'name', 'status', 'type', 'kind', 'amount', 'xp', 'coins', 'localDate', 'level', 'createdAt'];
@@ -180,7 +197,8 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
     onError: (e) => toast.error(e),
   });
   const archive = useMutation({
-    mutationFn: ({ id, on }: { id: string; on: boolean }) => api.put(`/api/admin/r/${meta.key}/${id}${qs(userQs)}`, { archivedAt: on ? new Date().toISOString() : null }),
+    mutationFn: ({ id, on }: { id: string; on: boolean }) =>
+      api.put(`/api/admin/r/${meta.key}/${id}${qs(userQs)}`, { archivedAt: on ? new Date().toISOString() : null }),
     onSuccess: () => invalidate(),
     onError: (e) => toast.error(e),
   });
@@ -268,7 +286,13 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
                     ))}
                     <td className="text-right whitespace-nowrap">
                       {r.id !== undefined && (
-                        <Button size="sm" variant="ghost" icon={meta.mode === 'crud' ? 'pencil' : 'eye'} aria-label={meta.mode === 'crud' ? 'Editar' : 'Ver'} onClick={() => setEditing(r)} />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          icon={meta.mode === 'crud' ? 'pencil' : 'eye'}
+                          aria-label={meta.mode === 'crud' ? 'Editar' : 'Ver'}
+                          onClick={() => setEditing(r)}
+                        />
                       )}
                       {meta.archivable && meta.mode === 'crud' && (
                         <Button
@@ -286,7 +310,13 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
                           variant={ledger.danger ? 'danger' : 'secondary'}
                           icon={ledger.icon}
                           onClick={async () => {
-                            const c = await confirm({ title: ledger.label, message: 'Um lançamento compensatório será criado. O registro original permanece no histórico.', requireReason: true, confirmLabel: ledger.label, danger: ledger.danger });
+                            const c = await confirm({
+                              title: ledger.label,
+                              message: 'Um lançamento compensatório será criado. O registro original permanece no histórico.',
+                              requireReason: true,
+                              confirmLabel: ledger.label,
+                              danger: ledger.danger,
+                            });
                             if (c.ok) ledgerAction.mutate({ id, reason: c.reason });
                           }}
                         >
@@ -301,7 +331,12 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
                           icon="trash"
                           aria-label="Excluir"
                           onClick={async () => {
-                            const c = await confirm({ title: 'Excluir registro', message: `Excluir permanentemente "${display(r[meta.display])}"? Registros com histórico vinculado não podem ser excluídos — arquive-os.`, danger: true, confirmLabel: 'Excluir' });
+                            const c = await confirm({
+                              title: 'Excluir registro',
+                              message: `Excluir permanentemente "${display(r[meta.display])}"? Registros com histórico vinculado não podem ser excluídos — arquive-os.`,
+                              danger: true,
+                              confirmLabel: 'Excluir',
+                            });
                             if (c.ok) remove.mutate(id);
                           }}
                         />
@@ -327,7 +362,9 @@ function ResourceView({ meta, all, userId }: { meta: ResourceMeta; all: Resource
           </Button>
         </div>
       )}
-      {editing && <RecordForm meta={meta} all={all} userId={userId} row={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onSaved={invalidate} />}
+      {editing && (
+        <RecordForm meta={meta} all={all} userId={userId} row={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onSaved={invalidate} />
+      )}
     </Panel>
   );
 }
@@ -343,7 +380,21 @@ function toInput(f: FieldMeta, v: unknown): string {
 }
 
 /** Formulário gerado a partir dos metadados das colunas (fonte única: o schema do banco). */
-function RecordForm({ meta, all, userId, row, onClose, onSaved }: { meta: ResourceMeta; all: ResourceMeta[]; userId: string; row: Row | null; onClose: () => void; onSaved: () => void }) {
+function RecordForm({
+  meta,
+  all,
+  userId,
+  row,
+  onClose,
+  onSaved,
+}: {
+  meta: ResourceMeta;
+  all: ResourceMeta[];
+  userId: string;
+  row: Row | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const toast = useToast();
   const readonlyView = meta.mode === 'readonly';
   const [values, setValues] = useState<Record<string, string | boolean>>(() =>
@@ -425,7 +476,9 @@ function RecordForm({ meta, all, userId, row, onClose, onSaved }: { meta: Resour
             {fixed.map((f) => (
               <div key={f.key} className="min-w-0">
                 <dt className="text-xs text-faint">{f.label}</dt>
-                <dd className="font-mono text-xs break-all whitespace-pre-wrap">{f.type === 'json' ? toInput(f, row?.[f.key]) || '—' : display(row?.[f.key], f)}</dd>
+                <dd className="font-mono text-xs break-all whitespace-pre-wrap">
+                  {f.type === 'json' ? toInput(f, row?.[f.key]) || '—' : display(row?.[f.key], f)}
+                </dd>
               </div>
             ))}
           </dl>
@@ -453,7 +506,19 @@ function RefOptions({ refKey, all, userId }: { refKey: string; all: ResourceMeta
   );
 }
 
-function FieldInput({ f, all, userId, value, onChange }: { f: FieldMeta; all: ResourceMeta[]; userId: string; value: string | boolean; onChange: (v: string | boolean) => void }) {
+function FieldInput({
+  f,
+  all,
+  userId,
+  value,
+  onChange,
+}: {
+  f: FieldMeta;
+  all: ResourceMeta[];
+  userId: string;
+  value: string | boolean;
+  onChange: (v: string | boolean) => void;
+}) {
   const label = `${f.label}${f.required ? ' *' : ''}`;
   switch (f.type) {
     case 'boolean':
@@ -463,7 +528,15 @@ function FieldInput({ f, all, userId, value, onChange }: { f: FieldMeta; all: Re
         </div>
       );
     case 'enum':
-      return <Select label={label} value={String(value)} onChange={(e) => onChange(e.target.value)} placeholder={f.required ? undefined : '—'} options={(f.enumValues ?? []).map((v) => ({ value: v, label: v }))} />;
+      return (
+        <Select
+          label={label}
+          value={String(value)}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={f.required ? undefined : '—'}
+          options={(f.enumValues ?? []).map((v) => ({ value: v, label: v }))}
+        />
+      );
     case 'ref':
       return (
         <div>
@@ -479,7 +552,14 @@ function FieldInput({ f, all, userId, value, onChange }: { f: FieldMeta; all: Re
     case 'json':
       return (
         <div className="sm:col-span-2">
-          <Textarea label={`${label} (JSON)`} value={String(value)} onChange={(e) => onChange(e.target.value)} rows={5} className="font-mono text-xs" spellCheck={false} />
+          <Textarea
+            label={`${label} (JSON)`}
+            value={String(value)}
+            onChange={(e) => onChange(e.target.value)}
+            rows={5}
+            className="font-mono text-xs"
+            spellCheck={false}
+          />
         </div>
       );
     case 'int':
@@ -510,7 +590,17 @@ function ResetPassword({ userId }: { userId: string }) {
   return (
     <>
       <Button size="sm" variant="ghost" icon="lock" aria-label="Redefinir senha" title="Redefinir senha" onClick={() => setOpen(true)} />
-      <Modal open={open} onClose={() => setOpen(false)} title="Redefinir senha" size="sm" footer={<Button variant="primary" disabled={pw.length < 10} loading={m.isPending} onClick={() => m.mutate()}>Redefinir</Button>}>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Redefinir senha"
+        size="sm"
+        footer={
+          <Button variant="primary" disabled={pw.length < 10} loading={m.isPending} onClick={() => m.mutate()}>
+            Redefinir
+          </Button>
+        }
+      >
         <Input label="Nova senha (mín. 10 caracteres)" type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />
       </Modal>
     </>
@@ -659,12 +749,36 @@ function NewUserForm({ onClose }: { onClose: () => void }) {
     onError: (e) => toast.error(e),
   });
   return (
-    <Modal open onClose={onClose} title="Novo usuário" size="sm" footer={<Button variant="primary" loading={m.isPending} onClick={() => m.mutate()}>Criar</Button>}>
+    <Modal
+      open
+      onClose={onClose}
+      title="Novo usuário"
+      size="sm"
+      footer={
+        <Button variant="primary" loading={m.isPending} onClick={() => m.mutate()}>
+          Criar
+        </Button>
+      }
+    >
       <div className="space-y-3">
         <Input label="Nome" value={v.displayName} onChange={(e) => setV({ ...v, displayName: e.target.value })} />
         <Input label="E-mail" type="email" value={v.email} onChange={(e) => setV({ ...v, email: e.target.value })} />
-        <Input label="Senha inicial (mín. 10)" type="password" value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} autoComplete="new-password" />
-        <Select label="Papel" value={v.role} onChange={(e) => setV({ ...v, role: e.target.value })} options={[{ value: 'user', label: 'Usuário' }, { value: 'admin', label: 'Administrador' }]} />
+        <Input
+          label="Senha inicial (mín. 10)"
+          type="password"
+          value={v.password}
+          onChange={(e) => setV({ ...v, password: e.target.value })}
+          autoComplete="new-password"
+        />
+        <Select
+          label="Papel"
+          value={v.role}
+          onChange={(e) => setV({ ...v, role: e.target.value })}
+          options={[
+            { value: 'user', label: 'Usuário' },
+            { value: 'admin', label: 'Administrador' },
+          ]}
+        />
       </div>
     </Modal>
   );

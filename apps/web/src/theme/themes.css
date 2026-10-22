@@ -50,8 +50,7 @@
   --panel-bg: linear-gradient(180deg, rgb(255 236 190 / 0.035), transparent 40%), var(--surface);
   --page-bg:
     radial-gradient(1200px 600px at 15% -10%, rgb(158 43 37 / calc(0.12 * var(--fx))), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgb(201 168 76 / calc(0.08 * var(--fx))), transparent 60%),
-    var(--bg);
+    radial-gradient(900px 500px at 90% 0%, rgb(201 168 76 / calc(0.08 * var(--fx))), transparent 60%), var(--bg);
   --ornament: var(--accent);
 
   --chart-1: #c9a84c;
@@ -110,8 +109,7 @@
   --panel-bg: linear-gradient(180deg, rgb(91 42 110 / calc(0.1 * var(--fx))), transparent 55%), var(--surface);
   --page-bg:
     radial-gradient(900px 500px at 50% -20%, rgb(91 42 110 / calc(0.22 * var(--fx))), transparent 65%),
-    radial-gradient(700px 400px at 100% 100%, rgb(143 29 51 / calc(0.1 * var(--fx))), transparent 60%),
-    var(--bg);
+    radial-gradient(700px 400px at 100% 100%, rgb(143 29 51 / calc(0.1 * var(--fx))), transparent 60%), var(--bg);
   --ornament: var(--accent);
 
   --chart-1: #c9c4d6;
@@ -169,9 +167,16 @@
 
   --panel-bg: linear-gradient(180deg, rgb(255 255 255 / 0.9), rgb(255 253 248 / 1));
   --page-bg:
-    conic-gradient(from 180deg at 50% -10%, transparent 0deg, rgb(233 215 158 / calc(0.35 * var(--fx))) 8deg, transparent 16deg, transparent 344deg, rgb(233 215 158 / calc(0.35 * var(--fx))) 352deg, transparent 360deg),
-    radial-gradient(1000px 520px at 50% -15%, rgb(255 246 214 / calc(0.9 * var(--fx))), transparent 70%),
-    var(--bg);
+    conic-gradient(
+      from 180deg at 50% -10%,
+      transparent 0deg,
+      rgb(233 215 158 / calc(0.35 * var(--fx))) 8deg,
+      transparent 16deg,
+      transparent 344deg,
+      rgb(233 215 158 / calc(0.35 * var(--fx))) 352deg,
+      transparent 360deg
+    ),
+    radial-gradient(1000px 520px at 50% -15%, rgb(255 246 214 / calc(0.9 * var(--fx))), transparent 70%), var(--bg);
   --ornament: #b59a5a;
 
   --chart-1: #a8842c;
@@ -232,8 +237,7 @@
     linear-gradient(rgb(58 168 255 / calc(0.04 * var(--fx))) 1px, transparent 1px) 0 0 / 32px 32px,
     linear-gradient(90deg, rgb(58 168 255 / calc(0.04 * var(--fx))) 1px, transparent 1px) 0 0 / 32px 32px,
     radial-gradient(900px 500px at 80% -10%, rgb(139 92 246 / calc(0.18 * var(--fx))), transparent 60%),
-    radial-gradient(700px 400px at 0% 0%, rgb(58 215 255 / calc(0.1 * var(--fx))), transparent 60%),
-    var(--bg);
+    radial-gradient(700px 400px at 0% 0%, rgb(58 215 255 / calc(0.1 * var(--fx))), transparent 60%), var(--bg);
   --ornament: var(--accent);
 
   --chart-1: #3ad7ff;

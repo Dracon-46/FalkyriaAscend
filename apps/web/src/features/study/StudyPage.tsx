@@ -12,7 +12,21 @@ import { FormActions, useForm } from '../../components/forms';
 import { DonutChart, TimeSeriesChart } from '../../components/charts/Charts';
 import { Icon } from '../../components/ui/Icon';
 import { Modal, useConfirm } from '../../components/ui/Modal';
-import { Badge, Button, EmptyState, ErrorState, Input, Loading, PageHeader, Panel, ProgressBar, Select, Tabs, Textarea, cx } from '../../components/ui/primitives';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ErrorState,
+  Input,
+  Loading,
+  PageHeader,
+  Panel,
+  ProgressBar,
+  Select,
+  Tabs,
+  Textarea,
+  cx,
+} from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 
 type Tab = 'visao' | 'registrar' | 'sessoes' | 'avaliacoes' | 'marcos' | 'biblioteca';
@@ -98,7 +112,10 @@ const STATUS_LABEL = { planned: 'Planejado', in_progress: 'Em andamento', comple
 
 const useOverview = () => useQuery({ queryKey: ['study', 'overview'], queryFn: () => api.get<SubjectOverview[]>('/api/study/overview') });
 const useAreas = (includeArchived = false) =>
-  useQuery({ queryKey: ['knowledge-areas', includeArchived], queryFn: () => api.get<Area[]>(`/api/knowledge-areas${includeArchived ? '?includeArchived=true' : ''}`) });
+  useQuery({
+    queryKey: ['knowledge-areas', includeArchived],
+    queryFn: () => api.get<Area[]>(`/api/knowledge-areas${includeArchived ? '?includeArchived=true' : ''}`),
+  });
 const useResources = () => useQuery({ queryKey: ['study-resources'], queryFn: () => api.get<Resource[]>('/api/study-resources') });
 
 const hours = (min: number) => (min >= 60 ? `${fmt1(min / 60)} h` : `${fmt(min)} min`);
@@ -160,14 +177,18 @@ function Dimension({ label, value, hint, progress, icon }: { label: string; valu
 function OverviewTab() {
   const overview = useOverview();
   const areas = useAreas();
-  const prod = useQuery({ queryKey: ['stats', 'productivity', 'study-90'], queryFn: () => api.get<Productivity>('/api/stats/productivity?granularity=week&days=90') });
+  const prod = useQuery({
+    queryKey: ['stats', 'productivity', 'study-90'],
+    queryFn: () => api.get<Productivity>('/api/stats/productivity?granularity=week&days=90'),
+  });
   if (overview.isLoading) return <Loading />;
   if (overview.isError) return <ErrorState error={overview.error} onRetry={() => overview.refetch()} />;
   const subjects = overview.data!;
   const byId = new Map(subjects.map((s) => [s.id, s]));
-  const groups = [...(areas.data ?? []).map((a) => ({ area: a as Area | null, items: subjects.filter((s) => s.areaId === a.id) })), { area: null, items: subjects.filter((s) => !s.areaId || !(areas.data ?? []).some((a) => a.id === s.areaId)) }].filter(
-    (g) => g.items.length > 0,
-  );
+  const groups = [
+    ...(areas.data ?? []).map((a) => ({ area: a as Area | null, items: subjects.filter((s) => s.areaId === a.id) })),
+    { area: null, items: subjects.filter((s) => !s.areaId || !(areas.data ?? []).some((a) => a.id === s.areaId)) },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <div className="space-y-4">
@@ -198,7 +219,12 @@ function OverviewTab() {
                   </div>
                   <ProgressBar value={s.mastery.progress} xp className="mt-2" label={`Progresso de maestria em ${s.name}`} />
                   <div className="mt-3 grid grid-cols-2 gap-3">
-                    <Dimension icon="clock" label="Tempo investido" value={hours(s.minutes)} hint={`${s.sessions} sessões${s.lastSession ? ` · última ${fmtDate(s.lastSession)}` : ''}`} />
+                    <Dimension
+                      icon="clock"
+                      label="Tempo investido"
+                      value={hours(s.minutes)}
+                      hint={`${s.sessions} sessões${s.lastSession ? ` · última ${fmtDate(s.lastSession)}` : ''}`}
+                    />
                     <Dimension
                       icon="list-checks"
                       label="Conteúdo concluído"
@@ -256,7 +282,11 @@ function OverviewTab() {
           )}
         </Panel>
         <Panel title="Tempo por disciplina" icon="compass">
-          {prod.data ? <DonutChart data={prod.data.studyBySubject.map((s) => ({ label: s.subject, value: s.minutes, color: s.color }))} unit="min" height={190} /> : <Loading />}
+          {prod.data ? (
+            <DonutChart data={prod.data.studyBySubject.map((s) => ({ label: s.subject, value: s.minutes, color: s.color }))} unit="min" height={190} />
+          ) : (
+            <Loading />
+          )}
           <p className="mt-2 text-xs text-faint">Tempo investido é apenas uma das dimensões do conhecimento.</p>
         </Panel>
       </div>
@@ -339,8 +369,23 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
             />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Input label="Data" type="date" max={me.today} value={v.date ?? ''} onChange={(e) => form.set('date', e.target.value || null)} error={form.errors.date} />
-            <Input label="Duração (min)" type="number" min={1} max={1440} value={v.minutes ?? ''} onChange={(e) => form.set('minutes', Number(e.target.value))} error={form.errors.minutes} />
+            <Input
+              label="Data"
+              type="date"
+              max={me.today}
+              value={v.date ?? ''}
+              onChange={(e) => form.set('date', e.target.value || null)}
+              error={form.errors.date}
+            />
+            <Input
+              label="Duração (min)"
+              type="number"
+              min={1}
+              max={1440}
+              value={v.minutes ?? ''}
+              onChange={(e) => form.set('minutes', Number(e.target.value))}
+              error={form.errors.minutes}
+            />
             <Select
               label="Tipo de atividade"
               value={v.activityType ?? 'reading'}
@@ -348,9 +393,20 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
               options={STUDY_ACTIVITY_TYPES.map((t) => ({ value: t, label: STUDY_ACTIVITY_LABELS[t] }))}
             />
           </div>
-          <Input label="Conteúdo estudado" value={v.content ?? ''} onChange={(e) => form.set('content', e.target.value)} placeholder="Ex.: Capítulo 3 — oferta e demanda" error={form.errors.content} />
+          <Input
+            label="Conteúdo estudado"
+            value={v.content ?? ''}
+            onChange={(e) => form.set('content', e.target.value)}
+            placeholder="Ex.: Capítulo 3 — oferta e demanda"
+            error={form.errors.content}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
-            <Input label="Resultado (opcional)" value={v.result ?? ''} onChange={(e) => form.set('result', nullIfEmpty(e.target.value))} placeholder="Ex.: resumo pronto, 20 exercícios" />
+            <Input
+              label="Resultado (opcional)"
+              value={v.result ?? ''}
+              onChange={(e) => form.set('result', nullIfEmpty(e.target.value))}
+              placeholder="Ex.: resumo pronto, 20 exercícios"
+            />
             <Input
               label="Unidades concluídas"
               type="number"
@@ -361,7 +417,13 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
               hint={resource ? `Avança o recurso "${resource.title}" e concede maestria por conteúdo.` : 'Aulas, capítulos ou módulos terminados nesta sessão.'}
             />
           </div>
-          <Input label="Evidência (link, opcional)" type="url" value={v.evidenceUrl ?? ''} onChange={(e) => form.set('evidenceUrl', nullIfEmpty(e.target.value))} error={form.errors.evidenceUrl} />
+          <Input
+            label="Evidência (link, opcional)"
+            type="url"
+            value={v.evidenceUrl ?? ''}
+            onChange={(e) => form.set('evidenceUrl', nullIfEmpty(e.target.value))}
+            error={form.errors.evidenceUrl}
+          />
           <Textarea label="Observações" value={v.notes ?? ''} onChange={(e) => form.set('notes', nullIfEmpty(e.target.value))} rows={2} />
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="ghost" onClick={onDone}>
@@ -444,7 +506,12 @@ function SessionsTab() {
                       icon="trash"
                       aria-label="Excluir sessão"
                       onClick={async () => {
-                        const r = await confirm({ title: 'Excluir sessão', message: 'A sessão será excluída e sua recompensa (XP, atributos, maestria e moedas) será estornada.', danger: true, confirmLabel: 'Excluir' });
+                        const r = await confirm({
+                          title: 'Excluir sessão',
+                          message: 'A sessão será excluída e sua recompensa (XP, atributos, maestria e moedas) será estornada.',
+                          danger: true,
+                          confirmLabel: 'Excluir',
+                        });
                         if (r.ok) remove.mutate(s.id);
                       }}
                     />
@@ -499,12 +566,41 @@ function AssessmentsTab() {
             save.mutate(data);
           }}
         >
-          <Select label="Disciplina" value={v.subjectId} onChange={(e) => form.set('subjectId', e.target.value)} placeholder="Selecione…" error={form.errors.subjectId} options={(overview.data ?? []).map((s) => ({ value: s.id, label: s.name }))} />
-          <Input label="Título" value={v.title} onChange={(e) => form.set('title', e.target.value)} error={form.errors.title} placeholder="Ex.: Simulado de Macroeconomia" />
+          <Select
+            label="Disciplina"
+            value={v.subjectId}
+            onChange={(e) => form.set('subjectId', e.target.value)}
+            placeholder="Selecione…"
+            error={form.errors.subjectId}
+            options={(overview.data ?? []).map((s) => ({ value: s.id, label: s.name }))}
+          />
+          <Input
+            label="Título"
+            value={v.title}
+            onChange={(e) => form.set('title', e.target.value)}
+            error={form.errors.title}
+            placeholder="Ex.: Simulado de Macroeconomia"
+          />
           <Input label="Data" type="date" max={me.today} value={v.date ?? ''} onChange={(e) => form.set('date', e.target.value || null)} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Nota" type="number" min={0} step="0.1" value={v.score} onChange={(e) => form.set('score', Number(e.target.value))} error={form.errors.score} />
-            <Input label="Nota máxima" type="number" min={0.1} step="0.1" value={v.maxScore} onChange={(e) => form.set('maxScore', Number(e.target.value))} error={form.errors.maxScore} />
+            <Input
+              label="Nota"
+              type="number"
+              min={0}
+              step="0.1"
+              value={v.score}
+              onChange={(e) => form.set('score', Number(e.target.value))}
+              error={form.errors.score}
+            />
+            <Input
+              label="Nota máxima"
+              type="number"
+              min={0.1}
+              step="0.1"
+              value={v.maxScore}
+              onChange={(e) => form.set('maxScore', Number(e.target.value))}
+              error={form.errors.maxScore}
+            />
           </div>
           {v.maxScore ? (
             <p className={cx('text-sm', ratio >= 0.7 ? 'text-success' : 'text-muted')}>
@@ -603,10 +699,29 @@ function MilestonesTab() {
             if (data) save.mutate(data);
           }}
         >
-          <Select label="Disciplina" value={v.subjectId} onChange={(e) => form.set('subjectId', e.target.value)} placeholder="Selecione…" error={form.errors.subjectId} options={(overview.data ?? []).map((s) => ({ value: s.id, label: s.name }))} />
-          <Input label="Marco" value={v.title} onChange={(e) => form.set('title', e.target.value)} error={form.errors.title} placeholder="Ex.: Projeto entregue, certificação obtida" />
+          <Select
+            label="Disciplina"
+            value={v.subjectId}
+            onChange={(e) => form.set('subjectId', e.target.value)}
+            placeholder="Selecione…"
+            error={form.errors.subjectId}
+            options={(overview.data ?? []).map((s) => ({ value: s.id, label: s.name }))}
+          />
+          <Input
+            label="Marco"
+            value={v.title}
+            onChange={(e) => form.set('title', e.target.value)}
+            error={form.errors.title}
+            placeholder="Ex.: Projeto entregue, certificação obtida"
+          />
           <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
-          <Input label="Evidência (link)" type="url" value={v.evidenceUrl ?? ''} onChange={(e) => form.set('evidenceUrl', nullIfEmpty(e.target.value))} error={form.errors.evidenceUrl} />
+          <Input
+            label="Evidência (link)"
+            type="url"
+            value={v.evidenceUrl ?? ''}
+            onChange={(e) => form.set('evidenceUrl', nullIfEmpty(e.target.value))}
+            error={form.errors.evidenceUrl}
+          />
           <Input label="Data" type="date" max={me.today} value={v.achievedOn ?? ''} onChange={(e) => form.set('achievedOn', e.target.value || null)} />
           <p className="text-xs text-faint">Marcos representam conhecimento aplicado e verificável — a evidência mais forte de domínio.</p>
           <div className="flex justify-end">
@@ -656,7 +771,10 @@ function LibraryTab() {
   const overview = useOverview();
   const subjectsAll = useQuery({
     queryKey: ['subjects', showArchived],
-    queryFn: () => api.get<Array<{ id: string; name: string; description: string; color: string; areaId: string | null; archivedAt: string | null }>>(`/api/subjects${showArchived ? '?includeArchived=true' : ''}`),
+    queryFn: () =>
+      api.get<Array<{ id: string; name: string; description: string; color: string; areaId: string | null; archivedAt: string | null }>>(
+        `/api/subjects${showArchived ? '?includeArchived=true' : ''}`,
+      ),
   });
   const resources = useResources();
   const qc = useQueryClient();
@@ -671,7 +789,12 @@ function LibraryTab() {
     onError: (e) => toast.error(e),
   });
   const askDelete = async (url: string, name: string) => {
-    const r = await confirm({ title: 'Excluir', message: `Excluir "${name}"? Registros com histórico não podem ser excluídos — arquive-os.`, danger: true, confirmLabel: 'Excluir' });
+    const r = await confirm({
+      title: 'Excluir',
+      message: `Excluir "${name}"? Registros com histórico não podem ser excluídos — arquive-os.`,
+      danger: true,
+      confirmLabel: 'Excluir',
+    });
     if (r.ok) mutate.mutate({ method: 'del', url });
   };
   const subjectName = (id: string) => subjectsAll.data?.find((s) => s.id === id)?.name ?? '—';
@@ -686,7 +809,15 @@ function LibraryTab() {
         </label>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Áreas de conhecimento" icon="git-branch" actions={<Button size="sm" icon="plus" onClick={() => setArea('new')}>Nova área</Button>}>
+        <Panel
+          title="Áreas de conhecimento"
+          icon="git-branch"
+          actions={
+            <Button size="sm" icon="plus" onClick={() => setArea('new')}>
+              Nova área
+            </Button>
+          }
+        >
           {areas.isLoading ? (
             <Loading />
           ) : (areas.data ?? []).length === 0 ? (
@@ -700,14 +831,35 @@ function LibraryTab() {
                     {a.name} {a.archivedAt && <Badge>arquivada</Badge>}
                   </span>
                   <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${a.name}`} onClick={() => setArea(a)} />
-                  <Button size="sm" variant="ghost" icon={a.archivedAt ? 'undo' : 'archive'} aria-label={a.archivedAt ? 'Desarquivar' : 'Arquivar'} title={a.archivedAt ? 'Desarquivar' : 'Arquivar'} onClick={() => mutate.mutate({ method: 'post', url: `/api/knowledge-areas/${a.id}/${a.archivedAt ? 'unarchive' : 'archive'}` })} />
-                  <Button size="sm" variant="ghost" icon="trash" aria-label={`Excluir ${a.name}`} onClick={() => askDelete(`/api/knowledge-areas/${a.id}`, a.name)} />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={a.archivedAt ? 'undo' : 'archive'}
+                    aria-label={a.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    title={a.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    onClick={() => mutate.mutate({ method: 'post', url: `/api/knowledge-areas/${a.id}/${a.archivedAt ? 'unarchive' : 'archive'}` })}
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon="trash"
+                    aria-label={`Excluir ${a.name}`}
+                    onClick={() => askDelete(`/api/knowledge-areas/${a.id}`, a.name)}
+                  />
                 </li>
               ))}
             </ul>
           )}
         </Panel>
-        <Panel title="Disciplinas" icon="book-open" actions={<Button size="sm" icon="plus" onClick={() => setSubject('new')}>Nova disciplina</Button>}>
+        <Panel
+          title="Disciplinas"
+          icon="book-open"
+          actions={
+            <Button size="sm" icon="plus" onClick={() => setSubject('new')}>
+              Nova disciplina
+            </Button>
+          }
+        >
           {subjectsAll.isLoading ? (
             <Loading />
           ) : (subjectsAll.data ?? []).length === 0 ? (
@@ -727,7 +879,14 @@ function LibraryTab() {
                     </p>
                   </div>
                   <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${s.name}`} onClick={() => setSubject(s)} />
-                  <Button size="sm" variant="ghost" icon={s.archivedAt ? 'undo' : 'archive'} aria-label={s.archivedAt ? 'Desarquivar' : 'Arquivar'} title={s.archivedAt ? 'Desarquivar' : 'Arquivar'} onClick={() => mutate.mutate({ method: 'post', url: `/api/subjects/${s.id}/${s.archivedAt ? 'unarchive' : 'archive'}` })} />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={s.archivedAt ? 'undo' : 'archive'}
+                    aria-label={s.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    title={s.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    onClick={() => mutate.mutate({ method: 'post', url: `/api/subjects/${s.id}/${s.archivedAt ? 'unarchive' : 'archive'}` })}
+                  />
                   <Button size="sm" variant="ghost" icon="trash" aria-label={`Excluir ${s.name}`} onClick={() => askDelete(`/api/subjects/${s.id}`, s.name)} />
                 </li>
               ))}
@@ -735,7 +894,15 @@ function LibraryTab() {
           )}
         </Panel>
       </div>
-      <Panel title="Recursos (cursos, livros, módulos, aulas)" icon="library" actions={<Button size="sm" icon="plus" disabled={(subjectsAll.data ?? []).length === 0} onClick={() => setResource('new')}>Novo recurso</Button>}>
+      <Panel
+        title="Recursos (cursos, livros, módulos, aulas)"
+        icon="library"
+        actions={
+          <Button size="sm" icon="plus" disabled={(subjectsAll.data ?? []).length === 0} onClick={() => setResource('new')}>
+            Novo recurso
+          </Button>
+        }
+      >
         {resources.isLoading ? (
           <Loading />
         ) : (resources.data ?? []).length === 0 ? (
@@ -748,9 +915,7 @@ function LibraryTab() {
               <li key={r.id} className="rounded-[var(--radius)] border border-line p-3">
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate">
-                      {r.title}
-                    </p>
+                    <p className="truncate">{r.title}</p>
                     <p className="text-xs text-faint">
                       {KIND_LABEL[r.kind]} · {subjectName(r.subjectId)} · {STATUS_LABEL[r.status]}
                     </p>
@@ -761,7 +926,13 @@ function LibraryTab() {
                     </a>
                   )}
                   <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${r.title}`} onClick={() => setResource(r)} />
-                  <Button size="sm" variant="ghost" icon="trash" aria-label={`Excluir ${r.title}`} onClick={() => askDelete(`/api/study-resources/${r.id}`, r.title)} />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon="trash"
+                    aria-label={`Excluir ${r.title}`}
+                    onClick={() => askDelete(`/api/study-resources/${r.id}`, r.title)}
+                  />
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <ProgressBar value={r.completedUnits / r.totalUnits} className="flex-1" label={`Progresso de ${r.title}`} />
@@ -785,7 +956,15 @@ function LibraryTab() {
           onClose={() => setSubject(null)}
         />
       )}
-      {resource && <ResourceForm key={resource === 'new' ? 'new' : resource.id} resource={resource === 'new' ? null : resource} subjects={subjectsAll.data ?? []} resources={resources.data ?? []} onClose={() => setResource(null)} />}
+      {resource && (
+        <ResourceForm
+          key={resource === 'new' ? 'new' : resource.id}
+          resource={resource === 'new' ? null : resource}
+          subjects={subjectsAll.data ?? []}
+          resources={resources.data ?? []}
+          onClose={() => setResource(null)}
+        />
+      )}
     </div>
   );
 }
@@ -805,7 +984,10 @@ function useSave(url: string, id: string | null, onClose: () => void, label: str
 }
 
 function AreaForm({ area, onClose }: { area: Area | null; onClose: () => void }) {
-  const form = useForm(areaInput, area ? { name: area.name, description: area.description, color: area.color } : { name: '', description: '', color: '#6b7fd7' });
+  const form = useForm(
+    areaInput,
+    area ? { name: area.name, description: area.description, color: area.color } : { name: '', description: '', color: '#6b7fd7' },
+  );
   const save = useSave('/api/knowledge-areas', area?.id ?? null, onClose, 'Área');
   return (
     <Modal open onClose={onClose} title={area ? 'Editar área' : 'Nova área de conhecimento'} size="sm">
@@ -820,7 +1002,14 @@ function AreaForm({ area, onClose }: { area: Area | null; onClose: () => void })
       >
         <Input label="Nome" value={form.values.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} autoFocus />
         <Textarea label="Descrição" value={form.values.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
-        <Input label="Cor" type="color" value={form.values.color ?? '#6b7fd7'} onChange={(e) => form.set('color', e.target.value)} className="!h-10 !p-1" error={form.errors.color} />
+        <Input
+          label="Cor"
+          type="color"
+          value={form.values.color ?? '#6b7fd7'}
+          onChange={(e) => form.set('color', e.target.value)}
+          className="!h-10 !p-1"
+          error={form.errors.color}
+        />
         <FormActions onCancel={onClose} loading={save.isPending} />
       </form>
     </Modal>
@@ -862,7 +1051,13 @@ function SubjectForm({
           <Input label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} autoFocus />
           <Input label="Cor" type="color" value={v.color ?? '#6b7fd7'} onChange={(e) => form.set('color', e.target.value)} className="!h-10 !p-1" />
         </div>
-        <Select label="Área de conhecimento" value={v.areaId ?? ''} onChange={(e) => form.set('areaId', e.target.value || null)} placeholder="Sem área" options={areas.filter((a) => !a.archivedAt).map((a) => ({ value: a.id, label: a.name }))} />
+        <Select
+          label="Área de conhecimento"
+          value={v.areaId ?? ''}
+          onChange={(e) => form.set('areaId', e.target.value || null)}
+          placeholder="Sem área"
+          options={areas.filter((a) => !a.archivedAt).map((a) => ({ value: a.id, label: a.name }))}
+        />
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <fieldset>
           <legend className="field-label">Pré-requisitos</legend>
@@ -894,11 +1089,28 @@ function SubjectForm({
   );
 }
 
-function ResourceForm({ resource, subjects, resources, onClose }: { resource: Resource | null; subjects: Array<{ id: string; name: string }>; resources: Resource[]; onClose: () => void }) {
+function ResourceForm({
+  resource,
+  subjects,
+  resources,
+  onClose,
+}: {
+  resource: Resource | null;
+  subjects: Array<{ id: string; name: string }>;
+  resources: Resource[];
+  onClose: () => void;
+}) {
   const form = useForm(
     resourceInput,
     resource
-      ? { subjectId: resource.subjectId, parentId: resource.parentId, kind: resource.kind, title: resource.title, url: resource.url, totalUnits: resource.totalUnits }
+      ? {
+          subjectId: resource.subjectId,
+          parentId: resource.parentId,
+          kind: resource.kind,
+          title: resource.title,
+          url: resource.url,
+          totalUnits: resource.totalUnits,
+        }
       : { subjectId: subjects[0]?.id ?? '', parentId: null, kind: 'book', title: '', url: null, totalUnits: 1 },
   );
   const v = form.values;
@@ -916,13 +1128,38 @@ function ResourceForm({ resource, subjects, resources, onClose }: { resource: Re
         }}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <Select label="Disciplina" value={v.subjectId} onChange={(e) => form.setValues({ ...v, subjectId: e.target.value, parentId: null })} error={form.errors.subjectId} options={subjects.map((s) => ({ value: s.id, label: s.name }))} />
-          <Select label="Tipo" value={v.kind} onChange={(e) => form.set('kind', e.target.value as ResourceKind)} options={Object.entries(KIND_LABEL).map(([value, label]) => ({ value, label }))} />
+          <Select
+            label="Disciplina"
+            value={v.subjectId}
+            onChange={(e) => form.setValues({ ...v, subjectId: e.target.value, parentId: null })}
+            error={form.errors.subjectId}
+            options={subjects.map((s) => ({ value: s.id, label: s.name }))}
+          />
+          <Select
+            label="Tipo"
+            value={v.kind}
+            onChange={(e) => form.set('kind', e.target.value as ResourceKind)}
+            options={Object.entries(KIND_LABEL).map(([value, label]) => ({ value, label }))}
+          />
         </div>
         <Input label="Título" value={v.title} onChange={(e) => form.set('title', e.target.value)} error={form.errors.title} />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Input label="Total de unidades" type="number" min={1} value={v.totalUnits ?? 1} onChange={(e) => form.set('totalUnits', Number(e.target.value))} error={form.errors.totalUnits} hint="Capítulos, aulas ou módulos." />
-          <Select label="Faz parte de (opcional)" value={v.parentId ?? ''} onChange={(e) => form.set('parentId', e.target.value || null)} placeholder="Nenhum" options={parents.map((r) => ({ value: r.id, label: r.title }))} />
+          <Input
+            label="Total de unidades"
+            type="number"
+            min={1}
+            value={v.totalUnits ?? 1}
+            onChange={(e) => form.set('totalUnits', Number(e.target.value))}
+            error={form.errors.totalUnits}
+            hint="Capítulos, aulas ou módulos."
+          />
+          <Select
+            label="Faz parte de (opcional)"
+            value={v.parentId ?? ''}
+            onChange={(e) => form.set('parentId', e.target.value || null)}
+            placeholder="Nenhum"
+            options={parents.map((r) => ({ value: r.id, label: r.title }))}
+          />
         </div>
         <Input label="Link (opcional)" type="url" value={v.url ?? ''} onChange={(e) => form.set('url', nullIfEmpty(e.target.value))} error={form.errors.url} />
         <FormActions onCancel={onClose} loading={save.isPending} />

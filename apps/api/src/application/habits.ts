@@ -85,7 +85,11 @@ export async function refreshStreak(tx: DbOrTx, h: Habit, today: string): Promis
   const best = Math.max(state.best, h.bestStreak);
   await setHabitStreak(tx, h.id, state.current, best);
   const { config } = await getActiveConfig(tx, h.userId);
-  const crossed = streakMilestonesCrossed(h.bestStreak, best, config.streakMilestones.map((m) => m.days));
+  const crossed = streakMilestonesCrossed(
+    h.bestStreak,
+    best,
+    config.streakMilestones.map((m) => m.days),
+  );
   for (const days of crossed) {
     const m = config.streakMilestones.find((x) => x.days === days)!;
     await grantReward(tx, {
@@ -282,7 +286,10 @@ export async function habitsForDay(db: DbOrTx, userId: string, today: string) {
     const last14 = Array.from({ length: 14 }, (_, i) => {
       const d = addDays(today, i - 13);
       const c = mine.find((x) => x.localDate === d);
-      return { date: d, status: c?.status ?? (h.frequency !== 'times_per_week' && isScheduledOn(scheduleOf(h), d) ? (d === today ? 'pending' : 'none') : 'off') };
+      return {
+        date: d,
+        status: c?.status ?? (h.frequency !== 'times_per_week' && isScheduledOn(scheduleOf(h), d) ? (d === today ? 'pending' : 'none') : 'off'),
+      };
     });
     return { ...h, scheduledToday, todayStatus: todayCheckin?.status ?? null, weekDone, last14 };
   });

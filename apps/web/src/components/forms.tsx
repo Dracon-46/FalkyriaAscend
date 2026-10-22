@@ -56,7 +56,10 @@ export function WeightsEditor({ value, onChange }: { value: Record<string, numbe
         {attrs.map((a) => {
           const w = value[a.code] ?? 0;
           return (
-            <label key={a.code} className={cx('flex items-center gap-2 rounded-[var(--radius-sm)] border px-2 py-1.5 text-sm', w > 0 ? 'border-accent' : 'border-line')}>
+            <label
+              key={a.code}
+              className={cx('flex items-center gap-2 rounded-[var(--radius-sm)] border px-2 py-1.5 text-sm', w > 0 ? 'border-accent' : 'border-line')}
+            >
               <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: a.color }} />
               <span className="num w-9">{a.code}</span>
               <input
@@ -81,14 +84,28 @@ export function WeightsEditor({ value, onChange }: { value: Record<string, numbe
         })}
       </div>
       <p className="mt-1 text-xs text-faint">
-        {total === 0 ? 'Sem atributos: a atividade concede apenas XP geral e moedas.' : `O XP de atributo é dividido proporcionalmente: ${Object.entries(value).map(([k, w]) => `${k} ${Math.round((w / total) * 100)}%`).join(', ')}.`}
+        {total === 0
+          ? 'Sem atributos: a atividade concede apenas XP geral e moedas.'
+          : `O XP de atributo é dividido proporcionalmente: ${Object.entries(value)
+              .map(([k, w]) => `${k} ${Math.round((w / total) * 100)}%`)
+              .join(', ')}.`}
       </p>
     </fieldset>
   );
 }
 
 /** Seleção explícita das penalidades aplicáveis (nunca todas por padrão). */
-export function PenaltyRulesPicker({ value, onChange, disabled, disabledReason }: { value: string[]; onChange: (v: string[]) => void; disabled?: boolean; disabledReason?: string }) {
+export function PenaltyRulesPicker({
+  value,
+  onChange,
+  disabled,
+  disabledReason,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+  disabled?: boolean;
+  disabledReason?: string;
+}) {
   const lookups = useLookups();
   const rules = (lookups.data?.penaltyRules ?? []).filter((r) => r.active);
   return (
@@ -118,12 +135,24 @@ export function PenaltyRulesPicker({ value, onChange, disabled, disabledReason }
           })}
         </div>
       )}
-      {!disabled && <p className="mt-1 text-xs text-faint">Sem seleção, a falha apenas é registrada. Suspensões, descanso e indisponibilidade nunca geram penalidade.</p>}
+      {!disabled && (
+        <p className="mt-1 text-xs text-faint">Sem seleção, a falha apenas é registrada. Suspensões, descanso e indisponibilidade nunca geram penalidade.</p>
+      )}
     </fieldset>
   );
 }
 
-export function CategorySelect({ value, onChange, label = 'Categoria', error }: { value: string | null | undefined; onChange: (v: string | null) => void; label?: string; error?: string }) {
+export function CategorySelect({
+  value,
+  onChange,
+  label = 'Categoria',
+  error,
+}: {
+  value: string | null | undefined;
+  onChange: (v: string | null) => void;
+  label?: string;
+  error?: string;
+}) {
   const lookups = useLookups();
   return (
     <Select

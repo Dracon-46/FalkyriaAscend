@@ -3,7 +3,17 @@ import { z } from 'zod';
 import { configUpdateInput, profileInput, settingsInput } from '@rpg/contracts';
 import { noContent, parse, requireAdmin, requireUser } from '../http';
 import { clearSessionCookie } from '../plugins/auth';
-import { currentAccount, deleteAccount, exportAccount, getSettings, markRead, notificationsOf, recordVisit, saveSettings, updateProfile } from '../../application/use-cases/account';
+import {
+  currentAccount,
+  deleteAccount,
+  exportAccount,
+  getSettings,
+  markRead,
+  notificationsOf,
+  recordVisit,
+  saveSettings,
+  updateProfile,
+} from '../../application/use-cases/account';
 import { dashboardFor } from '../../application/use-cases/dashboard';
 import { configView, previewConfig, publishProgressionConfig } from '../../application/use-cases/progression-config';
 import type { AppContext } from '../../context';

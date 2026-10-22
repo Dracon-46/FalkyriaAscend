@@ -64,7 +64,12 @@ export function MissionDetailPage() {
         actions={
           <>
             {active && (
-              <Button variant="primary" icon="check" disabled={m.objectives.length > 0 && !m.progress.complete} onClick={() => (m.evidenceRequired ? setCompleting(true) : action.mutate({ action: 'complete' }))}>
+              <Button
+                variant="primary"
+                icon="check"
+                disabled={m.objectives.length > 0 && !m.progress.complete}
+                onClick={() => (m.evidenceRequired ? setCompleting(true) : action.mutate({ action: 'complete' }))}
+              >
                 Concluir
               </Button>
             )}
@@ -120,7 +125,11 @@ export function MissionDetailPage() {
                 <Button size="sm" icon="calendar" onClick={() => setRescheduling(true)}>
                   Reagendar
                 </Button>
-                <Button size="sm" icon="pause" onClick={() => ask('suspend', 'Suspender', 'Suspensão por motivo válido (doença, viagem, imprevisto) não gera falha nem penalidade.')}>
+                <Button
+                  size="sm"
+                  icon="pause"
+                  onClick={() => ask('suspend', 'Suspender', 'Suspensão por motivo válido (doença, viagem, imprevisto) não gera falha nem penalidade.')}
+                >
                   Suspender
                 </Button>
                 <Button size="sm" variant="ghost" icon="x" onClick={() => ask('cancel', 'Cancelar', 'Cancelar não é tratado como falha. Informe o motivo.')}>
@@ -134,7 +143,9 @@ export function MissionDetailPage() {
                     ask(
                       'fail',
                       'Declarar falha',
-                      rules.length ? `As penalidades configuradas serão aplicadas: ${rules.map((r) => r.name).join(', ')}.` : 'A falha será registrada no histórico (sem penalidade configurada).',
+                      rules.length
+                        ? `As penalidades configuradas serão aplicadas: ${rules.map((r) => r.name).join(', ')}.`
+                        : 'A falha será registrada no histórico (sem penalidade configurada).',
                       true,
                     )
                   }
@@ -168,7 +179,8 @@ export function MissionDetailPage() {
               {m.events.map((e) => (
                 <li key={e.id} className="relative text-sm">
                   <span className="absolute top-1.5 -left-[1.3rem] h-2 w-2 rounded-full bg-accent" />
-                  <span className="text-faint">{fmtDateTime(e.createdAt)}</span> · {e.fromStatus ? `${MISSION_STATUS_LABELS[e.fromStatus as MissionStatus] ?? e.fromStatus} → ` : ''}
+                  <span className="text-faint">{fmtDateTime(e.createdAt)}</span> ·{' '}
+                  {e.fromStatus ? `${MISSION_STATUS_LABELS[e.fromStatus as MissionStatus] ?? e.fromStatus} → ` : ''}
                   {MISSION_STATUS_LABELS[e.toStatus as MissionStatus] ?? e.toStatus}
                   {e.reason && <span className="text-muted"> — {e.reason}</span>}
                   <span className="text-faint"> ({e.actor === 'system' ? 'sistema' : e.actor === 'admin' ? 'administrador' : 'você'})</span>
@@ -225,7 +237,8 @@ export function MissionDetailPage() {
               <ul className="mt-3 space-y-1 border-t border-line pt-3 text-sm">
                 {m.penalties.map((p) => (
                   <li key={p.id}>
-                    {fmtDate(p.localDate)} · {PENALTY_TYPE_LABELS[p.type]} {p.amount > 0 && `(${p.amount})`} {p.status === 'reversed' && <Badge>revertida</Badge>}
+                    {fmtDate(p.localDate)} · {PENALTY_TYPE_LABELS[p.type]} {p.amount > 0 && `(${p.amount})`}{' '}
+                    {p.status === 'reversed' && <Badge>revertida</Badge>}
                   </li>
                 ))}
               </ul>
@@ -240,8 +253,19 @@ export function MissionDetailPage() {
       </div>
 
       {editing && <MissionForm open onClose={() => setEditing(false)} initial={missionToInput(m)} missionId={m.id} title="Editar missão" />}
-      <CompleteWithEvidence open={completing} onClose={() => setCompleting(false)} onSubmit={(evidence) => action.mutate({ action: 'complete', evidence })} loading={action.isPending} />
-      <Reschedule open={rescheduling} current={m.dueDate} onClose={() => setRescheduling(false)} onSubmit={(dueDate, reason) => action.mutate({ action: 'reschedule', dueDate, reason })} loading={action.isPending} />
+      <CompleteWithEvidence
+        open={completing}
+        onClose={() => setCompleting(false)}
+        onSubmit={(evidence) => action.mutate({ action: 'complete', evidence })}
+        loading={action.isPending}
+      />
+      <Reschedule
+        open={rescheduling}
+        current={m.dueDate}
+        onClose={() => setRescheduling(false)}
+        onSubmit={(dueDate, reason) => action.mutate({ action: 'reschedule', dueDate, reason })}
+        loading={action.isPending}
+      />
     </>
   );
 }
@@ -268,7 +292,10 @@ function ObjectiveRow({ missionId, o, editable }: { missionId: string; o: Missio
         </span>
       </div>
       <ProgressBar value={Number(o.current) / Number(o.target)} className="mt-1" label={o.title} />
-      <p className="mt-0.5 text-xs text-faint">{OBJECTIVE_METRIC_LABELS[o.metric as keyof typeof OBJECTIVE_METRIC_LABELS] ?? o.metric}{o.metric !== 'manual' && ' · calculado automaticamente'}</p>
+      <p className="mt-0.5 text-xs text-faint">
+        {OBJECTIVE_METRIC_LABELS[o.metric as keyof typeof OBJECTIVE_METRIC_LABELS] ?? o.metric}
+        {o.metric !== 'manual' && ' · calculado automaticamente'}
+      </p>
       {editable && o.metric === 'manual' && (
         <form
           className="mt-1 flex gap-2"
@@ -306,7 +333,19 @@ function CompleteWithEvidence({ open, onClose, onSubmit, loading }: { open: bool
   );
 }
 
-function Reschedule({ open, current, onClose, onSubmit, loading }: { open: boolean; current: string | null; onClose: () => void; onSubmit: (d: string, r: string) => void; loading: boolean }) {
+function Reschedule({
+  open,
+  current,
+  onClose,
+  onSubmit,
+  loading,
+}: {
+  open: boolean;
+  current: string | null;
+  onClose: () => void;
+  onSubmit: (d: string, r: string) => void;
+  loading: boolean;
+}) {
   const [date, setDate] = useState(current ?? '');
   const [reason, setReason] = useState('');
   return (

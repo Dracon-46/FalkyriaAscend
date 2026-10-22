@@ -57,12 +57,7 @@ export function computeStreak(entries: StreakEntry[]): StreakState {
  * Decide se uma falha deve ser tolerada: no máximo `tolerance` falhas toleradas
  * numa janela móvel de `windowDays` dias terminando na data da falha.
  */
-export function isMissTolerated(
-  missDate: string,
-  history: StreakEntry[],
-  tolerance: number,
-  windowDays = 7,
-): boolean {
+export function isMissTolerated(missDate: string, history: StreakEntry[], tolerance: number, windowDays = 7): boolean {
   if (tolerance <= 0) return false;
   const windowStart = addDays(missDate, -(windowDays - 1));
   const used = history.filter((e) => e.status === 'tolerated' && e.date >= windowStart && e.date < missDate).length;

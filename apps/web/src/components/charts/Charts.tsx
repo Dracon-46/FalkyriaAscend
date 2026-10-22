@@ -122,7 +122,16 @@ export function AttributeRadar({ data, compareLabel, height = 300 }: { data: Rad
               isAnimationActive={t.animate}
             />
           )}
-          <Radar name="Atual" dataKey="level" stroke={t.accent} fill={t.accent} fillOpacity={0.22} strokeWidth={2} dot={{ r: 3, fill: t.accent }} isAnimationActive={t.animate} />
+          <Radar
+            name="Atual"
+            dataKey="level"
+            stroke={t.accent}
+            fill={t.accent}
+            fillOpacity={0.22}
+            strokeWidth={2}
+            dot={{ r: 3, fill: t.accent }}
+            isAnimationActive={t.animate}
+          />
           <Tooltip
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
@@ -225,8 +234,26 @@ export function TimeSeriesChart({
             tickLine={false}
             minTickGap={18}
           />
-          <YAxis yAxisId="left" tick={{ fill: t.axis, fontSize: 11 }} axisLine={false} tickLine={false} width={44} tickFormatter={(v: number) => fmt(v)} label={yUnit ? { value: yUnit, angle: -90, position: 'insideLeft', fill: t.axis, fontSize: 10, dx: 14 } : undefined} />
-          {hasRight && <YAxis yAxisId="right" orientation="right" tick={{ fill: t.axis, fontSize: 11 }} axisLine={false} tickLine={false} width={40} label={rightUnit ? { value: rightUnit, angle: 90, position: 'insideRight', fill: t.axis, fontSize: 10 } : undefined} />}
+          <YAxis
+            yAxisId="left"
+            tick={{ fill: t.axis, fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+            width={44}
+            tickFormatter={(v: number) => fmt(v)}
+            label={yUnit ? { value: yUnit, angle: -90, position: 'insideLeft', fill: t.axis, fontSize: 10, dx: 14 } : undefined}
+          />
+          {hasRight && (
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tick={{ fill: t.axis, fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              width={40}
+              label={rightUnit ? { value: rightUnit, angle: 90, position: 'insideRight', fill: t.axis, fontSize: 10 } : undefined}
+            />
+          )}
           <Tooltip
             cursor={{ fill: t.grid }}
             content={({ active, payload, label }) =>
@@ -235,7 +262,11 @@ export function TimeSeriesChart({
                   title={fmtPeriod(String(label), granularity)}
                   rows={payload.map((p) => {
                     const def = series.find((s) => s.key === p.dataKey);
-                    return { label: def?.label ?? String(p.dataKey), value: `${p.value == null ? '—' : fmt1(Number(p.value))}${def?.unit ? ` ${def.unit}` : ''}`, color: String(p.color ?? '') };
+                    return {
+                      label: def?.label ?? String(p.dataKey),
+                      value: `${p.value == null ? '—' : fmt1(Number(p.value))}${def?.unit ? ` ${def.unit}` : ''}`,
+                      color: String(p.color ?? ''),
+                    };
                   })}
                 />
               ) : null
@@ -247,7 +278,18 @@ export function TimeSeriesChart({
             const common = { dataKey: s.key, name: s.label, yAxisId: s.axis ?? 'left', isAnimationActive: t.animate } as const;
             if (s.type === 'bar') return <Bar key={s.key} {...common} fill={c} stackId={s.stack} radius={s.stack ? 0 : [3, 3, 0, 0]} maxBarSize={36} />;
             if (s.type === 'line')
-              return <Line key={s.key} {...common} type="monotone" stroke={c} strokeWidth={2} dot={false} strokeDasharray={s.dashed ? '5 4' : undefined} connectNulls />;
+              return (
+                <Line
+                  key={s.key}
+                  {...common}
+                  type="monotone"
+                  stroke={c}
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray={s.dashed ? '5 4' : undefined}
+                  connectNulls
+                />
+              );
             return <Area key={s.key} {...common} type="monotone" stroke={c} strokeWidth={2} fill={`url(#${gid}-${s.key})`} stackId={s.stack} />;
           })}
         </ComposedChart>
@@ -258,7 +300,15 @@ export function TimeSeriesChart({
 
 // ------------------------------------------------------------------ Distribuição
 
-export function DonutChart({ data, height = 220, unit = 'XP' }: { data: Array<{ label: string; value: number; color?: string | null }>; height?: number; unit?: string }) {
+export function DonutChart({
+  data,
+  height = 220,
+  unit = 'XP',
+}: {
+  data: Array<{ label: string; value: number; color?: string | null }>;
+  height?: number;
+  unit?: string;
+}) {
   const t = useChartTheme();
   const items = data.filter((d) => d.value > 0);
   const total = items.reduce((a, d) => a + d.value, 0);
@@ -269,7 +319,16 @@ export function DonutChart({ data, height = 220, unit = 'XP' }: { data: Array<{ 
       <div style={{ height }}>
         <ResponsiveContainer>
           <PieChart>
-            <Pie data={colored} dataKey="value" nameKey="label" innerRadius="58%" outerRadius="88%" paddingAngle={2} stroke="none" isAnimationActive={t.animate}>
+            <Pie
+              data={colored}
+              dataKey="value"
+              nameKey="label"
+              innerRadius="58%"
+              outerRadius="88%"
+              paddingAngle={2}
+              stroke="none"
+              isAnimationActive={t.animate}
+            >
               {colored.map((d) => (
                 <Cell key={d.label} fill={d.color} />
               ))}
@@ -313,7 +372,17 @@ export function StatusStrip({ days }: { days: Array<{ date: string; status: stri
     off: 'transparent',
     skipped: 'transparent',
   };
-  const label: Record<string, string> = { done: 'cumprido', missed: 'falhou', tolerated: 'falha tolerada', excused: 'dispensado', rest: 'descanso', pending: 'pendente', none: 'sem registro', off: 'não programado', skipped: 'não programado' };
+  const label: Record<string, string> = {
+    done: 'cumprido',
+    missed: 'falhou',
+    tolerated: 'falha tolerada',
+    excused: 'dispensado',
+    rest: 'descanso',
+    pending: 'pendente',
+    none: 'sem registro',
+    off: 'não programado',
+    skipped: 'não programado',
+  };
   return (
     <div className="flex gap-[3px]" aria-label="Últimos 14 dias">
       {days.map((d) => (

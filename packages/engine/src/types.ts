@@ -3,15 +3,7 @@
  * Os valores são estáveis (persistidos no banco); os rótulos ficam em LABELS.
  */
 
-export const DIFFICULTIES = [
-  'routine',
-  'easy',
-  'moderate',
-  'hard',
-  'very_hard',
-  'epic',
-  'legendary',
-] as const;
+export const DIFFICULTIES = ['routine', 'easy', 'moderate', 'hard', 'very_hard', 'epic', 'legendary'] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
@@ -59,15 +51,7 @@ export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
   special: 'Desafio especial',
 };
 
-export const MISSION_STATUSES = [
-  'available',
-  'in_progress',
-  'completed',
-  'failed',
-  'cancelled',
-  'suspended',
-  'expired',
-] as const;
+export const MISSION_STATUSES = ['available', 'in_progress', 'completed', 'failed', 'cancelled', 'suspended', 'expired'] as const;
 export type MissionStatus = (typeof MISSION_STATUSES)[number];
 
 export const MISSION_STATUS_LABELS: Record<MissionStatus, string> = {
@@ -99,18 +83,7 @@ export function canTransitionMission(from: MissionStatus, to: MissionStatus): bo
 }
 
 /** Categorias de origem de XP geral, usadas para limites diários. */
-export const XP_SOURCES = [
-  'mission',
-  'habit',
-  'study',
-  'training',
-  'quick',
-  'goal',
-  'achievement',
-  'streak',
-  'season',
-  'adjustment',
-] as const;
+export const XP_SOURCES = ['mission', 'habit', 'study', 'training', 'quick', 'goal', 'achievement', 'streak', 'season', 'adjustment'] as const;
 export type XpSource = (typeof XP_SOURCES)[number];
 
 export const XP_SOURCE_LABELS: Record<XpSource, string> = {
@@ -176,18 +149,7 @@ export const CHECKIN_STATUS_LABELS: Record<CheckinStatus, string> = {
   skipped: 'Não programado',
 };
 
-export const ITEM_KINDS = [
-  'real_reward',
-  'consumable',
-  'cosmetic',
-  'title',
-  'badge',
-  'frame',
-  'theme',
-  'effect',
-  'collectible',
-  'challenge_unlock',
-] as const;
+export const ITEM_KINDS = ['real_reward', 'consumable', 'cosmetic', 'title', 'badge', 'frame', 'theme', 'effect', 'collectible', 'challenge_unlock'] as const;
 export type ItemKind = (typeof ITEM_KINDS)[number];
 
 export const ITEM_KIND_LABELS: Record<ItemKind, string> = {

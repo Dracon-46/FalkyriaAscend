@@ -1,19 +1,7 @@
 /** Verificação de posse entre usuários: todo vínculo entre registros precisa apontar para dados do mesmo usuário. */
 import { and, eq, inArray } from 'drizzle-orm';
 import type { DbOrTx } from '../client';
-import {
-  achievements,
-  attributes,
-  categories,
-  goals,
-  items,
-  knowledgeAreas,
-  missions,
-  seasons,
-  skills,
-  studyResources,
-  studySubjects,
-} from '../schema';
+import { achievements, attributes, categories, goals, items, knowledgeAreas, missions, seasons, skills, studyResources, studySubjects } from '../schema';
 
 const OWNED_TABLES = {
   achievements,
@@ -51,6 +39,9 @@ export async function existingAttributeCodes(db: DbOrTx, userId: string, codes: 
 }
 
 export async function findCategory(db: DbOrTx, userId: string, categoryId: string) {
-  const [cat] = await db.select().from(categories).where(and(eq(categories.id, categoryId), eq(categories.userId, userId)));
+  const [cat] = await db
+    .select()
+    .from(categories)
+    .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)));
   return cat ?? null;
 }

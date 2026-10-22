@@ -20,7 +20,10 @@ export async function neglectedCategories(db: DbOrTx, userId: string, since: str
 
 /** Metas ativas sem nenhuma missão aberta vinculada. */
 export async function goalsWithoutOpenMissions(db: DbOrTx, userId: string) {
-  const goalRows = await db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.status, 'active')));
+  const goalRows = await db
+    .select()
+    .from(goals)
+    .where(and(eq(goals.userId, userId), eq(goals.status, 'active')));
   const linked = await db
     .select({ goalId: missions.goalId })
     .from(missions)

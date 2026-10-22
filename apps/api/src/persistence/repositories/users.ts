@@ -14,7 +14,10 @@ export async function findUser(db: DbOrTx, id: string) {
 }
 
 export async function findUserByEmail(db: DbOrTx, email: string) {
-  const [u] = await db.select().from(users).where(sql`lower(${users.email}) = lower(${email})`);
+  const [u] = await db
+    .select()
+    .from(users)
+    .where(sql`lower(${users.email}) = lower(${email})`);
   return u ?? null;
 }
 
@@ -45,13 +48,24 @@ export async function updateUser(db: DbOrTx, id: string, patch: UserPatch) {
 
 export function listUsersSummary(db: DbOrTx) {
   return db
-    .select({ id: users.id, email: users.email, displayName: users.displayName, role: users.role, isDemo: users.isDemo, disabledAt: users.disabledAt, createdAt: users.createdAt })
+    .select({
+      id: users.id,
+      email: users.email,
+      displayName: users.displayName,
+      role: users.role,
+      isDemo: users.isDemo,
+      disabledAt: users.disabledAt,
+      createdAt: users.createdAt,
+    })
     .from(users)
     .orderBy(asc(users.createdAt));
 }
 
 export async function findDemoUser(db: DbOrTx, email: string) {
-  const [u] = await db.select().from(users).where(and(eq(users.isDemo, true), sql`lower(${users.email}) = lower(${email})`));
+  const [u] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.isDemo, true), sql`lower(${users.email}) = lower(${email})`));
   return u ?? null;
 }
 

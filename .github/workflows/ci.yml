@@ -20,7 +20,7 @@ env:
 
 jobs:
   quality:
-    name: Qualidade (tipos e arquitetura)
+    name: Qualidade (formatação, tipos e arquitetura)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,6 +30,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
+      - name: Formatação (Prettier)
+        run: npm run format:check
       - name: Typecheck (todos os pacotes)
         run: npm run typecheck
       - name: Regras de arquitetura (ADR-001)

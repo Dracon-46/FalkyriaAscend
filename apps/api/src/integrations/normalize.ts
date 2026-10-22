@@ -135,7 +135,10 @@ export function normalizeLyfta(w: LyftaWorkout, timeZone: string, weightUnit: 'k
     elevationM: null,
     avgHeartRate: null,
     sets,
-    notes: [`Duração estimada: ${sets.length} séries × ${ESTIMATED_MINUTES_PER_SET} min (a API do Lyfta não informa duração).`, `Unidade de peso considerada: ${weightUnit}.`],
+    notes: [
+      `Duração estimada: ${sets.length} séries × ${ESTIMATED_MINUTES_PER_SET} min (a API do Lyfta não informa duração).`,
+      `Unidade de peso considerada: ${weightUnit}.`,
+    ],
   };
 }
 
@@ -152,7 +155,12 @@ export function normalizeHevy(w: HevyWorkout, timeZone: string): ExternalActivit
   for (const ex of w.exercises ?? []) {
     for (const s of ex.sets ?? []) {
       if (s.type === 'warmup' || !s.reps || s.reps <= 0) continue;
-      sets.push({ exerciseName: (ex.title ?? 'Exercício').trim(), reps: s.reps, weightKg: s.weight_kg ?? null, rir: s.rpe != null ? Math.max(0, Math.round(10 - s.rpe)) : null });
+      sets.push({
+        exerciseName: (ex.title ?? 'Exercício').trim(),
+        reps: s.reps,
+        weightKg: s.weight_kg ?? null,
+        rir: s.rpe != null ? Math.max(0, Math.round(10 - s.rpe)) : null,
+      });
     }
   }
   const start = w.start_time ? new Date(w.start_time) : null;

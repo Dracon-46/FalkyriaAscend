@@ -105,10 +105,16 @@ export function TrainingPage() {
 }
 
 function useTypes(includeArchived = false) {
-  return useQuery({ queryKey: ['activity-types', includeArchived], queryFn: () => api.get<ActivityType[]>(`/api/activity-types${includeArchived ? '?includeArchived=true' : ''}`) });
+  return useQuery({
+    queryKey: ['activity-types', includeArchived],
+    queryFn: () => api.get<ActivityType[]>(`/api/activity-types${includeArchived ? '?includeArchived=true' : ''}`),
+  });
 }
 function useExercises(includeArchived = false) {
-  return useQuery({ queryKey: ['exercises', includeArchived], queryFn: () => api.get<Exercise[]>(`/api/exercises${includeArchived ? '?includeArchived=true' : ''}`) });
+  return useQuery({
+    queryKey: ['exercises', includeArchived],
+    queryFn: () => api.get<Exercise[]>(`/api/exercises${includeArchived ? '?includeArchived=true' : ''}`),
+  });
 }
 
 // ------------------------------------------------------------------ Registrar
@@ -121,7 +127,18 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
   const types = useTypes();
   const exercises = useExercises();
   const [records, setRecords] = useState<string[]>([]);
-  const initial: ActivityForm = { typeId: '', title: null, date: me.today, durationMin: 45, distanceKm: null, elevationM: null, avgHeartRate: null, perceivedEffort: null, notes: null, sets: [] };
+  const initial: ActivityForm = {
+    typeId: '',
+    title: null,
+    date: me.today,
+    durationMin: 45,
+    distanceKm: null,
+    elevationM: null,
+    avgHeartRate: null,
+    perceivedEffort: null,
+    notes: null,
+    sets: [],
+  };
   const form = useForm(activityInput, initial);
   const v = form.values;
   const type = types.data?.find((t) => t.id === v.typeId);
@@ -154,7 +171,11 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
       </Panel>
     );
 
-  const setRow = (i: number, patch: Partial<(typeof sets)[number]>) => form.set('sets', sets.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+  const setRow = (i: number, patch: Partial<(typeof sets)[number]>) =>
+    form.set(
+      'sets',
+      sets.map((s, j) => (j === i ? { ...s, ...patch } : s)),
+    );
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -177,16 +198,60 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
               error={form.errors.typeId}
               options={(types.data ?? []).map((t) => ({ value: t.id, label: `${t.name} (${ACTIVITY_CATEGORY_LABELS[t.category]})` }))}
             />
-            <Input label="Data" type="date" value={v.date ?? ''} max={me.today} onChange={(e) => form.set('date', e.target.value || null)} error={form.errors.date} />
-            <Input label="Duração (min)" type="number" min={1} max={1440} value={v.durationMin ?? ''} onChange={(e) => form.set('durationMin', Number(e.target.value))} error={form.errors.durationMin} />
+            <Input
+              label="Data"
+              type="date"
+              value={v.date ?? ''}
+              max={me.today}
+              onChange={(e) => form.set('date', e.target.value || null)}
+              error={form.errors.date}
+            />
+            <Input
+              label="Duração (min)"
+              type="number"
+              min={1}
+              max={1440}
+              value={v.durationMin ?? ''}
+              onChange={(e) => form.set('durationMin', Number(e.target.value))}
+              error={form.errors.durationMin}
+            />
           </div>
-          <Input label="Título (opcional)" value={v.title ?? ''} onChange={(e) => form.set('title', e.target.value || null)} placeholder="Ex.: Treino A — empurrar" />
+          <Input
+            label="Título (opcional)"
+            value={v.title ?? ''}
+            onChange={(e) => form.set('title', e.target.value || null)}
+            placeholder="Ex.: Treino A — empurrar"
+          />
           <div className="grid gap-3 sm:grid-cols-4">
             {usesDistance && (
-              <Input label="Distância (km)" type="number" min={0} step="0.01" value={v.distanceKm ?? ''} onChange={(e) => form.set('distanceKm', numOrNull(e.target.value))} error={form.errors.distanceKm} />
+              <Input
+                label="Distância (km)"
+                type="number"
+                min={0}
+                step="0.01"
+                value={v.distanceKm ?? ''}
+                onChange={(e) => form.set('distanceKm', numOrNull(e.target.value))}
+                error={form.errors.distanceKm}
+              />
             )}
-            {usesDistance && <Input label="Elevação (m)" type="number" min={0} value={v.elevationM ?? ''} onChange={(e) => form.set('elevationM', numOrNull(e.target.value))} />}
-            <Input label="FC média (bpm)" type="number" min={30} max={250} value={v.avgHeartRate ?? ''} onChange={(e) => form.set('avgHeartRate', numOrNull(e.target.value))} error={form.errors.avgHeartRate} />
+            {usesDistance && (
+              <Input
+                label="Elevação (m)"
+                type="number"
+                min={0}
+                value={v.elevationM ?? ''}
+                onChange={(e) => form.set('elevationM', numOrNull(e.target.value))}
+              />
+            )}
+            <Input
+              label="FC média (bpm)"
+              type="number"
+              min={30}
+              max={250}
+              value={v.avgHeartRate ?? ''}
+              onChange={(e) => form.set('avgHeartRate', numOrNull(e.target.value))}
+              error={form.errors.avgHeartRate}
+            />
             <Select
               label="Esforço percebido"
               value={v.perceivedEffort == null ? '' : String(v.perceivedEffort)}
@@ -206,7 +271,10 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
               <legend className="field-label">Séries</legend>
               {(exercises.data ?? []).length === 0 && <p className="text-sm text-faint">Cadastre exercícios na aba "Tipos e exercícios".</p>}
               {sets.map((s, i) => (
-                <div key={i} className="grid grid-cols-2 gap-2 rounded-[var(--radius-sm)] border border-line p-2 sm:grid-cols-[1fr_5rem_6rem_5rem_auto] sm:items-end">
+                <div
+                  key={i}
+                  className="grid grid-cols-2 gap-2 rounded-[var(--radius-sm)] border border-line p-2 sm:grid-cols-[1fr_5rem_6rem_5rem_auto] sm:items-end"
+                >
                   <Select
                     className="col-span-2 sm:col-span-1"
                     label="Exercício"
@@ -217,20 +285,54 @@ function RegisterTab({ onDone }: { onDone: () => void }) {
                     options={(exercises.data ?? []).map((x) => ({ value: x.id, label: x.name }))}
                   />
                   <Input label="Reps" type="number" min={0} value={s.reps ?? ''} onChange={(e) => setRow(i, { reps: Number(e.target.value) })} />
-                  <Input label="Carga (kg)" type="number" min={0} step="0.5" value={s.weightKg ?? ''} onChange={(e) => setRow(i, { weightKg: numOrNull(e.target.value) })} />
+                  <Input
+                    label="Carga (kg)"
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={s.weightKg ?? ''}
+                    onChange={(e) => setRow(i, { weightKg: numOrNull(e.target.value) })}
+                  />
                   <Input label="RIR" type="number" min={0} max={10} value={s.rir ?? ''} onChange={(e) => setRow(i, { rir: numOrNull(e.target.value) })} />
                   <div className="flex items-end gap-1 pb-0.5">
-                    <Button variant="ghost" icon="plus" aria-label="Duplicar série" title="Duplicar série" onClick={() => form.set('sets', [...sets.slice(0, i + 1), { ...s }, ...sets.slice(i + 1)])} />
-                    <Button variant="ghost" icon="trash" aria-label="Remover série" onClick={() => form.set('sets', sets.filter((_, j) => j !== i))} />
+                    <Button
+                      variant="ghost"
+                      icon="plus"
+                      aria-label="Duplicar série"
+                      title="Duplicar série"
+                      onClick={() => form.set('sets', [...sets.slice(0, i + 1), { ...s }, ...sets.slice(i + 1)])}
+                    />
+                    <Button
+                      variant="ghost"
+                      icon="trash"
+                      aria-label="Remover série"
+                      onClick={() =>
+                        form.set(
+                          'sets',
+                          sets.filter((_, j) => j !== i),
+                        )
+                      }
+                    />
                   </div>
                 </div>
               ))}
-              <Button size="sm" icon="plus" disabled={(exercises.data ?? []).length === 0} onClick={() => form.set('sets', [...sets, { exerciseId: sets.at(-1)?.exerciseId ?? exercises.data?.[0]?.id ?? '', reps: 8, weightKg: sets.at(-1)?.weightKg ?? null, rir: null }])}>
+              <Button
+                size="sm"
+                icon="plus"
+                disabled={(exercises.data ?? []).length === 0}
+                onClick={() =>
+                  form.set('sets', [
+                    ...sets,
+                    { exerciseId: sets.at(-1)?.exerciseId ?? exercises.data?.[0]?.id ?? '', reps: 8, weightKg: sets.at(-1)?.weightKg ?? null, rir: null },
+                  ])
+                }
+              >
                 Adicionar série
               </Button>
               {sets.length > 0 && (
                 <p className="text-xs text-faint">
-                  Volume: <span className="num">{fmt(sets.reduce((a, s) => a + Number(s.reps ?? 0) * Number(s.weightKg ?? 0), 0))} kg</span> em {sets.length} séries.
+                  Volume: <span className="num">{fmt(sets.reduce((a, s) => a + Number(s.reps ?? 0) * Number(s.weightKg ?? 0), 0))} kg</span> em {sets.length}{' '}
+                  séries.
                 </p>
               )}
             </fieldset>
@@ -283,7 +385,10 @@ function ActivitiesTab() {
   const confirm = useConfirm();
   const qc = useQueryClient();
   const list = useQuery({ queryKey: ['activities'], queryFn: () => api.get<ActivityRow[]>('/api/activities?limit=200') });
-  const prod = useQuery({ queryKey: ['stats', 'productivity', 'training-90'], queryFn: () => api.get<Productivity>('/api/stats/productivity?granularity=week&days=90') });
+  const prod = useQuery({
+    queryKey: ['stats', 'productivity', 'training-90'],
+    queryFn: () => api.get<Productivity>('/api/stats/productivity?granularity=week&days=90'),
+  });
   const [open, setOpen] = useState<string | null>(null);
   const remove = useMutation({
     mutationFn: (id: string) => api.del(`/api/activities/${id}`),
@@ -315,7 +420,12 @@ function ActivitiesTab() {
               />
               <div className="divider my-3" />
               <p className="mb-1 text-xs text-faint">Distância semanal (km)</p>
-              <TimeSeriesChart data={prod.data!.training} granularity="week" height={140} series={[{ key: 'distanceKm', label: 'Distância', type: 'area', unit: 'km' }]} />
+              <TimeSeriesChart
+                data={prod.data!.training}
+                granularity="week"
+                height={140}
+                series={[{ key: 'distanceKm', label: 'Distância', type: 'area', unit: 'km' }]}
+              />
             </>
           )}
         </Panel>
@@ -353,7 +463,14 @@ function ActivitiesTab() {
                   <Badge tone={a.source === 'manual' ? 'muted' : a.source === 'demo' ? 'warning' : 'info'}>{SOURCE_LABEL[a.source] ?? a.source}</Badge>
                   <div className="flex gap-1">
                     {(a.sets.length > 0 || a.notes) && (
-                      <Button size="sm" variant="ghost" icon={open === a.id ? 'chevron-down' : 'chevron-right'} aria-expanded={open === a.id} aria-label="Detalhes" onClick={() => setOpen(open === a.id ? null : a.id)} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        icon={open === a.id ? 'chevron-down' : 'chevron-right'}
+                        aria-expanded={open === a.id}
+                        aria-label="Detalhes"
+                        onClick={() => setOpen(open === a.id ? null : a.id)}
+                      />
                     )}
                     <Button
                       size="sm"
@@ -515,7 +632,12 @@ function TypesTab() {
     onError: (e) => toast.error(e),
   });
   const askDelete = async (path: string, id: string, name: string) => {
-    const r = await confirm({ title: 'Excluir', message: `Excluir "${name}"? Se houver histórico vinculado, a exclusão será recusada — arquive em vez disso.`, danger: true, confirmLabel: 'Excluir' });
+    const r = await confirm({
+      title: 'Excluir',
+      message: `Excluir "${name}"? Se houver histórico vinculado, a exclusão será recusada — arquive em vez disso.`,
+      danger: true,
+      confirmLabel: 'Excluir',
+    });
     if (r.ok) remove.mutate({ path, id });
   };
   const skillName = (id: string | null) => lookups.data?.skills.find((s) => s.id === id)?.name;
@@ -560,7 +682,14 @@ function TypesTab() {
                     <AttrWeights weights={t.attributeWeights} />
                   </div>
                   <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${t.name}`} onClick={() => setEditingType(t)} />
-                  <Button size="sm" variant="ghost" icon={t.archivedAt ? 'undo' : 'archive'} aria-label={t.archivedAt ? 'Desarquivar' : 'Arquivar'} title={t.archivedAt ? 'Desarquivar' : 'Arquivar'} onClick={() => archive.mutate({ path: 'activity-types', id: t.id, action: t.archivedAt ? 'unarchive' : 'archive' })} />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={t.archivedAt ? 'undo' : 'archive'}
+                    aria-label={t.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    title={t.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    onClick={() => archive.mutate({ path: 'activity-types', id: t.id, action: t.archivedAt ? 'unarchive' : 'archive' })}
+                  />
                   <Button size="sm" variant="ghost" icon="trash" aria-label={`Excluir ${t.name}`} onClick={() => askDelete('activity-types', t.id, t.name)} />
                 </li>
               ))}
@@ -593,7 +722,14 @@ function TypesTab() {
                     <p className="text-xs text-faint">{x.muscleGroup}</p>
                   </div>
                   <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${x.name}`} onClick={() => setEditingEx(x)} />
-                  <Button size="sm" variant="ghost" icon={x.archivedAt ? 'undo' : 'archive'} aria-label={x.archivedAt ? 'Desarquivar' : 'Arquivar'} title={x.archivedAt ? 'Desarquivar' : 'Arquivar'} onClick={() => archive.mutate({ path: 'exercises', id: x.id, action: x.archivedAt ? 'unarchive' : 'archive' })} />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={x.archivedAt ? 'undo' : 'archive'}
+                    aria-label={x.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    title={x.archivedAt ? 'Desarquivar' : 'Arquivar'}
+                    onClick={() => archive.mutate({ path: 'exercises', id: x.id, action: x.archivedAt ? 'unarchive' : 'archive' })}
+                  />
                   <Button size="sm" variant="ghost" icon="trash" aria-label={`Excluir ${x.name}`} onClick={() => askDelete('exercises', x.id, x.name)} />
                 </li>
               ))}
@@ -601,8 +737,12 @@ function TypesTab() {
           )}
         </Panel>
       </div>
-      {editingType && <TypeForm key={editingType === 'new' ? 'new' : editingType.id} type={editingType === 'new' ? null : editingType} onClose={() => setEditingType(null)} />}
-      {editingEx && <ExerciseForm key={editingEx === 'new' ? 'new' : editingEx.id} exercise={editingEx === 'new' ? null : editingEx} onClose={() => setEditingEx(null)} />}
+      {editingType && (
+        <TypeForm key={editingType === 'new' ? 'new' : editingType.id} type={editingType === 'new' ? null : editingType} onClose={() => setEditingType(null)} />
+      )}
+      {editingEx && (
+        <ExerciseForm key={editingEx === 'new' ? 'new' : editingEx.id} exercise={editingEx === 'new' ? null : editingEx} onClose={() => setEditingEx(null)} />
+      )}
     </div>
   );
 }
@@ -613,7 +753,9 @@ function TypeForm({ type, onClose }: { type: ActivityType | null; onClose: () =>
   const lookups = useLookups();
   const form = useForm(
     activityTypeInput,
-    type ? { name: type.name, category: type.category, icon: type.icon, skillId: type.skillId, intensity: type.intensity, attributeWeights: type.attributeWeights } : { name: '', category: 'other', icon: 'activity', skillId: null, intensity: 1, attributeWeights: {} },
+    type
+      ? { name: type.name, category: type.category, icon: type.icon, skillId: type.skillId, intensity: type.intensity, attributeWeights: type.attributeWeights }
+      : { name: '', category: 'other', icon: 'activity', skillId: null, intensity: 1, attributeWeights: {} },
   );
   const v = form.values;
   const save = useMutation({
@@ -641,8 +783,18 @@ function TypeForm({ type, onClose }: { type: ActivityType | null; onClose: () =>
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <Input label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} />
-          <Select label="Categoria" value={v.category} onChange={(e) => form.set('category', e.target.value as ActivityCategory)} options={ACTIVITY_CATEGORIES.map((c) => ({ value: c, label: ACTIVITY_CATEGORY_LABELS[c] }))} />
-          <Select label="Ícone" value={v.icon ?? 'activity'} onChange={(e) => form.set('icon', e.target.value)} options={ICON_NAMES.map((n) => ({ value: n, label: n }))} />
+          <Select
+            label="Categoria"
+            value={v.category}
+            onChange={(e) => form.set('category', e.target.value as ActivityCategory)}
+            options={ACTIVITY_CATEGORIES.map((c) => ({ value: c, label: ACTIVITY_CATEGORY_LABELS[c] }))}
+          />
+          <Select
+            label="Ícone"
+            value={v.icon ?? 'activity'}
+            onChange={(e) => form.set('icon', e.target.value)}
+            options={ICON_NAMES.map((n) => ({ value: n, label: n }))}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Input

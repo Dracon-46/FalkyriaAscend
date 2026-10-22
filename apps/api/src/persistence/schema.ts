@@ -134,7 +134,9 @@ export const userSettings = pgTable('user_settings', {
   theme: text('theme', { enum: THEMES }).notNull().default('medieval'),
   /** { base, accent, accent2, effects (0-1) } — preferência visual, validada por Zod. */
   customTheme: jsonb('custom_theme').$type<{ base: string; accent: string; accent2: string; effects: number }>(),
-  reducedMotion: text('reduced_motion', { enum: ['system', 'on', 'off'] }).notNull().default('system'),
+  reducedMotion: text('reduced_motion', { enum: ['system', 'on', 'off'] })
+    .notNull()
+    .default('system'),
   /** Lista ordenada de widgets visíveis e período padrão — preferência de interface. */
   dashboardWidgets: jsonb('dashboard_widgets').$type<{ widgets: Array<{ id: string; visible: boolean }>; periodDays: number }>(),
   /** Preferências de notificação por categoria e horário silencioso. */
@@ -161,7 +163,9 @@ export const gameConfigs = pgTable(
   },
   (t) => [
     uniqueIndex('game_configs_version_uq').on(t.userId, t.version),
-    uniqueIndex('game_configs_active_uq').on(t.userId).where(sql`${t.active}`),
+    uniqueIndex('game_configs_active_uq')
+      .on(t.userId)
+      .where(sql`${t.active}`),
   ],
 );
 
@@ -433,15 +437,14 @@ export const penaltyApplications = pgTable(
     targetItemId: uuid('target_item_id').references(() => items.id, { onDelete: 'set null' }),
     targetSkillId: uuid('target_skill_id').references(() => skills.id, { onDelete: 'set null' }),
     explanation: jsonb('explanation').$type<string[]>().notNull().default([]),
-    status: text('status', { enum: ['applied', 'reversed'] }).notNull().default('applied'),
+    status: text('status', { enum: ['applied', 'reversed'] })
+      .notNull()
+      .default('applied'),
     reversedAt: timestamp('reversed_at', { withTimezone: true }),
     reversalReason: text('reversal_reason'),
     createdAt: createdAt(),
   },
-  (t) => [
-    uniqueIndex('penalty_idem_uq').on(t.userId, t.idempotencyKey),
-    index('penalty_user_date_idx').on(t.userId, t.localDate),
-  ],
+  (t) => [uniqueIndex('penalty_idem_uq').on(t.userId, t.idempotencyKey), index('penalty_user_date_idx').on(t.userId, t.localDate)],
 );
 
 export const unavailability = pgTable(
@@ -564,10 +567,7 @@ export const missionTemplates = pgTable('mission_templates', {
   /** Pesos de atributos por código (blueprint copiado para cada instância). */
   attributeWeights: jsonb('attribute_weights').$type<Record<string, number>>().notNull().default({}),
   /** Objetivos-modelo (blueprint validado por Zod, copiado para cada instância). */
-  objectives: jsonb('objectives')
-    .$type<Array<{ title: string; metric: string; target: number; unit?: string; optional?: boolean }>>()
-    .notNull()
-    .default([]),
+  objectives: jsonb('objectives').$type<Array<{ title: string; metric: string; target: number; unit?: string; optional?: boolean }>>().notNull().default([]),
   penaltyRuleIds: jsonb('penalty_rule_ids').$type<string[]>().notNull().default([]),
   active: boolean('active').notNull().default(true),
   createdAt: createdAt(),
@@ -592,13 +592,17 @@ export const missions = pgTable(
     statusReason: text('status_reason'),
     startDate: date('start_date'),
     dueDate: date('due_date'),
-    completionMode: text('completion_mode', { enum: ['manual', 'auto'] }).notNull().default('manual'),
+    completionMode: text('completion_mode', { enum: ['manual', 'auto'] })
+      .notNull()
+      .default('manual'),
     rewardXpOverride: integer('reward_xp_override'),
     rewardCoinsOverride: integer('reward_coins_override'),
     isSecret: boolean('is_secret').notNull().default(false),
     evidenceRequired: boolean('evidence_required').notNull().default(false),
     evidence: text('evidence'),
-    source: text('source', { enum: ['manual', 'template', 'suggestion', 'season', 'demo'] }).notNull().default('manual'),
+    source: text('source', { enum: ['manual', 'template', 'suggestion', 'season', 'demo'] })
+      .notNull()
+      .default('manual'),
     priority: integer('priority').notNull().default(0),
     /** Pesos de atributos por código (códigos são imutáveis). */
     attributeWeights: jsonb('attribute_weights').$type<Record<string, number>>().notNull().default({}),
@@ -609,10 +613,7 @@ export const missions = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [
-    index('missions_user_status_idx').on(t.userId, t.status),
-    uniqueIndex('missions_template_period_uq').on(t.templateId, t.periodKey),
-  ],
+  (t) => [index('missions_user_status_idx').on(t.userId, t.status), uniqueIndex('missions_template_period_uq').on(t.templateId, t.periodKey)],
 );
 
 export const missionObjectives = pgTable('mission_objectives', {
@@ -659,7 +660,9 @@ export const missionEvents = pgTable(
     toStatus: text('to_status').notNull(),
     reason: text('reason'),
     data: jsonb('data'),
-    actor: text('actor', { enum: ['user', 'system', 'admin'] }).notNull().default('user'),
+    actor: text('actor', { enum: ['user', 'system', 'admin'] })
+      .notNull()
+      .default('user'),
     createdAt: createdAt(),
   },
   (t) => [index('mission_events_mission_idx').on(t.missionId)],
@@ -720,15 +723,14 @@ export const habitCheckins = pgTable(
     localDate: date('local_date').notNull(),
     status: text('status', { enum: CHECKIN_STATUSES }).notNull(),
     note: text('note'),
-    source: text('source', { enum: ['user', 'evaluation', 'admin', 'demo'] }).notNull().default('user'),
+    source: text('source', { enum: ['user', 'evaluation', 'admin', 'demo'] })
+      .notNull()
+      .default('user'),
     grantId: uuid('grant_id').references(() => rewardGrants.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [
-    uniqueIndex('habit_checkins_uq').on(t.habitId, t.localDate),
-    index('habit_checkins_user_date_idx').on(t.userId, t.localDate),
-  ],
+  (t) => [uniqueIndex('habit_checkins_uq').on(t.habitId, t.localDate), index('habit_checkins_user_date_idx').on(t.userId, t.localDate)],
 );
 
 // ---------------------------------------------------------------- Estudos
@@ -809,7 +811,9 @@ export const studySessions = pgTable(
   },
   (t) => [
     index('study_sessions_user_date_idx').on(t.userId, t.localDate),
-    uniqueIndex('study_sessions_ext_uq').on(t.userId, t.source, t.externalId).where(sql`${t.externalId} is not null`),
+    uniqueIndex('study_sessions_ext_uq')
+      .on(t.userId, t.source, t.externalId)
+      .where(sql`${t.externalId} is not null`),
     check('study_minutes_range', sql`${t.minutes} > 0 and ${t.minutes} <= 1440`),
   ],
 );
@@ -886,7 +890,9 @@ export const activities = pgTable(
   },
   (t) => [
     index('activities_user_date_idx').on(t.userId, t.localDate),
-    uniqueIndex('activities_ext_uq').on(t.userId, t.source, t.externalId).where(sql`${t.externalId} is not null`),
+    uniqueIndex('activities_ext_uq')
+      .on(t.userId, t.source, t.externalId)
+      .where(sql`${t.externalId} is not null`),
     check('activity_duration_range', sql`${t.durationMin} > 0 and ${t.durationMin} <= 1440`),
     check('activity_effort_range', sql`${t.perceivedEffort} is null or (${t.perceivedEffort} between 1 and 10)`),
   ],
@@ -993,7 +999,9 @@ export const purchases = pgTable(
     unitPrice: integer('unit_price').notNull(),
     total: integer('total').notNull(),
     idempotencyKey: text('idempotency_key').notNull(),
-    status: text('status', { enum: ['completed', 'refunded'] }).notNull().default('completed'),
+    status: text('status', { enum: ['completed', 'refunded'] })
+      .notNull()
+      .default('completed'),
     itemSnapshot: jsonb('item_snapshot').notNull(),
     refundedAt: timestamp('refunded_at', { withTimezone: true }),
     refundReason: text('refund_reason'),
@@ -1021,7 +1029,9 @@ export const inventoryItems = pgTable(
   },
   (t) => [
     index('inventory_user_idx').on(t.userId),
-    uniqueIndex('inventory_equipped_slot_uq').on(t.userId, t.slot).where(sql`${t.state} = 'equipped'`),
+    uniqueIndex('inventory_equipped_slot_uq')
+      .on(t.userId, t.slot)
+      .where(sql`${t.state} = 'equipped'`),
   ],
 );
 
@@ -1091,7 +1101,9 @@ export const notifications = pgTable(
   },
   (t) => [
     index('notifications_user_idx').on(t.userId, t.createdAt),
-    uniqueIndex('notifications_dedupe_uq').on(t.userId, t.dedupeKey).where(sql`${t.dedupeKey} is not null`),
+    uniqueIndex('notifications_dedupe_uq')
+      .on(t.userId, t.dedupeKey)
+      .where(sql`${t.dedupeKey} is not null`),
   ],
 );
 
@@ -1101,7 +1113,9 @@ export const integrationConnections = pgTable(
     id: id(),
     userId: userRef(),
     provider: text('provider', { enum: ['strava', 'lyfta', 'hevy'] }).notNull(),
-    status: text('status', { enum: ['pending', 'connected', 'error', 'revoked'] }).notNull().default('pending'),
+    status: text('status', { enum: ['pending', 'connected', 'error', 'revoked'] })
+      .notNull()
+      .default('pending'),
     externalAccountId: text('external_account_id'),
     scopes: text('scopes'),
     /** Credenciais cifradas com AES-256-GCM (chave em INTEGRATION_ENCRYPTION_KEY). */
@@ -1128,7 +1142,9 @@ export const integrationEvents = pgTable(
     externalId: text('external_id').notNull(),
     dedupeKey: text('dedupe_key').notNull(),
     payload: jsonb('payload'),
-    status: text('status', { enum: ['received', 'processed', 'ignored', 'error'] }).notNull().default('received'),
+    status: text('status', { enum: ['received', 'processed', 'ignored', 'error'] })
+      .notNull()
+      .default('received'),
     error: text('error'),
     receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
     processedAt: timestamp('processed_at', { withTimezone: true }),

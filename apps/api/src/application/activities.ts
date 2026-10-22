@@ -107,22 +107,30 @@ export async function recordActivity(tx: DbOrTx, userId: string, a: NormalizedAc
 
   const row = await insertActivity(tx, {
     userId,
-      typeId: a.typeId,
-      title: a.title ?? null,
-      localDate: a.date,
-      startedAt: a.startedAt ?? null,
-      durationMin: a.durationMin,
-      distanceKm: a.distanceKm ?? null,
-      elevationM: a.elevationM ?? null,
-      avgHeartRate: a.avgHeartRate ?? null,
-      perceivedEffort: a.perceivedEffort ?? null,
-      notes: a.notes ?? null,
-      source: a.source,
+    typeId: a.typeId,
+    title: a.title ?? null,
+    localDate: a.date,
+    startedAt: a.startedAt ?? null,
+    durationMin: a.durationMin,
+    distanceKm: a.distanceKm ?? null,
+    elevationM: a.elevationM ?? null,
+    avgHeartRate: a.avgHeartRate ?? null,
+    perceivedEffort: a.perceivedEffort ?? null,
+    notes: a.notes ?? null,
+    source: a.source,
     externalId: a.externalId ?? null,
   });
   await insertSets(
     tx,
-    (a.sets ?? []).map((s, i) => ({ userId, activityId: row.id, exerciseId: s.exerciseId, setIndex: i + 1, reps: s.reps, weightKg: s.weightKg ?? null, rir: s.rir ?? null })),
+    (a.sets ?? []).map((s, i) => ({
+      userId,
+      activityId: row.id,
+      exerciseId: s.exerciseId,
+      setIndex: i + 1,
+      reps: s.reps,
+      weightKg: s.weightKg ?? null,
+      rir: s.rir ?? null,
+    })),
   );
 
   const { config } = await getActiveConfig(tx, userId);

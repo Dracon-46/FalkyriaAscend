@@ -62,9 +62,22 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             </p>
           )}
           {effectiveMode === 'register' && (
-            <Input label="Nome do personagem" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} error={errors.displayName} autoComplete="nickname" />
+            <Input
+              label="Nome do personagem"
+              value={form.displayName}
+              onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+              error={errors.displayName}
+              autoComplete="nickname"
+            />
           )}
-          <Input label="E-mail" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} error={errors.email} autoComplete="email" />
+          <Input
+            label="E-mail"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            error={errors.email}
+            autoComplete="email"
+          />
           <Input
             label="Senha"
             type="password"
@@ -86,11 +99,17 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             <p className="text-center text-sm text-muted">
               {mode === 'login' ? (
                 <>
-                  Novo por aqui? <Link className="link" to="/cadastro">Criar conta</Link>
+                  Novo por aqui?{' '}
+                  <Link className="link" to="/cadastro">
+                    Criar conta
+                  </Link>
                 </>
               ) : (
                 <>
-                  Já tem conta? <Link className="link" to="/entrar">Entrar</Link>
+                  Já tem conta?{' '}
+                  <Link className="link" to="/entrar">
+                    Entrar
+                  </Link>
                 </>
               )}
             </p>

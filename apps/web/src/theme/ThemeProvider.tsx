@@ -4,11 +4,31 @@ import type { Settings, ThemeKey } from '../lib/types';
 const STORAGE_KEY = 'ascend.theme';
 
 export const THEME_META: Record<ThemeKey, { label: string; description: string; swatch: string[] }> = {
-  medieval: { label: 'Medieval', description: 'Reino de pedra, metal e pergaminho: ouro envelhecido, marfim, vermelho profundo.', swatch: ['#100d0a', '#c9a84c', '#9e2b25', '#ece3cf'] },
-  vampire: { label: 'Vampiros', description: 'Grimório gótico e aristocrático: preto profundo, prata envelhecida, bordô contido.', swatch: ['#08060a', '#b8b4c4', '#8f1d33', '#5b2a6e'] },
-  angel: { label: 'Anjos', description: 'Catedral celestial clara: marfim, ouro, prata e azul celeste, com raios de luz.', swatch: ['#f4efe4', '#8c6a1c', '#2f5f99', '#fffdf8'] },
-  system: { label: 'Sistema', description: 'Interface de status de anime: painéis translúcidos, bordas luminosas, ciano e violeta.', swatch: ['#04060c', '#3ad7ff', '#8b5cf6', '#dce8ff'] },
-  custom: { label: 'Personalizado', description: 'Escolha a base, as cores de destaque e a intensidade dos efeitos.', swatch: ['#1d1711', '#888', '#555', '#eee'] },
+  medieval: {
+    label: 'Medieval',
+    description: 'Reino de pedra, metal e pergaminho: ouro envelhecido, marfim, vermelho profundo.',
+    swatch: ['#100d0a', '#c9a84c', '#9e2b25', '#ece3cf'],
+  },
+  vampire: {
+    label: 'Vampiros',
+    description: 'Grimório gótico e aristocrático: preto profundo, prata envelhecida, bordô contido.',
+    swatch: ['#08060a', '#b8b4c4', '#8f1d33', '#5b2a6e'],
+  },
+  angel: {
+    label: 'Anjos',
+    description: 'Catedral celestial clara: marfim, ouro, prata e azul celeste, com raios de luz.',
+    swatch: ['#f4efe4', '#8c6a1c', '#2f5f99', '#fffdf8'],
+  },
+  system: {
+    label: 'Sistema',
+    description: 'Interface de status de anime: painéis translúcidos, bordas luminosas, ciano e violeta.',
+    swatch: ['#04060c', '#3ad7ff', '#8b5cf6', '#dce8ff'],
+  },
+  custom: {
+    label: 'Personalizado',
+    description: 'Escolha a base, as cores de destaque e a intensidade dos efeitos.',
+    swatch: ['#1d1711', '#888', '#555', '#eee'],
+  },
 };
 
 type ThemePrefs = Pick<Settings, 'theme' | 'customTheme' | 'reducedMotion'>;

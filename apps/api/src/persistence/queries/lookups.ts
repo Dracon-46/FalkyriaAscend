@@ -15,7 +15,10 @@ export async function formLookups(db: DbOrTx, userId: string) {
       .from(attributes)
       .where(eq(attributes.userId, userId))
       .orderBy(asc(attributes.sortOrder)),
-    db.select({ id: penaltyRules.id, name: penaltyRules.name, type: penaltyRules.type, active: penaltyRules.active }).from(penaltyRules).where(eq(penaltyRules.userId, userId)),
+    db
+      .select({ id: penaltyRules.id, name: penaltyRules.name, type: penaltyRules.type, active: penaltyRules.active })
+      .from(penaltyRules)
+      .where(eq(penaltyRules.userId, userId)),
     db.select({ id: skills.id, name: skills.name, parentId: skills.parentId }).from(skills).where(eq(skills.userId, userId)),
   ]);
   return { categories: cats, attributes: attrs, penaltyRules: rules, skills: sk };

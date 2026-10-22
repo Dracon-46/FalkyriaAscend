@@ -1,13 +1,7 @@
 import { computeFixedReward } from '@rpg/engine';
 import type { Season } from '../persistence/models';
 import { periodTotals } from '../persistence/queries/period-totals';
-import {
-  listRewardsOfSeason,
-  listSeasons,
-  listUnclaimedRewards,
-  markSeasonRewardClaimed,
-  updateSeasonRow,
-} from '../persistence/repositories/seasons';
+import { listRewardsOfSeason, listSeasons, listUnclaimedRewards, markSeasonRewardClaimed, updateSeasonRow } from '../persistence/repositories/seasons';
 import { type DbOrTx } from '../persistence/unit-of-work';
 import { getActiveConfig } from './config';
 import { notify } from './notifications';

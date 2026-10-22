@@ -74,7 +74,8 @@ function stripHidden(meta: ResourceMeta, row: Record<string, unknown>) {
 /** Traduz violações de integridade do banco em erros de aplicação. */
 function translateDbError(err: unknown, meta: ResourceMeta): never {
   const code = pgCode(err);
-  if (code === PG.foreignKeyViolation) throw conflict(`${meta.label}: há registros vinculados (ou a referência informada não existe). Arquive em vez de excluir.`);
+  if (code === PG.foreignKeyViolation)
+    throw conflict(`${meta.label}: há registros vinculados (ou a referência informada não existe). Arquive em vez de excluir.`);
   if (code === PG.uniqueViolation) throw conflict(`${meta.label}: valor duplicado em campo único.`);
   if (code === PG.checkViolation) throw unprocessable(`${meta.label}: valor viola uma regra de integridade.`);
   throw err;
@@ -163,7 +164,13 @@ async function validateSpecific(db: Db, meta: ResourceMeta, userId: string, valu
   if (meta.key === 'missions') {
     const { config } = await getActiveConfig(db, userId);
     const errors = validateDifficulty(
-      { type: merged.type as never, difficulty: merged.difficulty as never, startDate: merged.startDate as string | null, dueDate: merged.dueDate as string | null, objectiveCount: 99 },
+      {
+        type: merged.type as never,
+        difficulty: merged.difficulty as never,
+        startDate: merged.startDate as string | null,
+        dueDate: merged.dueDate as string | null,
+        objectiveCount: 99,
+      },
       config,
     ).filter((e) => !e.includes('objetivos'));
     if (errors.length) throw unprocessable(errors.join(' '));
@@ -242,7 +249,15 @@ export async function updateResourceRowAsAdmin(db: Db, admin: AdminActor, key: s
       if (!existing) throw notFound(meta.label);
       await validateSpecific(db, meta, admin.id, values, existing);
       const updated = await updateResourceRow(tx, meta, id, values);
-      await audit(tx, { actorId: admin.id, userId: meta.global ? id : userId, action: 'admin.update', entityType: meta.key, entityId: id, before: existing, after: updated });
+      await audit(tx, {
+        actorId: admin.id,
+        userId: meta.global ? id : userId,
+        action: 'admin.update',
+        entityType: meta.key,
+        entityId: id,
+        before: existing,
+        after: updated,
+      });
       return stripHidden(meta, updated);
     });
   } catch (err) {
@@ -297,7 +312,14 @@ export async function reverseGrantAsAdmin(db: Db, admin: AdminActor, grantId: st
   const userId = await targetUser(db, admin.id, input.userId);
   return inTransaction(db, async (tx) => {
     const r = await reverseGrant(tx, userId, grantId, input.reason, admin.id);
-    await audit(tx, { actorId: admin.id, userId, action: 'admin.grant_reverse', entityType: 'reward_grants', entityId: grantId, meta: { reason: input.reason } });
+    await audit(tx, {
+      actorId: admin.id,
+      userId,
+      action: 'admin.grant_reverse',
+      entityType: 'reward_grants',
+      entityId: grantId,
+      meta: { reason: input.reason },
+    });
     return r;
   });
 }
@@ -323,7 +345,15 @@ export async function reverseCoinTransaction(db: Db, admin: AdminActor, txId: st
       reversalOf: txId,
       actorId: admin.id,
     });
-    await audit(tx, { actorId: admin.id, userId, action: 'admin.coin_reverse', entityType: 'coin_transactions', entityId: txId, after: rev, meta: { reason: input.reason } });
+    await audit(tx, {
+      actorId: admin.id,
+      userId,
+      action: 'admin.coin_reverse',
+      entityType: 'coin_transactions',
+      entityId: txId,
+      after: rev,
+      meta: { reason: input.reason },
+    });
     return rev;
   });
 }
@@ -339,7 +369,15 @@ export async function revokeAchievement(db: Db, admin: AdminActor, unlockId: str
       if (g && !g.reversedAt) await reverseGrant(tx, userId, ua.grantId, `Conquista revogada: ${input.reason}`, admin.id);
     }
     await deleteUnlock(tx, unlockId);
-    await audit(tx, { actorId: admin.id, userId, action: 'admin.achievement_revoke', entityType: 'user_achievements', entityId: unlockId, before: ua, meta: { reason: input.reason } });
+    await audit(tx, {
+      actorId: admin.id,
+      userId,
+      action: 'admin.achievement_revoke',
+      entityType: 'user_achievements',
+      entityId: unlockId,
+      before: ua,
+      meta: { reason: input.reason },
+    });
     return { revoked: true };
   });
 }
@@ -376,9 +414,21 @@ export function listAllUsers(db: Db) {
 export async function createUserAsAdmin(db: Db, admin: AdminActor, input: RegisterInput & { role: 'admin' | 'user'; timezone: string }, now: Date) {
   const u = await inTransaction(db, async (tx) => {
     if (await findUserByEmail(tx, input.email)) throw conflict('E-mail já cadastrado.');
-    const created = await insertUser(tx, { email: input.email.toLowerCase(), passwordHash: await hashPassword(input.password), displayName: input.displayName, role: input.role });
+    const created = await insertUser(tx, {
+      email: input.email.toLowerCase(),
+      passwordHash: await hashPassword(input.password),
+      displayName: input.displayName,
+      role: input.role,
+    });
     await seedUserDefaults(tx, created.id, localDateOf(now, input.timezone));
-    await audit(tx, { actorId: admin.id, userId: created.id, action: 'admin.user_create', entityType: 'users', entityId: created.id, meta: { role: input.role } });
+    await audit(tx, {
+      actorId: admin.id,
+      userId: created.id,
+      action: 'admin.user_create',
+      entityType: 'users',
+      entityId: created.id,
+      meta: { role: input.role },
+    });
     return created;
   });
   return { id: u.id, email: u.email, displayName: u.displayName, role: u.role };

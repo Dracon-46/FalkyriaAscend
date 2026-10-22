@@ -35,12 +35,7 @@ export async function metricValue(db: DbOrTx, userId: string, metric: ObjectiveM
     case 'training_sessions':
     case 'training_minutes':
     case 'distance_km': {
-      const conds: SQL[] = [
-        eq(activities.userId, userId),
-        isNull(activities.deletedAt),
-        gte(activities.localDate, w.from),
-        lte(activities.localDate, w.to),
-      ];
+      const conds: SQL[] = [eq(activities.userId, userId), isNull(activities.deletedAt), gte(activities.localDate, w.from), lte(activities.localDate, w.to)];
       if (w.refId) conds.push(eq(activities.typeId, w.refId));
       const [r] = await db
         .select({
@@ -62,19 +57,20 @@ export async function metricValue(db: DbOrTx, userId: string, metric: ObjectiveM
         lte(habitCheckins.localDate, w.to),
       ];
       if (w.refId) conds.push(eq(habitCheckins.habitId, w.refId));
-      const [r] = await db.select({ n: count() }).from(habitCheckins).where(and(...conds));
+      const [r] = await db
+        .select({ n: count() })
+        .from(habitCheckins)
+        .where(and(...conds));
       return r?.n ?? 0;
     }
     case 'missions_completed': {
-      const conds: SQL[] = [
-        eq(missions.userId, userId),
-        eq(missions.status, 'completed'),
-        gte(missions.completedOn, w.from),
-        lte(missions.completedOn, w.to),
-      ];
+      const conds: SQL[] = [eq(missions.userId, userId), eq(missions.status, 'completed'), gte(missions.completedOn, w.from), lte(missions.completedOn, w.to)];
       if (w.refId) conds.push(eq(missions.categoryId, w.refId));
       if (w.excludeMissionId) conds.push(ne(missions.id, w.excludeMissionId));
-      const [r] = await db.select({ n: count() }).from(missions).where(and(...conds));
+      const [r] = await db
+        .select({ n: count() })
+        .from(missions)
+        .where(and(...conds));
       return r?.n ?? 0;
     }
   }

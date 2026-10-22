@@ -1,11 +1,5 @@
 import { addDays, levelFromXp, nextRank, rankForLevel, startOfIsoWeek } from '@rpg/engine';
-import {
-  missionsForDashboard,
-  recentAppliedPenalties,
-  recentFailedMissions,
-  recentGrants,
-  recentPersonalRecords,
-} from '../persistence/queries/dashboard';
+import { missionsForDashboard, recentAppliedPenalties, recentFailedMissions, recentGrants, recentPersonalRecords } from '../persistence/queries/dashboard';
 import { grantTotalsOn } from '../persistence/queries/stats';
 import { listActiveGoals } from '../persistence/repositories/goals';
 import { listObjectivesOf } from '../persistence/repositories/missions';
@@ -64,11 +58,16 @@ export async function buildDashboard(db: DbOrTx, userId: string, today: string) 
   const character = await characterSummary(db, userId, today);
 
   const active = await missionsForDashboard(db, userId, today);
-  const objectives = await listObjectivesOf(db, active.map((m) => m.id));
+  const objectives = await listObjectivesOf(
+    db,
+    active.map((m) => m.id),
+  );
   const withObjectives = active
     .filter((m) => !m.isSecret || m.status === 'completed')
     .map((m) => ({ ...m, objectives: objectives.filter((o) => o.missionId === m.id) }));
-  const todayMissions = withObjectives.filter((m) => m.type === 'daily' || m.dueDate === today || (m.status === 'completed' && m.completedOn === today && m.type !== 'weekly'));
+  const todayMissions = withObjectives.filter(
+    (m) => m.type === 'daily' || m.dueDate === today || (m.status === 'completed' && m.completedOn === today && m.type !== 'weekly'),
+  );
   const weeklyMissions = withObjectives.filter((m) => m.type === 'weekly' && m.status !== 'completed');
 
   const alerts: Array<{ kind: string; title: string; link: string; date?: string | null }> = [];
@@ -77,9 +76,15 @@ export async function buildDashboard(db: DbOrTx, userId: string, today: string) 
       alerts.push({ kind: m.dueDate === today ? 'due_today' : 'due_tomorrow', title: m.title, link: `/missoes/${m.id}`, date: m.dueDate });
     }
   }
-  for (const m of await recentFailedMissions(db, userId, addDays(today, -3))) alerts.push({ kind: m.status, title: m.title, link: `/missoes/${m.id}`, date: m.dueDate });
+  for (const m of await recentFailedMissions(db, userId, addDays(today, -3)))
+    alerts.push({ kind: m.status, title: m.title, link: `/missoes/${m.id}`, date: m.dueDate });
   for (const p of await recentAppliedPenalties(db, userId, addDays(today, -3))) {
-    alerts.push({ kind: 'penalty', title: `${p.sourceTitle}: ${p.type === 'coin_loss' ? `−${p.amount} moedas` : p.type}`, link: '/historico?aba=penalidades', date: p.localDate });
+    alerts.push({
+      kind: 'penalty',
+      title: `${p.sourceTitle}: ${p.type === 'coin_loss' ? `−${p.amount} moedas` : p.type}`,
+      link: '/historico?aba=penalidades',
+      date: p.localDate,
+    });
   }
 
   const goalRows = await listActiveGoals(db, userId);

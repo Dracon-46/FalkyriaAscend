@@ -57,7 +57,13 @@ export function saveHabit(db: Db, userId: string, data: HabitInput, existingId: 
     await validatePenaltyRules(tx, userId, data.penaltyRuleIds);
     const weights = await validateWeights(tx, userId, data.attributeWeights);
     const { penaltyRuleIds, ...rest } = data;
-    const values = { ...rest, attributeWeights: weights, endDate: rest.endDate ?? null, timeOfDay: rest.timeOfDay ?? null, categoryId: rest.categoryId ?? null };
+    const values = {
+      ...rest,
+      attributeWeights: weights,
+      endDate: rest.endDate ?? null,
+      timeOfDay: rest.timeOfDay ?? null,
+      categoryId: rest.categoryId ?? null,
+    };
     let before: Habit | null = null;
     let row: Habit;
     if (existingId) {
@@ -67,7 +73,15 @@ export function saveHabit(db: Db, userId: string, data: HabitInput, existingId: 
       row = await insertHabit(tx, { ...values, userId });
     }
     await replaceHabitRules(tx, userId, row.id, penaltyRuleIds);
-    await audit(tx, { actorId: userId, userId, action: existingId ? 'update' : 'create', entityType: 'habits', entityId: row.id, before, after: { ...row, penaltyRuleIds } });
+    await audit(tx, {
+      actorId: userId,
+      userId,
+      action: existingId ? 'update' : 'create',
+      entityType: 'habits',
+      entityId: row.id,
+      before,
+      after: { ...row, penaltyRuleIds },
+    });
     return row;
   });
 }

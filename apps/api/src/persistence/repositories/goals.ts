@@ -8,7 +8,10 @@ export type GoalPatch = Partial<Omit<NewGoal, 'id' | 'userId'>>;
 export type MilestonePatch = Partial<Omit<typeof goalMilestones.$inferInsert, 'id' | 'userId' | 'goalId'>>;
 
 export async function findGoal(db: DbOrTx, userId: string, id: string) {
-  const [g] = await db.select().from(goals).where(and(eq(goals.id, id), eq(goals.userId, userId)));
+  const [g] = await db
+    .select()
+    .from(goals)
+    .where(and(eq(goals.id, id), eq(goals.userId, userId)));
   return g ?? null;
 }
 
@@ -26,12 +29,18 @@ export function listGoals(db: DbOrTx, userId: string) {
 }
 
 export function listActiveGoals(db: DbOrTx, userId: string) {
-  return db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.status, 'active')));
+  return db
+    .select()
+    .from(goals)
+    .where(and(eq(goals.userId, userId), eq(goals.status, 'active')));
 }
 
 export async function countOwnedGoals(db: DbOrTx, userId: string, ids: string[]): Promise<number> {
   if (ids.length === 0) return 0;
-  const rows = await db.select({ id: goals.id }).from(goals).where(and(eq(goals.userId, userId), inArray(goals.id, ids)));
+  const rows = await db
+    .select({ id: goals.id })
+    .from(goals)
+    .where(and(eq(goals.userId, userId), inArray(goals.id, ids)));
   return rows.length;
 }
 

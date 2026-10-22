@@ -70,8 +70,15 @@ function CharacterChip() {
   const me = useSession();
   const c = me.character;
   return (
-    <NavLink to="/personagem" className="flex min-w-0 items-center gap-3 rounded-[var(--radius)] px-2 py-1 hover:bg-surface-hover" aria-label={`Nível ${c.level.level}, ${fmt(c.coins)} moedas`}>
-      <div className="avatar-frame grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 font-display text-sm" style={{ borderColor: c.equipped.frame?.color ?? 'var(--border-strong)' }}>
+    <NavLink
+      to="/personagem"
+      className="flex min-w-0 items-center gap-3 rounded-[var(--radius)] px-2 py-1 hover:bg-surface-hover"
+      aria-label={`Nível ${c.level.level}, ${fmt(c.coins)} moedas`}
+    >
+      <div
+        className="avatar-frame grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 font-display text-sm"
+        style={{ borderColor: c.equipped.frame?.color ?? 'var(--border-strong)' }}
+      >
         <span className="num text-accent">{c.level.level}</span>
       </div>
       <div className="hidden min-w-0 sm:block">
@@ -113,7 +120,16 @@ function Notifications({ open, onClose }: { open: boolean; onClose: () => void }
     onSuccess: () => qc.invalidateQueries(),
   });
   return (
-    <Modal open={open} onClose={onClose} title="Notificações" footer={<Button size="sm" onClick={() => readAll.mutate()}>Marcar todas como lidas</Button>}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Notificações"
+      footer={
+        <Button size="sm" onClick={() => readAll.mutate()}>
+          Marcar todas como lidas
+        </Button>
+      }
+    >
       {q.data?.items.length === 0 && <p className="text-muted">Nenhuma notificação ainda.</p>}
       <ul className="space-y-2">
         {q.data?.items.map((n) => (
@@ -144,7 +160,11 @@ export function QuickLog({ open, onClose }: { open: boolean; onClose: () => void
   const [attributeCode, setAttr] = useState('');
   const lookups = useQuery({ queryKey: ['lookups'], queryFn: () => api.get<Lookups>('/api/lookups'), enabled: open });
   const m = useMutation({
-    mutationFn: () => api.post<{ reward: Parameters<typeof toast.reward>[0]; after: Parameters<typeof toast.reward>[1] }>('/api/quick-log', { title, attributeCode: attributeCode || null }),
+    mutationFn: () =>
+      api.post<{ reward: Parameters<typeof toast.reward>[0]; after: Parameters<typeof toast.reward>[1] }>('/api/quick-log', {
+        title,
+        attributeCode: attributeCode || null,
+      }),
     onSuccess: (r) => {
       toast.reward(r.reward, r.after, 'Tarefa registrada');
       setTitle('');
@@ -171,7 +191,14 @@ export function QuickLog({ open, onClose }: { open: boolean; onClose: () => void
         }}
         className="space-y-3"
       >
-        <Input label="O que você fez?" placeholder="Ex.: lavar a louça, pagar contas" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus maxLength={160} />
+        <Input
+          label="O que você fez?"
+          placeholder="Ex.: lavar a louça, pagar contas"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          autoFocus
+          maxLength={160}
+        />
         <Select
           label="Atributo (opcional)"
           value={attributeCode}
@@ -179,7 +206,9 @@ export function QuickLog({ open, onClose }: { open: boolean; onClose: () => void
           placeholder="Disciplina (padrão)"
           options={(lookups.data?.attributes ?? []).map((a) => ({ value: a.code, label: `${a.name} (${a.code})` }))}
         />
-        <p className="text-xs text-faint">Recompensa pequena e decrescente para repetições no mesmo dia, com limite diário. Para atividades maiores, use Missões, Estudos ou Treinos.</p>
+        <p className="text-xs text-faint">
+          Recompensa pequena e decrescente para repetições no mesmo dia, com limite diário. Para atividades maiores, use Missões, Estudos ou Treinos.
+        </p>
       </form>
     </Modal>
   );
@@ -216,7 +245,11 @@ export function AppLayout() {
         <Brand />
         <NavItems admin={me.user.role === 'admin'} />
         <div className="mt-auto space-y-1 px-1">
-          {me.user.isDemo && <p className="badge w-full justify-center" style={{ color: 'var(--warning)' }}>Conta de demonstração</p>}
+          {me.user.isDemo && (
+            <p className="badge w-full justify-center" style={{ color: 'var(--warning)' }}>
+              Conta de demonstração
+            </p>
+          )}
           <Button variant="ghost" icon="logout" className="w-full justify-start" onClick={logout}>
             Sair
           </Button>
@@ -250,12 +283,21 @@ export function AppLayout() {
       </div>
 
       {/* Navegação compacta (celular) */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-bg/95 backdrop-blur lg:hidden" aria-label="Navegação rápida" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-bg/95 backdrop-blur lg:hidden"
+        aria-label="Navegação rápida"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         {[
           { to: '/', icon: 'dashboard', label: 'Painel' },
           { to: '/missoes', icon: 'swords', label: 'Missões' },
         ].map((n) => (
-          <NavLink key={n.to} to={n.to} end className={({ isActive }) => cx('flex flex-col items-center gap-0.5 py-2 text-[0.68rem]', isActive ? 'text-accent' : 'text-muted')}>
+          <NavLink
+            key={n.to}
+            to={n.to}
+            end
+            className={({ isActive }) => cx('flex flex-col items-center gap-0.5 py-2 text-[0.68rem]', isActive ? 'text-accent' : 'text-muted')}
+          >
             <Icon name={n.icon} size={20} />
             {n.label}
           </NavLink>
@@ -265,7 +307,10 @@ export function AppLayout() {
             <Icon name="plus" size={20} />
           </span>
         </button>
-        <NavLink to="/habitos" className={({ isActive }) => cx('flex flex-col items-center gap-0.5 py-2 text-[0.68rem]', isActive ? 'text-accent' : 'text-muted')}>
+        <NavLink
+          to="/habitos"
+          className={({ isActive }) => cx('flex flex-col items-center gap-0.5 py-2 text-[0.68rem]', isActive ? 'text-accent' : 'text-muted')}
+        >
           <Icon name="flame" size={20} />
           Hábitos
         </NavLink>

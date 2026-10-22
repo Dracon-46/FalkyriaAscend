@@ -82,9 +82,7 @@ function ShopTab() {
   if (q.isLoading) return <Loading />;
   if (q.isError || !q.data) return <ErrorState error={q.error} onRetry={() => q.refetch()} />;
   const { balance, items } = q.data;
-  const filtered = items.filter(
-    (i) => (!category || i.category === category) && (!kind || i.kind === kind) && (!onlyAffordable || (i.price ?? 0) <= balance),
-  );
+  const filtered = items.filter((i) => (!category || i.category === category) && (!kind || i.kind === kind) && (!onlyAffordable || (i.price ?? 0) <= balance));
   const daysFor = (id: string) => projection.data?.projection.items.find((p) => p.id === id)?.days;
 
   return (
@@ -96,16 +94,29 @@ function ShopTab() {
           </p>
           <Coins value={balance} className="text-2xl" />
         </div>
-        {projection.data && <p className="max-w-xl flex-1 text-xs text-faint">Estimativas de prazo: {projection.data.projection.assumption} Não são promessas.</p>}
+        {projection.data && (
+          <p className="max-w-xl flex-1 text-xs text-faint">Estimativas de prazo: {projection.data.projection.assumption} Não são promessas.</p>
+        )}
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por categoria">
-          <button type="button" aria-pressed={!category} onClick={() => setCategory('')} className={cx('badge !py-1 text-[0.8rem]', !category && '!border-accent !text-accent')}>
+          <button
+            type="button"
+            aria-pressed={!category}
+            onClick={() => setCategory('')}
+            className={cx('badge !py-1 text-[0.8rem]', !category && '!border-accent !text-accent')}
+          >
             Todas
           </button>
           {categories.map((c) => (
-            <button key={c} type="button" aria-pressed={category === c} onClick={() => setCategory(category === c ? '' : c)} className={cx('badge !py-1 text-[0.8rem]', category === c && '!border-accent !text-accent')}>
+            <button
+              key={c}
+              type="button"
+              aria-pressed={category === c}
+              onClick={() => setCategory(category === c ? '' : c)}
+              className={cx('badge !py-1 text-[0.8rem]', category === c && '!border-accent !text-accent')}
+            >
               {c}
             </button>
           ))}
@@ -134,7 +145,16 @@ function ShopTab() {
           ))}
         </div>
       )}
-      {buying && <PurchaseModal key={buying.id} item={buying} balance={balance} days={daysFor(buying.id)} assumption={projection.data?.projection.assumption} onClose={() => setBuying(null)} />}
+      {buying && (
+        <PurchaseModal
+          key={buying.id}
+          item={buying}
+          balance={balance}
+          days={daysFor(buying.id)}
+          assumption={projection.data?.projection.assumption}
+          onClose={() => setBuying(null)}
+        />
+      )}
     </>
   );
 }
@@ -163,7 +183,10 @@ function ShopCard({ item, balance, days, onBuy }: { item: ShopItem; balance: num
   return (
     <article className="panel panel-hover flex flex-col gap-3">
       <div className="flex items-start gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] border" style={{ borderColor: rarityColor(item.rarity), color: rarityColor(item.rarity) }}>
+        <div
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] border"
+          style={{ borderColor: rarityColor(item.rarity), color: rarityColor(item.rarity) }}
+        >
           <Icon name={item.icon} size={22} />
         </div>
         <div className="min-w-0 flex-1">
@@ -177,7 +200,11 @@ function ShopCard({ item, balance, days, onBuy }: { item: ShopItem; balance: num
       </div>
       {item.description && <p className="text-sm text-muted">{item.description}</p>}
       <Requirements item={item} />
-      {a.owned > 0 && <p className="text-xs text-success">Você possui {a.owned} {a.owned === 1 ? 'unidade' : 'unidades'}.</p>}
+      {a.owned > 0 && (
+        <p className="text-xs text-success">
+          Você possui {a.owned} {a.owned === 1 ? 'unidade' : 'unidades'}.
+        </p>
+      )}
       {!a.canBuy && a.blockers.length > 0 && (
         <ul className="space-y-0.5 text-xs text-warning">
           {a.blockers.map((b) => (
@@ -203,7 +230,19 @@ function ShopCard({ item, balance, days, onBuy }: { item: ShopItem; balance: num
   );
 }
 
-function PurchaseModal({ item, balance, days, assumption, onClose }: { item: ShopItem; balance: number; days: number | null | undefined; assumption?: string; onClose: () => void }) {
+function PurchaseModal({
+  item,
+  balance,
+  days,
+  assumption,
+  onClose,
+}: {
+  item: ShopItem;
+  balance: number;
+  days: number | null | undefined;
+  assumption?: string;
+  onClose: () => void;
+}) {
   const toast = useToast();
   const qc = useQueryClient();
   // Uma chave por modal aberto: cliques duplos e novas tentativas nunca cobram duas vezes.
@@ -214,7 +253,8 @@ function PurchaseModal({ item, balance, days, assumption, onClose }: { item: Sho
   const total = price * qty;
   const after = balance - total;
   const buy = useMutation({
-    mutationFn: () => api.post<{ replayed: boolean; after: AfterAction | null }>('/api/shop/purchase', { itemId: item.id, quantity: qty }, { 'idempotency-key': key }),
+    mutationFn: () =>
+      api.post<{ replayed: boolean; after: AfterAction | null }>('/api/shop/purchase', { itemId: item.id, quantity: qty }, { 'idempotency-key': key }),
     onSuccess: (body) => {
       if (body.replayed) toast.info('Esta compra já havia sido registrada: nenhuma cobrança duplicada.');
       else toast.success(`Compra realizada: ${item.name}`, `−${fmt(total)} moedas. O item está no seu inventário.`);
@@ -285,7 +325,9 @@ function PurchaseModal({ item, balance, days, assumption, onClose }: { item: Sho
         {after < 0 && (
           <p className="text-sm text-danger" role="alert">
             Saldo insuficiente.
-            {days !== undefined && qty === 1 && (days === null ? ' Ainda não há ritmo de ganho recente para estimar o prazo.' : ` Estimativa: cerca de ${days} dia(s) no ritmo atual.`)}
+            {days !== undefined &&
+              qty === 1 &&
+              (days === null ? ' Ainda não há ritmo de ganho recente para estimar o prazo.' : ` Estimativa: cerca de ${days} dia(s) no ritmo atual.`)}
           </p>
         )}
         {assumption && after < 0 && <p className="text-xs text-faint">Premissa da estimativa: {assumption}</p>}
@@ -339,7 +381,9 @@ function ManageTab() {
     <>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="space-y-1">
-          <p className="text-sm text-muted">Itens sem preço não aparecem na vitrine (ex.: títulos concedidos por conquistas e níveis). Itens com histórico são arquivados, não excluídos.</p>
+          <p className="text-sm text-muted">
+            Itens sem preço não aparecem na vitrine (ex.: títulos concedidos por conquistas e níveis). Itens com histórico são arquivados, não excluídos.
+          </p>
           <Checkbox label="Mostrar arquivados" checked={showArchived} onChange={setShowArchived} />
         </div>
         <Button variant="primary" icon="plus" onClick={() => setEditing('new')}>
@@ -377,9 +421,7 @@ function ManageTab() {
                   <td>{ITEM_KIND_LABELS[i.kind]}</td>
                   <td className="text-muted">{i.category}</td>
                   <td>{i.price == null ? <span className="text-faint">não vendido</span> : <Coins value={i.price} />}</td>
-                  <td>
-                    {i.archivedAt ? <Badge>Arquivado</Badge> : i.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="muted">Inativo</Badge>}
-                  </td>
+                  <td>{i.archivedAt ? <Badge>Arquivado</Badge> : i.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="muted">Inativo</Badge>}</td>
                   <td className="whitespace-nowrap text-right">
                     <Button size="sm" variant="ghost" icon="pencil" aria-label={`Editar ${i.name}`} onClick={() => setEditing(i)} />
                     <Button
@@ -389,7 +431,11 @@ function ManageTab() {
                       aria-label={i.archivedAt ? `Restaurar ${i.name}` : `Arquivar ${i.name}`}
                       onClick={async () => {
                         if (!i.archivedAt) {
-                          const r = await confirm({ title: 'Arquivar item', message: `"${i.name}" deixará de aparecer na loja. Compras e inventário existentes são preservados.`, confirmLabel: 'Arquivar' });
+                          const r = await confirm({
+                            title: 'Arquivar item',
+                            message: `"${i.name}" deixará de aparecer na loja. Compras e inventário existentes são preservados.`,
+                            confirmLabel: 'Arquivar',
+                          });
                           if (!r.ok) return;
                         }
                         archive.mutate({ id: i.id, on: !i.archivedAt });
@@ -437,7 +483,10 @@ const PAYLOAD_HINT: Partial<Record<ItemKind, string>> = {
 function ItemFormModal({ item, onClose }: { item: Item | null; onClose: () => void }) {
   const toast = useToast();
   const qc = useQueryClient();
-  const achievements = useQuery({ queryKey: ['achievement-definitions'], queryFn: () => api.get<Array<{ id: string; name: string }>>('/api/achievement-definitions') });
+  const achievements = useQuery({
+    queryKey: ['achievement-definitions'],
+    queryFn: () => api.get<Array<{ id: string; name: string }>>('/api/achievement-definitions'),
+  });
   const form = useForm(
     itemInput,
     item
@@ -509,7 +558,12 @@ function ItemFormModal({ item, onClose }: { item: Item | null; onClose: () => vo
         <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
           <Input label="Nome" value={v.name} onChange={(e) => form.set('name', e.target.value)} error={form.errors.name} autoFocus />
           <div>
-            <Select label="Ícone" value={v.icon ?? 'gem'} onChange={(e) => form.set('icon', e.target.value)} options={ICON_NAMES.map((n) => ({ value: n, label: n }))} />
+            <Select
+              label="Ícone"
+              value={v.icon ?? 'gem'}
+              onChange={(e) => form.set('icon', e.target.value)}
+              options={ICON_NAMES.map((n) => ({ value: n, label: n }))}
+            />
             <p className="mt-1 flex items-center gap-1 text-xs text-faint">
               Prévia: <Icon name={v.icon ?? 'gem'} size={16} className="text-accent" />
             </p>
@@ -518,25 +572,82 @@ function ItemFormModal({ item, onClose }: { item: Item | null; onClose: () => vo
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <Input label="Categoria" list="item-categories" value={v.category ?? ''} onChange={(e) => form.set('category', e.target.value)} error={form.errors.category} />
+            <Input
+              label="Categoria"
+              list="item-categories"
+              value={v.category ?? ''}
+              onChange={(e) => form.set('category', e.target.value)}
+              error={form.errors.category}
+            />
             <datalist id="item-categories">
               {CATEGORY_SUGGESTIONS.map((c) => (
                 <option key={c} value={c} />
               ))}
             </datalist>
           </div>
-          <Select label="Tipo" value={v.kind} onChange={(e) => form.set('kind', e.target.value as ItemKind)} options={ITEM_KINDS.map((k) => ({ value: k, label: ITEM_KIND_LABELS[k] }))} />
-          <Select label="Raridade" value={v.rarity ?? 'common'} onChange={(e) => form.set('rarity', e.target.value as ItemForm['rarity'])} options={RARITIES.map((r) => ({ value: r, label: RARITY_LABELS[r] }))} />
+          <Select
+            label="Tipo"
+            value={v.kind}
+            onChange={(e) => form.set('kind', e.target.value as ItemKind)}
+            options={ITEM_KINDS.map((k) => ({ value: k, label: ITEM_KIND_LABELS[k] }))}
+          />
+          <Select
+            label="Raridade"
+            value={v.rarity ?? 'common'}
+            onChange={(e) => form.set('rarity', e.target.value as ItemForm['rarity'])}
+            options={RARITIES.map((r) => ({ value: r, label: RARITY_LABELS[r] }))}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-4">
-          <Input label="Preço (moedas)" type="number" min={0} value={v.price ?? ''} onChange={(e) => form.set('price', numOrNull(e.target.value))} error={form.errors.price} hint="Vazio = não vendido na loja." />
-          <Input label="Nível mínimo" type="number" min={1} value={v.minLevel ?? ''} onChange={(e) => form.set('minLevel', numOrNull(e.target.value))} error={form.errors.minLevel} />
-          <Input label="Limite de compras" type="number" min={1} value={v.purchaseLimit ?? ''} onChange={(e) => form.set('purchaseLimit', numOrNull(e.target.value))} error={form.errors.purchaseLimit} />
-          <Input label="Recarga (dias)" type="number" min={1} value={v.cooldownDays ?? ''} onChange={(e) => form.set('cooldownDays', numOrNull(e.target.value))} error={form.errors.cooldownDays} />
+          <Input
+            label="Preço (moedas)"
+            type="number"
+            min={0}
+            value={v.price ?? ''}
+            onChange={(e) => form.set('price', numOrNull(e.target.value))}
+            error={form.errors.price}
+            hint="Vazio = não vendido na loja."
+          />
+          <Input
+            label="Nível mínimo"
+            type="number"
+            min={1}
+            value={v.minLevel ?? ''}
+            onChange={(e) => form.set('minLevel', numOrNull(e.target.value))}
+            error={form.errors.minLevel}
+          />
+          <Input
+            label="Limite de compras"
+            type="number"
+            min={1}
+            value={v.purchaseLimit ?? ''}
+            onChange={(e) => form.set('purchaseLimit', numOrNull(e.target.value))}
+            error={form.errors.purchaseLimit}
+          />
+          <Input
+            label="Recarga (dias)"
+            type="number"
+            min={1}
+            value={v.cooldownDays ?? ''}
+            onChange={(e) => form.set('cooldownDays', numOrNull(e.target.value))}
+            error={form.errors.cooldownDays}
+          />
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
-          <Input label="Disponível a partir de" type="datetime-local" value={toLocalInput(v.availableFrom)} onChange={(e) => form.set('availableFrom', fromLocalInput(e.target.value))} error={form.errors.availableFrom} />
-          <Input label="Disponível até" type="datetime-local" value={toLocalInput(v.availableUntil)} onChange={(e) => form.set('availableUntil', fromLocalInput(e.target.value))} error={form.errors.availableUntil} />
+          <Input
+            label="Disponível a partir de"
+            type="datetime-local"
+            value={toLocalInput(v.availableFrom)}
+            onChange={(e) => form.set('availableFrom', fromLocalInput(e.target.value))}
+            error={form.errors.availableFrom}
+          />
+          <Input
+            label="Disponível até"
+            type="datetime-local"
+            value={toLocalInput(v.availableUntil)}
+            onChange={(e) => form.set('availableUntil', fromLocalInput(e.target.value))}
+            error={form.errors.availableUntil}
+          />
           <Select
             label="Conquista exigida"
             value={v.requiredAchievementId ?? ''}

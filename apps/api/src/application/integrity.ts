@@ -35,9 +35,11 @@ export async function checkIntegrity(db: DbOrTx, userId: string): Promise<Integr
 
   const xp = await totalGrantedXp(db, userId);
   const cp = await findCharacterProgress(db, userId);
-  if ((cp?.lifetimeXp ?? 0) !== xp) issues.push({ area: 'Personagem', message: 'XP vitalício divergente da soma das recompensas', expected: xp, actual: cp?.lifetimeXp ?? 0 });
+  if ((cp?.lifetimeXp ?? 0) !== xp)
+    issues.push({ area: 'Personagem', message: 'XP vitalício divergente da soma das recompensas', expected: xp, actual: cp?.lifetimeXp ?? 0 });
   const expectedLevel = levelFromXp(xp, config.curves.character).level;
-  if ((cp?.level ?? 1) !== expectedLevel) issues.push({ area: 'Personagem', message: 'Nível divergente da curva vigente', expected: expectedLevel, actual: cp?.level });
+  if ((cp?.level ?? 1) !== expectedLevel)
+    issues.push({ area: 'Personagem', message: 'Nível divergente da curva vigente', expected: expectedLevel, actual: cp?.level });
 
   const attrSums = await attributeXpTotals(db, userId);
   for (const a of await listAttributes(db, userId)) {

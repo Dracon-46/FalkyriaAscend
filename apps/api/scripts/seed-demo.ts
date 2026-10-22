@@ -85,7 +85,19 @@ for (let i = 0; i < DAYS; i++) {
     for (const h of created) if (rand() < h.p) await checkin(tx, uid, h.id, { status: 'done' }, day).catch(() => undefined);
     if (rand() < 0.65) {
       const subject = subjects[Math.floor(rand() * subjects.length)]!;
-      await logStudySession(tx, uid, { subjectId: subject.id, minutes: 30 + Math.round(rand() * 60), activityType: 'reading', content: `Estudo de ${subject.name}`, unitsCompleted: rand() < 0.2 ? 1 : 0 }, day, { source: 'demo' });
+      await logStudySession(
+        tx,
+        uid,
+        {
+          subjectId: subject.id,
+          minutes: 30 + Math.round(rand() * 60),
+          activityType: 'reading',
+          content: `Estudo de ${subject.name}`,
+          unitsCompleted: rand() < 0.2 ? 1 : 0,
+        },
+        day,
+        { source: 'demo' },
+      );
     }
     const weekday = new Date(`${day}T00:00:00Z`).getUTCDay();
     if ([1, 3, 5].includes(weekday) && rand() < 0.85) {
@@ -108,25 +120,48 @@ for (let i = 0; i < DAYS; i++) {
       await recordActivity(tx, uid, { typeId: run.id, title: 'Corrida', date: day, durationMin: Math.round(km * 6), distanceKm: km, source: 'demo' }, day);
     }
     if (rand() < 0.5) {
-      const m = await createMission(tx, uid, {
-        title: ['Responder pendências', 'Revisar orçamento', 'Organizar arquivos', 'Avançar no projeto pessoal'][Math.floor(rand() * 4)]!,
-        description: '',
-        type: 'one_time',
-        difficulty: rand() < 0.3 ? 'hard' : 'moderate',
-        categoryId: null, goalId: null, seasonId: null, parentId: null,
-        startDate: day, dueDate: addDays(day, 2), completionMode: 'manual',
-        rewardXpOverride: null, rewardCoinsOverride: null, isSecret: false, evidenceRequired: false, priority: 0,
-        attributeWeights: { EXE: 0.7, ORG: 0.3 }, objectives: [], penaltyRuleIds: [],
-      }, { source: 'demo' });
+      const m = await createMission(
+        tx,
+        uid,
+        {
+          title: ['Responder pendências', 'Revisar orçamento', 'Organizar arquivos', 'Avançar no projeto pessoal'][Math.floor(rand() * 4)]!,
+          description: '',
+          type: 'one_time',
+          difficulty: rand() < 0.3 ? 'hard' : 'moderate',
+          categoryId: null,
+          goalId: null,
+          seasonId: null,
+          parentId: null,
+          startDate: day,
+          dueDate: addDays(day, 2),
+          completionMode: 'manual',
+          rewardXpOverride: null,
+          rewardCoinsOverride: null,
+          isSecret: false,
+          evidenceRequired: false,
+          priority: 0,
+          attributeWeights: { EXE: 0.7, ORG: 0.3 },
+          objectives: [],
+          penaltyRuleIds: [],
+        },
+        { source: 'demo' },
+      );
       if (m && rand() < 0.8) await completeMission(tx, uid, m.id, day);
     }
     if (i % 14 === 13) {
-      await logAssessment(tx, uid, { subjectId: subjects[0]!.id, title: `Simulado ${Math.ceil(i / 14)}`, date: day, score: 6 + Math.round(rand() * 4), maxScore: 10 }, day);
+      await logAssessment(
+        tx,
+        uid,
+        { subjectId: subjects[0]!.id, title: `Simulado ${Math.ceil(i / 14)}`, date: day, score: 6 + Math.round(rand() * 4), maxScore: 10 },
+        day,
+      );
     }
     if (rand() < 0.3) await quickLog(tx, uid, { title: 'Lavar a louça' }, day);
     await afterAction(tx, uid, day);
   });
 }
 await evaluateUser(db, uid, new Date());
-console.log(`Demonstração criada: ${DEMO_EMAIL} (senha: ${process.env.DEMO_PASSWORD ? '[DEMO_PASSWORD]' : 'demonstracao-falkyria'}) — ${DAYS} dias de histórico.`);
+console.log(
+  `Demonstração criada: ${DEMO_EMAIL} (senha: ${process.env.DEMO_PASSWORD ? '[DEMO_PASSWORD]' : 'demonstracao-falkyria'}) — ${DAYS} dias de histórico.`,
+);
 await pool.end();

@@ -54,7 +54,10 @@ export async function computeMetrics(db: DbOrTx, userId: string, needed: Achieve
     m.habit_checkins = r?.n ?? 0;
   }
   if (has('best_habit_streak')) {
-    const [r] = await db.select({ v: max(habits.bestStreak) }).from(habits).where(eq(habits.userId, userId));
+    const [r] = await db
+      .select({ v: max(habits.bestStreak) })
+      .from(habits)
+      .where(eq(habits.userId, userId));
     m.best_habit_streak = num(r?.v);
   }
   if (has('perfect_weeks')) {
@@ -106,23 +109,38 @@ export async function computeMetrics(db: DbOrTx, userId: string, needed: Achieve
     m.coins_earned = w?.totalEarned ?? 0;
   }
   if (has('purchases')) {
-    const [r] = await db.select({ n: count() }).from(purchases).where(and(eq(purchases.userId, userId), eq(purchases.status, 'completed')));
+    const [r] = await db
+      .select({ n: count() })
+      .from(purchases)
+      .where(and(eq(purchases.userId, userId), eq(purchases.status, 'completed')));
     m.purchases = r?.n ?? 0;
   }
   if (has('goals_completed')) {
-    const [r] = await db.select({ n: count() }).from(goals).where(and(eq(goals.userId, userId), eq(goals.status, 'completed')));
+    const [r] = await db
+      .select({ n: count() })
+      .from(goals)
+      .where(and(eq(goals.userId, userId), eq(goals.status, 'completed')));
     m.goals_completed = r?.n ?? 0;
   }
   if (has('seasons_completed')) {
-    const [r] = await db.select({ n: count() }).from(seasons).where(and(eq(seasons.userId, userId), eq(seasons.status, 'closed')));
+    const [r] = await db
+      .select({ n: count() })
+      .from(seasons)
+      .where(and(eq(seasons.userId, userId), eq(seasons.status, 'closed')));
     m.seasons_completed = r?.n ?? 0;
   }
   if (has('attribute_max_level')) {
-    const [r] = await db.select({ v: max(attributes.level) }).from(attributes).where(eq(attributes.userId, userId));
+    const [r] = await db
+      .select({ v: max(attributes.level) })
+      .from(attributes)
+      .where(eq(attributes.userId, userId));
     m.attribute_max_level = num(r?.v);
   }
   if (has('skills_level5')) {
-    const [r] = await db.select({ n: count() }).from(skills).where(and(eq(skills.userId, userId), sql`${skills.level} >= 5`));
+    const [r] = await db
+      .select({ n: count() })
+      .from(skills)
+      .where(and(eq(skills.userId, userId), sql`${skills.level} >= 5`));
     m.skills_level5 = r?.n ?? 0;
   }
   if (has('distinct_pages_visited')) {

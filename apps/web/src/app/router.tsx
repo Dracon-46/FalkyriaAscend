@@ -17,7 +17,12 @@ const page = (loader: () => Promise<Record<string, unknown>>, name: string) => {
 function Protected({ children }: { children: ReactNode }) {
   const me = useMe();
   if (me.isLoading) return <Loading label="Abrindo os portões…" />;
-  if (me.isError) return <div className="p-6"><ErrorState error={me.error} onRetry={() => me.refetch()} /></div>;
+  if (me.isError)
+    return (
+      <div className="p-6">
+        <ErrorState error={me.error} onRetry={() => me.refetch()} />
+      </div>
+    );
   if (!me.data) return <Navigate to="/entrar" replace />;
   return <>{children}</>;
 }

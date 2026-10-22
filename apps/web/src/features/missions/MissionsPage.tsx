@@ -12,7 +12,21 @@ import { CategorySelect, FormActions, PenaltyRulesPicker, useForm, WeekdayPicker
 import { DifficultyBadge, StatusBadge, TypeBadge } from '../../components/ui/domain';
 import { Icon } from '../../components/ui/Icon';
 import { Modal, useConfirm } from '../../components/ui/Modal';
-import { Badge, Button, Checkbox, EmptyState, ErrorState, Input, Loading, PageHeader, Panel, ProgressBar, Select, Tabs, Textarea } from '../../components/ui/primitives';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  EmptyState,
+  ErrorState,
+  Input,
+  Loading,
+  PageHeader,
+  Panel,
+  ProgressBar,
+  Select,
+  Tabs,
+  Textarea,
+} from '../../components/ui/primitives';
 import { useToast } from '../../components/ui/Toast';
 import { emptyMission, MissionForm } from './MissionForm';
 
@@ -82,7 +96,14 @@ export function MissionsPage() {
         <>
           <div className="mb-4 flex flex-wrap gap-2">
             <Input className="!w-64" placeholder="Buscar por nome…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar missões" />
-            <Select className="!w-48" value={type} onChange={(e) => setType(e.target.value)} placeholder="Todos os tipos" options={MISSION_TYPES.map((t) => ({ value: t, label: MISSION_TYPE_LABELS[t] }))} aria-label="Filtrar por tipo" />
+            <Select
+              className="!w-48"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              placeholder="Todos os tipos"
+              options={MISSION_TYPES.map((t) => ({ value: t, label: MISSION_TYPE_LABELS[t] }))}
+              aria-label="Filtrar por tipo"
+            />
           </div>
           {list.isLoading ? (
             <Loading />
@@ -90,7 +111,11 @@ export function MissionsPage() {
             <ErrorState error={list.error} onRetry={() => list.refetch()} />
           ) : list.data!.length === 0 ? (
             <Panel>
-              <EmptyState icon="map" title="Nenhuma missão aqui" action={tab === 'active' ? <Button onClick={() => setCreating(true)}>Criar missão</Button> : undefined}>
+              <EmptyState
+                icon="map"
+                title="Nenhuma missão aqui"
+                action={tab === 'active' ? <Button onClick={() => setCreating(true)}>Criar missão</Button> : undefined}
+              >
                 {tab === 'active' ? 'Crie missões únicas, recorrentes, de projeto ou desafios compostos.' : 'Nada neste filtro.'}
               </EmptyState>
             </Panel>
@@ -103,7 +128,15 @@ export function MissionsPage() {
           )}
         </>
       )}
-      {creating && <MissionForm key={prefill ? 'prefill' : 'new'} open onClose={closeCreate} initial={prefill ?? emptyMission(me.today)} title={prefill ? 'Nova missão (sugestão)' : 'Nova missão'} />}
+      {creating && (
+        <MissionForm
+          key={prefill ? 'prefill' : 'new'}
+          open
+          onClose={closeCreate}
+          initial={prefill ?? emptyMission(me.today)}
+          title={prefill ? 'Nova missão (sugestão)' : 'Nova missão'}
+        />
+      )}
     </>
   );
 }
@@ -146,7 +179,14 @@ function MissionCard({ m }: { m: Mission }) {
       )}
       {active && (
         <div className="mt-auto flex gap-2">
-          <Button size="sm" variant="primary" icon="check" disabled={progress !== null && progress < 1} loading={complete.isPending} onClick={() => complete.mutate()}>
+          <Button
+            size="sm"
+            variant="primary"
+            icon="check"
+            disabled={progress !== null && progress < 1}
+            loading={complete.isPending}
+            onClick={() => complete.mutate()}
+          >
             Concluir
           </Button>
           <Link to={`/missoes/${m.id}`} className="btn btn-ghost btn-sm">
@@ -170,7 +210,8 @@ function SuggestionsTab({ onAccept }: { onAccept: (m: MissionInput) => void }) {
   return (
     <>
       <p className="mb-3 text-sm text-muted">
-        Sugestões baseadas em áreas negligenciadas, metas sem missões, hábitos com baixa adesão e ritmo de estudo. Nada é criado automaticamente e nenhuma sugestão vem com penalidade.
+        Sugestões baseadas em áreas negligenciadas, metas sem missões, hábitos com baixa adesão e ritmo de estudo. Nada é criado automaticamente e nenhuma
+        sugestão vem com penalidade.
       </p>
       {q.data!.length === 0 ? (
         <Panel>
@@ -263,7 +304,12 @@ function TemplatesTab() {
                 variant="danger"
                 icon="trash"
                 onClick={async () => {
-                  const r = await confirm({ title: 'Excluir modelo', message: `Excluir "${t.title}"? Missões já geradas permanecem.`, danger: true, confirmLabel: 'Excluir' });
+                  const r = await confirm({
+                    title: 'Excluir modelo',
+                    message: `Excluir "${t.title}"? Missões já geradas permanecem.`,
+                    danger: true,
+                    confirmLabel: 'Excluir',
+                  });
                   if (r.ok) remove.mutate(t.id);
                 }}
               >
@@ -283,7 +329,20 @@ function TemplateForm({ template, onClose }: { template: Template | null; onClos
   const toast = useToast();
   const form = useForm(
     templateInput,
-    template ?? { title: '', description: '', type: 'weekly', difficulty: 'moderate', categoryId: null, recurrence: 'weekly', weekdaysMask: 127, durationDays: 7, attributeWeights: {}, objectives: [], penaltyRuleIds: [], active: true },
+    template ?? {
+      title: '',
+      description: '',
+      type: 'weekly',
+      difficulty: 'moderate',
+      categoryId: null,
+      recurrence: 'weekly',
+      weekdaysMask: 127,
+      durationDays: 7,
+      attributeWeights: {},
+      objectives: [],
+      penaltyRuleIds: [],
+      active: true,
+    },
   );
   const v = form.values;
   const save = useMutation({
@@ -310,9 +369,24 @@ function TemplateForm({ template, onClose }: { template: Template | null; onClos
         <Input label="Nome" value={v.title} onChange={(e) => form.set('title', e.target.value)} error={form.errors.title} />
         <Textarea label="Descrição" value={v.description ?? ''} onChange={(e) => form.set('description', e.target.value)} rows={2} />
         <div className="grid gap-3 sm:grid-cols-4">
-          <Select label="Tipo" value={v.type} onChange={(e) => form.set('type', e.target.value as TemplateInput['type'])} options={MISSION_TYPES.map((t) => ({ value: t, label: MISSION_TYPE_LABELS[t] }))} />
-          <Select label="Dificuldade" value={v.difficulty} onChange={(e) => form.set('difficulty', e.target.value as TemplateInput['difficulty'])} options={DIFFICULTIES.map((d) => ({ value: d, label: DIFFICULTY_LABELS[d] }))} />
-          <Select label="Recorrência" value={v.recurrence ?? 'none'} onChange={(e) => form.set('recurrence', e.target.value as TemplateInput['recurrence'])} options={Object.entries(RECURRENCE_LABELS).map(([value, label]) => ({ value, label }))} />
+          <Select
+            label="Tipo"
+            value={v.type}
+            onChange={(e) => form.set('type', e.target.value as TemplateInput['type'])}
+            options={MISSION_TYPES.map((t) => ({ value: t, label: MISSION_TYPE_LABELS[t] }))}
+          />
+          <Select
+            label="Dificuldade"
+            value={v.difficulty}
+            onChange={(e) => form.set('difficulty', e.target.value as TemplateInput['difficulty'])}
+            options={DIFFICULTIES.map((d) => ({ value: d, label: DIFFICULTY_LABELS[d] }))}
+          />
+          <Select
+            label="Recorrência"
+            value={v.recurrence ?? 'none'}
+            onChange={(e) => form.set('recurrence', e.target.value as TemplateInput['recurrence'])}
+            options={Object.entries(RECURRENCE_LABELS).map(([value, label]) => ({ value, label }))}
+          />
           <CategorySelect value={v.categoryId} onChange={(c) => form.set('categoryId', c)} />
         </div>
         {v.recurrence === 'daily' && (
@@ -325,15 +399,49 @@ function TemplateForm({ template, onClose }: { template: Template | null; onClos
           <legend className="field-label">Objetivos (copiados para cada missão gerada)</legend>
           {objectives.map((o, i) => (
             <div key={i} className="grid gap-2 sm:grid-cols-[1fr_12rem_6rem_auto] sm:items-end">
-              <Input label="Objetivo" value={o.title} onChange={(e) => form.set('objectives', objectives.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
+              <Input
+                label="Objetivo"
+                value={o.title}
+                onChange={(e) =>
+                  form.set(
+                    'objectives',
+                    objectives.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)),
+                  )
+                }
+              />
               <Select
                 label="Medido por"
                 value={o.metric}
-                onChange={(e) => form.set('objectives', objectives.map((x, j) => (j === i ? { ...x, metric: e.target.value as typeof o.metric } : x)))}
+                onChange={(e) =>
+                  form.set(
+                    'objectives',
+                    objectives.map((x, j) => (j === i ? { ...x, metric: e.target.value as typeof o.metric } : x)),
+                  )
+                }
                 options={OBJECTIVE_METRIC_VALUES.map((m) => ({ value: m, label: OBJECTIVE_METRIC_LABELS[m] }))}
               />
-              <Input label="Meta" type="number" value={o.target} onChange={(e) => form.set('objectives', objectives.map((x, j) => (j === i ? { ...x, target: Number(e.target.value) } : x)))} />
-              <Button variant="ghost" icon="trash" aria-label="Remover" onClick={() => form.set('objectives', objectives.filter((_, j) => j !== i))} />
+              <Input
+                label="Meta"
+                type="number"
+                value={o.target}
+                onChange={(e) =>
+                  form.set(
+                    'objectives',
+                    objectives.map((x, j) => (j === i ? { ...x, target: Number(e.target.value) } : x)),
+                  )
+                }
+              />
+              <Button
+                variant="ghost"
+                icon="trash"
+                aria-label="Remover"
+                onClick={() =>
+                  form.set(
+                    'objectives',
+                    objectives.filter((_, j) => j !== i),
+                  )
+                }
+              />
             </div>
           ))}
           <Button size="sm" icon="plus" onClick={() => form.set('objectives', [...objectives, { title: '', metric: 'manual', target: 1 }])}>
@@ -348,4 +456,3 @@ function TemplateForm({ template, onClose }: { template: Template | null; onClos
     </Modal>
   );
 }
-

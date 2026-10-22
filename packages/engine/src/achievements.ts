@@ -84,8 +84,7 @@ export function evaluateAchievement(criteria: AchievementCriteria, metrics: Achi
     const current = metrics[c.metric] ?? 0;
     return { metric: c.metric, current, target: c.gte, met: current >= c.gte };
   });
-  const progress =
-    conditions.reduce((acc, c) => acc + (c.target === 0 ? 1 : Math.min(1, c.current / c.target)), 0) / conditions.length;
+  const progress = conditions.reduce((acc, c) => acc + (c.target === 0 ? 1 : Math.min(1, c.current / c.target)), 0) / conditions.length;
   return { unlocked: conditions.every((c) => c.met), progress, conditions };
 }
 
