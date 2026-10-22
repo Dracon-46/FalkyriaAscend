@@ -1,5 +1,5 @@
 # Ascend — imagem de produção (API + interface servida pela API).
-FROM node:22-bookworm-slim AS build
+FROM node:25-bookworm-slim AS build
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 COPY package.json package-lock.json ./
@@ -11,7 +11,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:25-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production PORT=3333 HOST=0.0.0.0 WEB_DIST_DIR=/app/web MIGRATIONS_DIR=/app/api/drizzle
 COPY --from=build /app/package.json /app/package-lock.json ./
