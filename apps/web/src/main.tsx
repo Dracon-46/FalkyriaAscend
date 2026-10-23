@@ -7,6 +7,7 @@ import { router } from './app/router';
 import { useMe } from './app/session';
 import { ConfirmProvider } from './components/ui/Modal';
 import { ToastProvider } from './components/ui/Toast';
+import { AppMotion } from './lib/motion';
 import { restoreStoredTheme, ThemeSync } from './theme/ThemeProvider';
 import { registerPwa } from './pwa';
 import './index.css';
@@ -35,11 +36,13 @@ function Root() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <ConfirmProvider>
-          <Root />
-        </ConfirmProvider>
-      </ToastProvider>
+      <AppMotion>
+        <ToastProvider>
+          <ConfirmProvider>
+            <Root />
+          </ConfirmProvider>
+        </ToastProvider>
+      </AppMotion>
     </QueryClientProvider>
   </StrictMode>,
 );
