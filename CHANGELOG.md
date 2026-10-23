@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Corrigido
+- Primeira execução: o cadastro do fundador feito na tela de entrada (`/entrar`) enviava um login e falhava com "E-mail ou senha inválidos". Agora cadastra. A tela também espera o servidor responder (o plano gratuito do Render leva até um minuto para acordar) e oferece "Tentar de novo" se ele não responder, em vez de mostrar o login sem saber se já existe conta.
+
 ## [0.4.0] - 2026-10-23
 
 ### Adicionado

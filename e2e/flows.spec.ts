@@ -27,7 +27,7 @@ async function xpTotal(page: Page) {
 test('primeira execução: cadastro cria o administrador com conteúdo inicial', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/entrar/);
-  await page.goto('/cadastro');
+  // Caminho real de quem instala: o cadastro do fundador acontece na própria tela de entrada.
   await expect(page.getByText('Primeira execução')).toBeVisible();
   await page.getByLabel('Nome do personagem').fill('Fundador');
   await page.getByLabel('E-mail').fill(EMAIL);
