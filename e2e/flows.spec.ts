@@ -117,3 +117,27 @@ test('administração: CRUD genérico com integridade verificada', async ({ page
   await page.getByRole('button', { name: 'Verificar integridade' }).click();
   await expect(page.getByText(/conferem com o livro-razão/)).toBeVisible();
 });
+
+test('cadastro aberto cria usuário comum, sem acesso à administração', async ({ page }) => {
+  await page.goto('/entrar');
+  await page.getByRole('link', { name: 'Criar conta' }).click();
+  await expect(page).toHaveURL(/\/cadastro/);
+  await expect(page.getByText('Primeira execução')).toBeHidden();
+  await page.getByLabel('Nome do personagem').fill('Visitante');
+  await page.getByLabel('E-mail').fill('visitante@exemplo.com');
+  await page.getByLabel('Senha').fill('senha-do-visitante');
+  await page.getByRole('button', { name: 'Começar a jornada' }).click();
+  await expect(page.getByRole('heading', { name: 'Painel de comando' })).toBeVisible();
+
+  // Nada do Admin: nem no menu, nem pela URL, nem pela API.
+  await expect(page.getByRole('link', { name: 'Administração' })).toBeHidden();
+  await page.goto('/admin/users');
+  await expect(page).not.toHaveURL(/\/admin/);
+  const res = await page.request.get('/api/admin/meta');
+  expect(res.status()).toBe(403);
+
+  // Só os próprios dados: a missão concluída pelo fundador não existe para o visitante, em nenhum status.
+  const missions = await page.request.get('/api/missions?q=Organizar');
+  expect(missions.ok()).toBe(true);
+  expect(JSON.stringify(await missions.json())).not.toContain('Organizar a mesa de trabalho');
+});
