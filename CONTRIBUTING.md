@@ -57,9 +57,10 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 
 | Workflow | Quando | Jobs |
 |---|---|---|
-| `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright e imagem Docker |
+| `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright, APK Android de debug e imagem Docker |
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
 | `Release` | CI verde em push na `main`; manual | tag `vX.Y.Z` e GitHub Release com as notas do CHANGELOG |
+| `Android` | chamado pelo `Release`; manual (informando a tag) | gera o APK (assinado, se houver os segredos) e anexa à release |
 | `Wiki` | push na `main` que altere `docs/wiki`; manual | publica `docs/wiki` na wiki do GitHub (páginas removidas também saem) |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
@@ -68,7 +69,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 Isto é feito pelo dono do repositório na interface do GitHub:
 
 1. **Branch padrão:** `develop`.
-2. **Regras (Rulesets) para `main` e `develop`:** exigir PR; exigir os checks `Qualidade (formatação, lint, tipos e arquitetura)`, `Testes do motor`, `Testes de integração da API`, `Build de produção`, `Testes ponta a ponta (Playwright)` e `Git Flow e Conventional Commits`; exigir branch atualizada; exigir revisão de Code Owners; bloquear force push e exclusão; exigir histórico linear apenas em `develop`.
+2. **Regras (Rulesets) para `main` e `develop`:** exigir PR; exigir os checks `Qualidade (formatação, lint, tipos e arquitetura)`, `Testes do motor`, `Testes de integração da API`, `Build de produção`, `Testes ponta a ponta (Playwright)`, `App Android (APK de debug)` e `Git Flow e Conventional Commits`; exigir branch atualizada; exigir revisão de Code Owners; bloquear force push e exclusão; exigir histórico linear apenas em `develop`.
 3. **Merge:** permitir *squash* (padrão para `develop`) e *merge commit* (para `release/*` e `hotfix/*` em `main`); desativar *rebase merge*; apagar a branch após o merge.
 4. **Segurança:** ativar Dependabot alerts, secret scanning e push protection.
 
@@ -84,7 +85,7 @@ git push -u origin release/0.2.0     # PR para main (merge commit)
 # depois do merge: PR de main → develop para trazer de volta os ajustes da release
 ```
 
-A tag `v0.2.0` e a GitHub Release são criadas pelo workflow `Release` assim que a CI passa no commit da `main`. As notas vêm da seção `[0.2.0]` do CHANGELOG; sem essa seção, a release falha. Para publicar uma versão manualmente (por exemplo, uma anterior ao workflow), use **Actions → Release → Run workflow** com a versão e o SHA do commit.
+A tag `v0.2.0`, a GitHub Release e o APK Android anexado a ela são criados pelo workflow `Release` assim que a CI passa no commit da `main` (detalhes do APK e da assinatura em [docs/15-app-android.md](docs/15-app-android.md)). As notas vêm da seção `[0.2.0]` do CHANGELOG; sem essa seção, a release falha. Para publicar uma versão manualmente (por exemplo, uma anterior ao workflow), use **Actions → Release → Run workflow** com a versão e o SHA do commit.
 
 ## Wiki
 

@@ -5,6 +5,7 @@
 ```
 apps/api            API Fastify em camadas: http → casos de uso → serviços de domínio → repositórios e consultas
 apps/web            interface React (PWA)
+apps/mobile         app Android (Capacitor) que abre a interface publicada
 packages/engine     regras do jogo: curva de XP, recompensas, penalidades, sequências e economia (puro e testado)
 packages/contracts  esquemas de entrada compartilhados (Zod)
 e2e/                testes ponta a ponta (Playwright)
@@ -35,9 +36,10 @@ npm run test:e2e    # quando mudar interface ou fluxo
 
 | Workflow | O que faz |
 |---|---|
-| **CI** | Formatação, lint, tipos, arquitetura, testes do motor e da API, build, E2E e imagem Docker |
+| **CI** | Formatação, lint, tipos, arquitetura, testes do motor e da API, build, E2E, APK Android e imagem Docker |
 | **Convenções de PR** | Valida Git Flow e Conventional Commits |
 | **Release** | Depois da CI verde na `main`, cria a tag `vX.Y.Z` e a GitHub Release com as notas do CHANGELOG |
+| **Android** | Gera o APK e anexa à release |
 | **Wiki** | Publica `docs/wiki` nesta wiki a cada push na `main` |
 
 Guia completo: [CONTRIBUTING.md](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/CONTRIBUTING.md).

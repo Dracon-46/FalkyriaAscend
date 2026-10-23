@@ -10,6 +10,7 @@
 | Entender XP, níveis, atributos e moedas | [Como o jogo funciona](Como-o-jogo-funciona) |
 | Saber como missões, hábitos e penalidades funcionam | [Missões, hábitos e penalidades](Missoes-habitos-e-penalidades) |
 | Conhecer cada tela do app | [Áreas do app](Areas-do-app) |
+| Instalar o app no Android | [App Android](App-Android) |
 | Conectar Strava, Lyfta ou Hevy | [Integrações](Integracoes) |
 | Rodar localmente ou publicar | [Instalação e deploy](Instalacao-e-deploy) |
 | Contribuir com o código | [Desenvolvimento](Desenvolvimento) |

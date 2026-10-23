@@ -5,6 +5,7 @@
 - [Como o jogo funciona](Como-o-jogo-funciona)
 - [Missões, hábitos e penalidades](Missoes-habitos-e-penalidades)
 - [Áreas do app](Areas-do-app)
+- [App Android](App-Android)
 - [Integrações](Integracoes)
 
 **Técnico**

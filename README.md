@@ -7,6 +7,7 @@
 | Camada | Tecnologia |
 |---|---|
 | Interface | React 19, Vite 7, TypeScript, Tailwind CSS 4, TanStack Query, Recharts, PWA |
+| Android | Capacitor 8 (APK publicado em cada release) |
 | API | Node.js 22, Fastify 5, Drizzle ORM, Zod |
 | Banco | PostgreSQL 16 (migrações versionadas) |
 | Regras | `@rpg/engine`: motor de gamificação puro e testado |
@@ -15,6 +16,7 @@
 ```
 apps/api            API em camadas (http → casos de uso → serviços → repositórios), avaliador diário, admin, integrações
 apps/web            interface (16 áreas + administração)
+apps/mobile         app Android (Capacitor) que abre a interface publicada
 packages/engine     regras: curva de XP, recompensas, penalidades, sequências, economia
 packages/contracts  esquemas de entrada compartilhados (Zod)
 docs/               requisitos, arquitetura, modelo de dados, regras, simulações…
@@ -87,5 +89,6 @@ Documentação técnica:
 12. [Roadmap, pendências e ideias](docs/12-roadmap.md)
 13. [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)
 14. [Deploy (Supabase + Render)](docs/14-deploy.md)
+15. [App Android](docs/15-app-android.md)
 
 O protótipo HTML original foi preservado em `docs/legacy/`.

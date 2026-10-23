@@ -1,0 +1,23 @@
+{
+  "name": "@rpg/mobile",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "description": "App Android do Ascend (Capacitor): abre a interface publicada, com tela própria para quando não há conexão.",
+  "scripts": {
+    "prepare:www": "node scripts/prepare-www.mjs",
+    "sync": "npm run prepare:www && cap sync android",
+    "icons": "node scripts/icons.mjs && capacitor-assets generate --android --iconBackgroundColor '#14110d' --iconBackgroundColorDark '#14110d' --splashBackgroundColor '#0d0b09' --splashBackgroundColorDark '#0d0b09'",
+    "apk:debug": "npm run sync && cd android && ./gradlew assembleDebug",
+    "apk:release": "npm run sync && cd android && ./gradlew assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3"
+  }
+}

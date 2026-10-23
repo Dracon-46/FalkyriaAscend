@@ -32,7 +32,7 @@ Doente, viajando ou sem condições? Registre uma **indisponibilidade** em **Há
 
 ## 5. Instalar no celular
 
-- **Android:** instale o APK da [última release](https://github.com/Dracon-46/Sistema-Gameficado/releases/latest) ou use o PWA.
+- **Android:** instale o APK da [última release](https://github.com/Dracon-46/Sistema-Gameficado/releases/latest) (passo a passo em [App Android](App-Android)) ou use o PWA.
 - **PWA (qualquer celular):** abra o endereço do Ascend no navegador e escolha **Adicionar à tela inicial**.
 
 Próximo: [Como o jogo funciona](Como-o-jogo-funciona).
