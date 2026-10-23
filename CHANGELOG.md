@@ -4,6 +4,10 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Adicionado
+- Wiki do GitHub com guia de uso (primeiros passos, regras do jogo, missões e penalidades, áreas do app, integrações, deploy, desenvolvimento e perguntas frequentes), versionada em `docs/wiki` e publicada pelo workflow `Wiki`.
+- Código de conduta (`CODE_OF_CONDUCT.md`), baseado no Contributor Covenant 2.1.
+
 ### Corrigido
 - A data de cadastro do usuário passa a vir do relógio da aplicação, não do banco. A avaliação diária começa nesse dia, e a diferença fazia os testes de hábitos e penalidades falharem a partir de 23/10/2026 (o relógio dos testes começa em 21/10).
 
