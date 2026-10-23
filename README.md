@@ -57,7 +57,7 @@ npm run format:check && npm run lint && npm run typecheck && npm run lint:arch  
 
 ## Como contribuir
 
-O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`) e **Conventional Commits**, com CI obrigatória em todo pull request. Veja [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) e o [CHANGELOG](CHANGELOG.md).
+O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`) e **Conventional Commits**, com CI obrigatória em todo pull request. Veja [CONTRIBUTING.md](CONTRIBUTING.md), o [código de conduta](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) e o [CHANGELOG](CHANGELOG.md).
 
 ## Produção
 
@@ -70,6 +70,10 @@ docker compose --profile app up -d --build   # banco + aplicação em http://loc
 Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @rpg/api`. A API serve a interface, aplica as migrações e roda o avaliador diário. Backups: `apps/api/scripts/backup.sh` (ver `docs/10-backup-e-recuperacao.md`).
 
 ## Documentação
+
+Guia de uso (para quem joga): a **[Wiki](https://github.com/Dracon-46/Sistema-Gameficado/wiki)**, gerada a partir de [`docs/wiki`](docs/wiki).
+
+Documentação técnica:
 
 1. [Requisitos](docs/01-requisitos.md)
 2. [Arquitetura, SOLID e padrões](docs/02-arquitetura.md) e [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)

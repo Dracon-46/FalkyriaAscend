@@ -61,6 +61,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
 | `Release` | CI verde em push na `main`; manual | tag `vX.Y.Z` e GitHub Release com as notas do CHANGELOG |
 | `Android` | chamado pelo `Release`; manual (informando a tag) | gera o APK (assinado, se houver os segredos) e anexa à release |
+| `Wiki` | push na `main` que altere `docs/wiki`; manual | publica `docs/wiki` na wiki do GitHub (páginas removidas também saem) |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
 ## Configuração recomendada do repositório (Settings)
@@ -85,6 +86,10 @@ git push -u origin release/0.2.0     # PR para main (merge commit)
 ```
 
 A tag `v0.2.0`, a GitHub Release e o APK Android anexado a ela são criados pelo workflow `Release` assim que a CI passa no commit da `main` (detalhes do APK e da assinatura em [docs/15-app-android.md](docs/15-app-android.md)). As notas vêm da seção `[0.2.0]` do CHANGELOG; sem essa seção, a release falha. Para publicar uma versão manualmente (por exemplo, uma anterior ao workflow), use **Actions → Release → Run workflow** com a versão e o SHA do commit.
+
+## Wiki
+
+A wiki do GitHub é gerada a partir de `docs/wiki`: edite ali e abra um PR. Editar direto na wiki não adianta, porque a próxima publicação sobrescreve. Links entre páginas usam o nome da página sem extensão (`[Primeiros passos](Primeiros-passos)`).
 
 ## Arquitetura
 
