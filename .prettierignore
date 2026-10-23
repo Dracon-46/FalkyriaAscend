@@ -13,3 +13,4 @@ apps/mobile/android
 apps/mobile/assets
 apps/mobile/www
 apps/mobile/capacitor.config.json
+apps/site/src/generated

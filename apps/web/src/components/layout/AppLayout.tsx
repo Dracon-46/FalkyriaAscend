@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence, m } from 'motion/react';
 import { api } from '../../lib/api';
 import { APP_NAME, COMPANY_NAME } from '../../lib/brand';
 import { fmt, fmtDateTime } from '../../lib/format';
+import { CountUp } from '../../lib/motion';
 import type { Lookups } from '../../lib/types';
 import { useSession } from '../../app/session';
 import { Icon } from '../ui/Icon';
@@ -72,15 +74,24 @@ function CharacterChip() {
   return (
     <NavLink
       to="/personagem"
-      className="flex min-w-0 items-center gap-3 rounded-[var(--radius)] px-2 py-1 hover:bg-surface-hover"
+      className="relative flex min-w-0 items-center gap-3 rounded-[var(--radius)] px-2 py-1 hover:bg-surface-hover"
       aria-label={`Nível ${c.level.level}, ${fmt(c.coins)} moedas`}
     >
       <div
         className="avatar-frame grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 font-display text-sm"
         style={{ borderColor: c.equipped.frame?.color ?? 'var(--border-strong)' }}
       >
-        <span className="num text-accent">{c.level.level}</span>
+        <m.span
+          key={c.level.level}
+          className="num text-accent"
+          initial={{ scale: 1.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+        >
+          {c.level.level}
+        </m.span>
       </div>
+      <XpGain totalXp={c.level.totalXp} />
       <div className="hidden min-w-0 sm:block">
         <p className="truncate text-sm">
           {c.name}
@@ -89,15 +100,49 @@ function CharacterChip() {
         <div className="flex items-center gap-2">
           <ProgressBar xp value={c.level.progress} className="w-28" label="Progresso do nível" />
           <span className="num text-xs text-faint">
-            {fmt(c.level.xpIntoLevel)}/{fmt(c.level.xpForNextLevel)}
+            <CountUp value={c.level.xpIntoLevel} />/{fmt(c.level.xpForNextLevel)}
           </span>
         </div>
       </div>
       <span className="num ml-1 inline-flex items-center gap-1 text-sm" style={{ color: 'var(--coin)' }}>
         <Icon name="coins" size={15} />
-        {fmt(c.coins)}
+        <CountUp value={c.coins} />
       </span>
     </NavLink>
+  );
+}
+
+/** "+N XP" que sobe do avatar quando o XP vitalício aumenta (o valor vem sempre do servidor). */
+function XpGain({ totalXp }: { totalXp: number }) {
+  const previous = useRef(totalXp);
+  const [gain, setGain] = useState<{ id: number; amount: number } | null>(null);
+
+  useEffect(() => {
+    const amount = totalXp - previous.current;
+    previous.current = totalXp;
+    if (amount <= 0) return;
+    setGain({ id: totalXp, amount });
+    const timer = setTimeout(() => setGain(null), 1600);
+    return () => clearTimeout(timer);
+  }, [totalXp]);
+
+  return (
+    <AnimatePresence>
+      {gain && (
+        <m.span
+          key={gain.id}
+          aria-hidden
+          className="num pointer-events-none absolute top-0 left-0 z-10 rounded-full border px-1.5 text-xs font-semibold whitespace-nowrap"
+          style={{ color: 'var(--xp)', borderColor: 'var(--xp)', background: 'var(--surface)', boxShadow: 'var(--glow)' }}
+          initial={{ opacity: 0, y: 14, scale: 0.6 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+          +{fmt(gain.amount)} XP
+        </m.span>
+      )}
+    </AnimatePresence>
   );
 }
 

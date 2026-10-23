@@ -6,6 +6,7 @@
 apps/api            API Fastify em camadas: http → casos de uso → serviços de domínio → repositórios e consultas
 apps/web            interface React (PWA)
 apps/mobile         app Android (Capacitor) que abre a interface publicada
+apps/site           site de apresentação (GitHub Pages)
 packages/engine     regras do jogo: curva de XP, recompensas, penalidades, sequências e economia (puro e testado)
 packages/contracts  esquemas de entrada compartilhados (Zod)
 e2e/                testes ponta a ponta (Playwright)
@@ -41,5 +42,6 @@ npm run test:e2e    # quando mudar interface ou fluxo
 | **Release** | Depois da CI verde na `main`, cria a tag `vX.Y.Z` e a GitHub Release com as notas do CHANGELOG |
 | **Android** | Gera o APK e anexa à release |
 | **Wiki** | Publica `docs/wiki` nesta wiki a cada push na `main` |
+| **Site** | Publica o site de apresentação no GitHub Pages |
 
 Guia completo: [CONTRIBUTING.md](https://github.com/Dracon-46/FalkyriaAscend/blob/main/CONTRIBUTING.md).

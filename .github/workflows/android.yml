@@ -55,14 +55,38 @@ jobs:
         id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [[ -z "$KEYSTORE_BASE64" ]]; then
             echo "::warning::Sem ANDROID_KEYSTORE_BASE64: será publicado um APK de debug."
             echo "variant=debug" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
-          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/ascend-release.jks" >> "$GITHUB_ENV"
+          keystore="$RUNNER_TEMP/ascend-release.jks"
+          # Espaços e quebras de linha coladas junto com o segredo não fazem parte do base64.
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > "$keystore"
+
+          # Confere os segredos antes do build para apontar qual deles está errado (nenhum valor é exibido).
+          # Mesmo corte de espaços nas pontas que o build.gradle aplica.
+          trim() { local v="$1"; v="${v#"${v%%[![:space:]]*}"}"; printf '%s' "${v%"${v##*[![:space:]]}"}"; }
+          export STORE_PASSWORD="$(trim "$STORE_PASSWORD")" KEY_PASSWORD="$(trim "$KEY_PASSWORD")"
+          KEY_ALIAS="$(trim "$KEY_ALIAS")"
+          if ! keytool -list -keystore "$keystore" -storepass:env STORE_PASSWORD > /dev/null 2>&1; then
+            echo "::error::ANDROID_KEYSTORE_PASSWORD não abre o keystore de ANDROID_KEYSTORE_BASE64. Os dois precisam vir do mesmo arquivo de chave."
+            exit 1
+          fi
+          if ! keytool -list -keystore "$keystore" -storepass:env STORE_PASSWORD -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            echo "::error::O keystore não tem a chave indicada em ANDROID_KEY_ALIAS."
+            exit 1
+          fi
+          if [[ "$KEY_PASSWORD" != "$STORE_PASSWORD" ]] && keytool -list -keystore "$keystore" -storepass:env STORE_PASSWORD | grep -qi 'PKCS12'; then
+            echo "::error::Em keystore PKCS12 a senha da chave é a mesma do keystore: ANDROID_KEY_PASSWORD deve ser igual a ANDROID_KEYSTORE_PASSWORD."
+            exit 1
+          fi
+          echo "Keystore, alias e senhas conferem."
+          echo "ANDROID_KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
           echo "variant=release" >> "$GITHUB_OUTPUT"
       - name: Gerar APK
         working-directory: apps/mobile
@@ -71,7 +95,13 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           VARIANT: ${{ steps.signing.outputs.variant }}
-        run: npm run "apk:$VARIANT"
+        run: |
+          # Corta espaços e quebras de linha nas pontas aqui também, para tags antigas cujo build.gradle não corta.
+          trim() { local v="$1"; v="${v#"${v%%[![:space:]]*}"}"; printf '%s' "${v%"${v##*[![:space:]]}"}"; }
+          export ANDROID_KEYSTORE_PASSWORD="$(trim "$ANDROID_KEYSTORE_PASSWORD")"
+          export ANDROID_KEY_ALIAS="$(trim "$ANDROID_KEY_ALIAS")"
+          export ANDROID_KEY_PASSWORD="$(trim "$ANDROID_KEY_PASSWORD")"
+          npm run "apk:$VARIANT"
       - name: Anexar à release
         env:
           GH_TOKEN: ${{ github.token }}
