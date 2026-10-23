@@ -92,6 +92,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Site de apresentação
+        run: npm run build --workspace @rpg/site
 
   e2e:
     name: Testes ponta a ponta (Playwright)

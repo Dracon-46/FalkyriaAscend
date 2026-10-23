@@ -1,0 +1,20 @@
+// Fontes servidas pelo próprio site (Fontsource), só o subconjunto latino e os pesos usados pelos temas.
+import '@fontsource/cinzel/latin-400.css';
+import '@fontsource/cinzel/latin-600.css';
+import '@fontsource/cinzel/latin-700.css';
+import '@fontsource/eb-garamond/latin-400.css';
+import '@fontsource/eb-garamond/latin-500.css';
+import '@fontsource/eb-garamond/latin-400-italic.css';
+import '@fontsource/cinzel-decorative/latin-700.css';
+import '@fontsource/cormorant-garamond/latin-500.css';
+import '@fontsource/cormorant-garamond/latin-600.css';
+import '@fontsource/marcellus/latin-400.css';
+import '@fontsource/spectral/latin-400.css';
+import '@fontsource/spectral/latin-500.css';
+import '@fontsource/rajdhani/latin-600.css';
+import '@fontsource/rajdhani/latin-700.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-600.css';
