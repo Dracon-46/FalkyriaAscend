@@ -132,11 +132,11 @@ function XpGain({ totalXp }: { totalXp: number }) {
         <m.span
           key={gain.id}
           aria-hidden
-          className="num pointer-events-none absolute top-0 left-4 text-xs font-semibold whitespace-nowrap"
-          style={{ color: 'var(--xp)', textShadow: '0 0 8px var(--xp)' }}
-          initial={{ opacity: 0, y: 4, scale: 0.8 }}
-          animate={{ opacity: 1, y: -18, scale: 1 }}
-          exit={{ opacity: 0, y: -30 }}
+          className="num pointer-events-none absolute top-0 left-0 z-10 rounded-full border px-1.5 text-xs font-semibold whitespace-nowrap"
+          style={{ color: 'var(--xp)', borderColor: 'var(--xp)', background: 'var(--surface)', boxShadow: 'var(--glow)' }}
+          initial={{ opacity: 0, y: 14, scale: 0.6 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
           +{fmt(gain.amount)} XP
