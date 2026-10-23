@@ -37,7 +37,7 @@ As migrações são aplicadas automaticamente quando a API inicia. Não é preci
 | `INTEGRATION_ENCRYPTION_KEY` | gere com `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
 
 4. O deploy roda **a partir da `main`** e **só depois que a CI do commit passa** (`autoDeployTrigger: checksPass`). Ou seja, cada release do Git Flow publica sozinha.
-5. Abra a URL e cadastre-se: **o primeiro usuário vira administrador**. Novos cadastros ficam fechados (`ALLOW_REGISTRATION=false`).
+5. Abra a URL e cadastre-se: **o primeiro usuário vira administrador**. Os cadastros seguintes ficam abertos (`ALLOW_REGISTRATION=true`) e criam **usuários comuns**: cada um vê e altera só os próprios dados e não acessa a área de Administração. Para fechar novos cadastros, mude a variável para `false` no Render. Aí só o administrador cria contas, pelo Admin.
 6. No celular, abra a URL e use **Adicionar à tela inicial** para instalar o PWA.
 
 ### Conferir a produção

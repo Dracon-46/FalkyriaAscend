@@ -38,7 +38,7 @@ npm run db:migrate                 # aplica as migrações (a API também aplica
 npm run dev                        # API em :3333 e interface em http://localhost:5173
 ```
 
-O **primeiro cadastro** vira administrador. Depois disso, novos cadastros só funcionam com `ALLOW_REGISTRATION=true`, ou pelo Admin.
+O **primeiro cadastro** vira administrador. Com `ALLOW_REGISTRATION=true` (padrão no `render.yaml`), qualquer pessoa pode criar conta e vira **usuário comum**: só vê os próprios dados e não acessa o Admin. Com `false`, novas contas só pelo Admin.
 
 ### Dados de demonstração (separados dos reais)
 
