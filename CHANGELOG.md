@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Corrigido
+- APK assinado: espaços e quebras de linha coladas junto com os segredos da chave (`ANDROID_KEYSTORE_*`, `ANDROID_KEY_*`) passam a ser descartados, em vez de quebrar a assinatura.
+
 ## [0.3.0] - 2026-10-23
 
 ### Adicionado

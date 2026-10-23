@@ -61,7 +61,8 @@ jobs:
             echo "variant=debug" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
+          # Espaços e quebras de linha coladas junto com o segredo não fazem parte do base64.
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/ascend-release.jks" >> "$GITHUB_ENV"
           echo "variant=release" >> "$GITHUB_OUTPUT"
       - name: Gerar APK
