@@ -7,6 +7,10 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 ### Adicionado
 - Site de apresentação do Ascend (`apps/site`), publicado no GitHub Pages pelo workflow `Site`: daisyUI 5 com os temas do app, animações com GSAP (ScrollTrigger) e Motion, rolagem suave com Lenis, ícones Lucide e fontes servidas pelo próprio site (Fontsource). Tabelas, ranks e curva de XP são gerados a partir do `@rpg/engine` no build.
 
+### Corrigido
+- APK assinado: espaços e quebras de linha coladas junto com os segredos da chave (`ANDROID_KEYSTORE_*`, `ANDROID_KEY_*`) passam a ser descartados, em vez de quebrar a assinatura.
+- Workflow `Android`: antes do build, confere se a senha abre o keystore, se o alias existe e se a senha da chave bate, e diz qual segredo está errado (sem exibir valores).
+
 ## [0.3.0] - 2026-10-23
 
 ### Adicionado
