@@ -5,6 +5,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 ## [Não lançado]
 
 ### Adicionado
+- Site de apresentação do Ascend (`apps/site`), publicado no GitHub Pages pelo workflow `Site`: daisyUI 5 com os temas do app, animações com GSAP (ScrollTrigger) e Motion, rolagem suave com Lenis, ícones Lucide e fontes servidas pelo próprio site (Fontsource). Tabelas, ranks e curva de XP são gerados a partir do `@rpg/engine` no build.
+
+### Adicionado
 - App Android (`apps/mobile`, Capacitor 8): abre a interface publicada, com ícone, splash e tela própria sem conexão. O APK é compilado em todo PR e anexado a cada GitHub Release, assinado quando os segredos da chave estão configurados. Guia em `docs/15-app-android.md`.
 - Wiki do GitHub com guia de uso (primeiros passos, regras do jogo, missões e penalidades, áreas do app, integrações, deploy, desenvolvimento e perguntas frequentes), versionada em `docs/wiki` e publicada pelo workflow `Wiki`.
 - Código de conduta (`CODE_OF_CONDUCT.md`), baseado no Contributor Covenant 2.1.

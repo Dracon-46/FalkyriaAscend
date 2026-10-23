@@ -2,6 +2,8 @@
 
 **RPG pessoal de vida real, um produto Falkyria.** Ascend transforma rotina, estudos, trabalho, treinos, hábitos e objetivos em progressão de longo prazo: níveis com dificuldade crescente, atributos, maestria, missões, penalidades previsíveis, moedas, loja, conquistas, temporadas e estatísticas. A interface tem cinco temas (Medieval, Vampiros, Anjos, Sistema e Personalizado).
 
+**Conheça o projeto:** [dracon-46.github.io/FalkyriaAscend](https://dracon-46.github.io/FalkyriaAscend/)
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -17,6 +19,7 @@
 apps/api            API em camadas (http → casos de uso → serviços → repositórios), avaliador diário, admin, integrações
 apps/web            interface (16 áreas + administração)
 apps/mobile         app Android (Capacitor) que abre a interface publicada
+apps/site           site de apresentação (GitHub Pages): daisyUI, GSAP, Motion e Lenis
 packages/engine     regras: curva de XP, recompensas, penalidades, sequências, economia
 packages/contracts  esquemas de entrada compartilhados (Zod)
 docs/               requisitos, arquitetura, modelo de dados, regras, simulações…
