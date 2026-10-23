@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', 'apps/api/drizzle/**', 'docs/**', 'playwright-report/**', 'test-results/**', 'apps/web/dev-dist/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'apps/api/drizzle/**',
+      'docs/**',
+      'playwright-report/**',
+      'test-results/**',
+      'apps/web/dev-dist/**',
+      'apps/mobile/android/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Adicionado
+- App Android (`apps/mobile`, Capacitor 8): abre a interface publicada, com ícone, splash e tela própria sem conexão. O APK é compilado em todo PR e anexado a cada GitHub Release, assinado quando os segredos da chave estão configurados. Guia em `docs/15-app-android.md`.
+
 ### Alterado
 - Dependências atualizadas: react-router 8, lucide-react 1, @fastify/static 10, tsup 9, Playwright 1.64, Prettier 3.9 e typescript-eslint 8.72; Actions `checkout`, `setup-node` e `upload-artifact` v7, `docker/build-push-action` v7 e `docker/setup-buildx-action` v4.
 

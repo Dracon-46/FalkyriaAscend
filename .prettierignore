@@ -9,3 +9,7 @@ docs/legacy
 docs/simulacoes.md
 apps/web/public
 *.md
+apps/mobile/android
+apps/mobile/assets
+apps/mobile/www
+apps/mobile/capacitor.config.json

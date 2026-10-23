@@ -1,0 +1,87 @@
+name: Android
+
+# Gera o APK do app Android (apps/mobile) e anexa à GitHub Release da versão.
+# Chamado pelo workflow Release logo depois de publicar a tag; também pode ser disparado à mão
+# para (re)gerar o APK de uma release existente.
+#
+# Assinatura: com os segredos ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS e
+# ANDROID_KEY_PASSWORD, sai o APK de release assinado (atualiza por cima da versão instalada).
+# Sem eles, sai um APK de debug, que instala mas não atualiza versões assinadas.
+# URL aberta pelo app: variável do repositório ASCEND_APP_URL (padrão: o serviço do render.yaml).
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Tag da release (ex.: v0.3.0)'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag da release (ex.: v0.3.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: android-${{ inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: APK Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TAG: ${{ inputs.tag }}
+      ASCEND_APP_URL: ${{ vars.ASCEND_APP_URL }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - run: npm ci
+      - name: Preparar assinatura
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "$KEYSTORE_BASE64" ]]; then
+            echo "::warning::Sem ANDROID_KEYSTORE_BASE64: será publicado um APK de debug."
+            echo "variant=debug" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/ascend-release.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/ascend-release.jks" >> "$GITHUB_ENV"
+          echo "variant=release" >> "$GITHUB_OUTPUT"
+      - name: Gerar APK
+        working-directory: apps/mobile
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VARIANT: ${{ steps.signing.outputs.variant }}
+        run: npm run "apk:$VARIANT"
+      - name: Anexar à release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VARIANT: ${{ steps.signing.outputs.variant }}
+        run: |
+          src="apps/mobile/android/app/build/outputs/apk/$VARIANT/app-$VARIANT.apk"
+          name="Ascend-$TAG.apk"
+          [[ "$VARIANT" == "debug" ]] && name="Ascend-$TAG-debug.apk"
+          cp "$src" "$RUNNER_TEMP/$name"
+          gh release upload "$TAG" "$RUNNER_TEMP/$name" --clobber
+      - name: Remover keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/ascend-release.jks"
