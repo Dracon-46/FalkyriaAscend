@@ -9,6 +9,7 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ### Corrigido
 - APK assinado: espaços e quebras de linha coladas junto com os segredos da chave (`ANDROID_KEYSTORE_*`, `ANDROID_KEY_*`) passam a ser descartados, em vez de quebrar a assinatura.
+- Workflow `Android`: antes do build, confere se a senha abre o keystore, se o alias existe e se a senha da chave bate, e diz qual segredo está errado (sem exibir valores).
 
 ## [0.3.0] - 2026-10-23
 
