@@ -95,7 +95,13 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           VARIANT: ${{ steps.signing.outputs.variant }}
-        run: npm run "apk:$VARIANT"
+        run: |
+          # Corta espaços e quebras de linha nas pontas aqui também, para tags antigas cujo build.gradle não corta.
+          trim() { local v="$1"; v="${v#"${v%%[![:space:]]*}"}"; printf '%s' "${v%"${v##*[![:space:]]}"}"; }
+          export ANDROID_KEYSTORE_PASSWORD="$(trim "$ANDROID_KEYSTORE_PASSWORD")"
+          export ANDROID_KEY_ALIAS="$(trim "$ANDROID_KEY_ALIAS")"
+          export ANDROID_KEY_PASSWORD="$(trim "$ANDROID_KEY_PASSWORD")"
+          npm run "apk:$VARIANT"
       - name: Anexar à release
         env:
           GH_TOKEN: ${{ github.token }}
