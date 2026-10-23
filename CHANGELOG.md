@@ -4,6 +4,8 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+## [0.4.0] - 2026-10-23
+
 ### Adicionado
 - Site de apresentação do Ascend (`apps/site`), publicado no GitHub Pages pelo workflow `Site`: daisyUI 5 com os temas do app, animações com GSAP (ScrollTrigger) e Motion, rolagem suave com Lenis, ícones Lucide e fontes servidas pelo próprio site (Fontsource). Tabelas, ranks e curva de XP são gerados a partir do `@rpg/engine` no build.
 - Animações de recompensa no app com Motion: subida de nível com raios, faíscas e contagem até o novo nível; avisos de recompensa e de conquista com entrada em destaque; moedas e XP do cabeçalho contam até o novo valor, com um "+N XP" ao ganhar experiência. Tudo respeita a opção de movimento reduzido do app e do sistema.
@@ -56,7 +58,8 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.3.0...develop
+[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.0...develop
+[0.4.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.1.0...v0.2.0

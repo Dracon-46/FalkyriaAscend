@@ -1,6 +1,6 @@
 {
   "name": "@rpg/mobile",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "App Android do Ascend (Capacitor): abre a interface publicada, com tela própria para quando não há conexão.",
