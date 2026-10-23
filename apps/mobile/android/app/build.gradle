@@ -8,7 +8,9 @@ def (major, minor, patch) = appVersion.tokenize('.').collect { it.replaceAll(/\D
 def appVersionCode = major * 10000 + minor * 100 + patch
 
 // Assinatura de release só pelas variáveis de ambiente (segredos da CI). Sem elas, o release sai sem assinatura.
-def keystorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+// Espaços e quebras de linha nas pontas são descartados: é comum virem junto ao colar o segredo.
+def secret = { String name -> System.getenv(name)?.trim() }
+def keystorePath = secret('ANDROID_KEYSTORE_PATH')
 def hasReleaseSigning = keystorePath && file(keystorePath).exists()
 
 android {
@@ -31,9 +33,9 @@ android {
         if (hasReleaseSigning) {
             release {
                 storeFile file(keystorePath)
-                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
-                keyAlias System.getenv('ANDROID_KEY_ALIAS')
-                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+                storePassword secret('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias secret('ANDROID_KEY_ALIAS')
+                keyPassword secret('ANDROID_KEY_PASSWORD')
             }
         }
     }
