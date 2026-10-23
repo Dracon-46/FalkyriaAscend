@@ -5,7 +5,7 @@ import { gsap, useGSAP } from '../lib/animation';
 
 const W = 640;
 const H = 300;
-const PAD = { l: 56, r: 16, t: 16, b: 34 };
+const PAD = { l: 56, r: 30, t: 22, b: 34 };
 const maxXp = xpCurve[xpCurve.length - 1]!.xp;
 const sx = (level: number) => PAD.l + ((level - 1) / 99) * (W - PAD.l - PAD.r);
 const sy = (xp: number) => H - PAD.b - (xp / maxXp) * (H - PAD.t - PAD.b);
