@@ -60,6 +60,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 | `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build, E2E Playwright e imagem Docker |
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
 | `Release` | CI verde em push na `main`; manual | tag `vX.Y.Z` e GitHub Release com as notas do CHANGELOG |
+| `Wiki` | push na `main` que altere `docs/wiki`; manual | publica `docs/wiki` na wiki do GitHub (páginas removidas também saem) |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
 ## Configuração recomendada do repositório (Settings)
@@ -84,6 +85,10 @@ git push -u origin release/0.2.0     # PR para main (merge commit)
 ```
 
 A tag `v0.2.0` e a GitHub Release são criadas pelo workflow `Release` assim que a CI passa no commit da `main`. As notas vêm da seção `[0.2.0]` do CHANGELOG; sem essa seção, a release falha. Para publicar uma versão manualmente (por exemplo, uma anterior ao workflow), use **Actions → Release → Run workflow** com a versão e o SHA do commit.
+
+## Wiki
+
+A wiki do GitHub é gerada a partir de `docs/wiki`: edite ali e abra um PR. Editar direto na wiki não adianta, porque a próxima publicação sobrescreve. Links entre páginas usam o nome da página sem extensão (`[Primeiros passos](Primeiros-passos)`).
 
 ## Arquitetura
 

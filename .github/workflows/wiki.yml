@@ -1,0 +1,40 @@
+name: Wiki
+
+# A wiki do GitHub é gerada a partir de docs/wiki (revisada por PR como o resto do código).
+# Páginas removidas de docs/wiki também saem da wiki.
+on:
+  push:
+    branches: [main]
+    paths: ['docs/wiki/**', '.github/workflows/wiki.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publicar wiki
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Sincronizar docs/wiki com a wiki
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/wiki"
+          rsync -a --delete --exclude '.git' docs/wiki/ "$RUNNER_TEMP/wiki/"
+          cd "$RUNNER_TEMP/wiki"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Wiki já está atualizada."
+            exit 0
+          fi
+          git commit -m "docs(wiki): sincroniza com ${GITHUB_SHA::7}"
+          git push
