@@ -10,8 +10,10 @@ services:
     # Mesma região do banco (Supabase East US / North Virginia) para evitar latência por consulta.
     region: virginia
     branch: main
-    # Publica só depois que a CI do commit na main passar.
-    autoDeployTrigger: checksPass
+    # Publica a cada commit na main. A main só recebe PRs de release/hotfix com a CI verde, e o workflow
+    # "Smoke de produção" confere o app depois do deploy. Não use checksPass: o Render esperaria também o
+    # próprio smoke, que por sua vez espera o deploy, e nenhum dos dois terminaria.
+    autoDeployTrigger: commit
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV

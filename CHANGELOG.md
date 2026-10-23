@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Corrigido
+- Deploy no Render travado depois da 0.4.1. Com `autoDeployTrigger: checksPass`, o Render esperava todos os checks do commit, inclusive o smoke de produção, que por sua vez espera o deploy. O Render agora publica a cada commit na `main` (`autoDeployTrigger: commit`). A `main` só recebe PRs com a CI verde, e o smoke confere o app depois.
+
 ### Adicionado
 - Smoke de produção (workflow `Smoke de produção` e `npm run test:smoke`): testes de ponta a ponta com Playwright contra o app publicado, sem criar dados. Rodam depois de cada release (esperando o Render publicar o commit dela), a cada 6 horas e sob demanda. Conferem API e banco no ar, proteção CSRF, tela de entrada no desktop e no celular e o PWA. As execuções periódicas também evitam que o Supabase pause o projeto por inatividade.
 - `/api/health` informa o commit publicado (`RENDER_GIT_COMMIT`, preenchido pelo Render).
