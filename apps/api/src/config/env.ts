@@ -34,6 +34,8 @@ const envSchema = z.object({
   /** Diretório do build da interface para servir em produção (opcional). */
   WEB_DIST_DIR: z.string().optional(),
   LOG_LEVEL: z.string().default('info'),
+  /** Commit publicado, preenchido pelo Render a cada deploy. Exposto em /api/health para o smoke de produção. */
+  RENDER_GIT_COMMIT: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

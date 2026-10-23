@@ -1,0 +1,54 @@
+name: Smoke de produção
+
+# Testes de ponta a ponta contra o app publicado no Render (somente leitura: nada é cadastrado).
+# A CI já roda os fluxos completos num banco isolado; este workflow confere o que só existe em produção:
+# serviço no ar, banco conectado, variáveis certas, tela de entrada e PWA.
+# Também mantém o serviço e o banco do Supabase ativos (o plano gratuito pausa projetos parados).
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: smoke-producao
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+  FORCE_COLOR: '1'
+
+jobs:
+  smoke:
+    name: Smoke de produção (Playwright)
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SMOKE_BASE_URL: ${{ vars.ASCEND_APP_URL || 'https://falkyria-ascend.onrender.com' }}
+      # Após uma release, espera o Render publicar exatamente este commit (o deploy roda depois da CI).
+      SMOKE_EXPECTED_COMMIT: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || '' }}
+      SMOKE_WAIT_SECONDS: ${{ github.event_name == 'workflow_run' && '1200' || '180' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Smoke contra ${{ env.SMOKE_BASE_URL }}
+        run: npm run test:smoke
+      - name: Relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-report
+          path: test-results/
+          retention-days: 7

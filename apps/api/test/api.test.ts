@@ -23,6 +23,11 @@ beforeAll(async () => {
 afterAll(async () => t.close());
 
 describe('autenticação, sessão e CSRF', () => {
+  it('health responde sem sessão e informa o commit publicado (nulo fora do Render)', async () => {
+    const r = await t.app.inject({ method: 'GET', url: '/api/health' });
+    expect(r.statusCode).toBe(200);
+    expect(r.json()).toMatchObject({ ok: true, commit: null });
+  });
   it('o primeiro usuário é administrador; os demais não', async () => {
     expect((await admin.get('/api/me')).body.user.role).toBe('admin');
     expect((await other.get('/api/me')).body.user.role).toBe('user');

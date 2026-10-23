@@ -49,6 +49,7 @@ npm run typecheck
 npm run lint:arch       # regras do ADR-001
 npm test                # motor + API com PostgreSQL real
 npm run test:e2e        # se mudou interface ou fluxo
+npm run test:smoke      # opcional: confere o app publicado (SMOKE_BASE_URL muda o endereço)
 ```
 
 Preencha o template do PR e informe só os testes que você realmente executou.
@@ -63,6 +64,7 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 | `Android` | chamado pelo `Release`; manual (informando a tag) | gera o APK (assinado, se houver os segredos) e anexa à release |
 | `Wiki` | push na `main` que altere `docs/wiki`; manual | publica `docs/wiki` na wiki do GitHub (páginas removidas também saem) |
 | `Site` | push na `main` que altere `apps/site` ou o motor; manual | publica o site de apresentação no GitHub Pages (Settings → Pages → Source: GitHub Actions) |
+| `Smoke de produção` | depois de cada `Release`; a cada 6 horas; manual | testes de ponta a ponta somente leitura contra o app publicado (`npm run test:smoke`): API e banco no ar, CSRF, tela de entrada, PWA e layout de celular. Após uma release, espera o Render publicar o commit dela |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
 ## Configuração recomendada do repositório (Settings)

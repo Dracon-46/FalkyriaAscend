@@ -1,7 +1,7 @@
 {
   "name": "ascend",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Ascend — RPG pessoal de vida real (um produto Falkyria).",
   "type": "module",
   "workspaces": [
@@ -21,6 +21,7 @@
     "format:check": "prettier --check .",
     "test": "npm run lint:arch && npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
+    "test:smoke": "playwright test -c playwright.smoke.config.ts",
     "test:all": "npm test && npm run test:e2e",
     "db:migrate": "npm run db:migrate --workspace @rpg/api",
     "db:generate": "npm run db:generate --workspace @rpg/api",
