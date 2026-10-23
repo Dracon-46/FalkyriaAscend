@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Adicionado
+- Site de apresentação do Ascend (`apps/site`), publicado no GitHub Pages pelo workflow `Site`: daisyUI 5 com os temas do app, animações com GSAP (ScrollTrigger) e Motion, rolagem suave com Lenis, ícones Lucide e fontes servidas pelo próprio site (Fontsource). Tabelas, ranks e curva de XP são gerados a partir do `@rpg/engine` no build.
+
 ## [0.3.0] - 2026-10-23
 
 ### Adicionado

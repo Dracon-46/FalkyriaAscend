@@ -1,0 +1,204 @@
+@import 'tailwindcss';
+@plugin 'daisyui' {
+  themes: false;
+}
+
+/* Os quatro temas do app Ascend, como temas do daisyUI. O seletor de tema do site troca entre eles. */
+@plugin 'daisyui/theme' {
+  name: 'medieval';
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: #100d0a;
+  --color-base-200: #1d1711;
+  --color-base-300: #2a2118;
+  --color-base-content: #ece3cf;
+  --color-primary: #c9a84c;
+  --color-primary-content: #1a1408;
+  --color-secondary: #9e2b25;
+  --color-secondary-content: #f6e9e7;
+  --color-accent: #e0c26a;
+  --color-accent-content: #1a1408;
+  --color-neutral: #2a2118;
+  --color-neutral-content: #ece3cf;
+  --color-info: #6b8fb3;
+  --color-info-content: #0b1118;
+  --color-success: #6c9a5b;
+  --color-success-content: #0c140a;
+  --color-warning: #d9a441;
+  --color-warning-content: #1a1205;
+  --color-error: #c4483c;
+  --color-error-content: #fbeeec;
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.375rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'vampiro';
+  color-scheme: dark;
+  --color-base-100: #08060a;
+  --color-base-200: #140f15;
+  --color-base-300: #221a24;
+  --color-base-content: #ebe4ea;
+  --color-primary: #b8b4c4;
+  --color-primary-content: #120e14;
+  --color-secondary: #8f1d33;
+  --color-secondary-content: #fbe9ee;
+  --color-accent: #cfc6b0;
+  --color-accent-content: #120e14;
+  --color-neutral: #221a24;
+  --color-neutral-content: #ebe4ea;
+  --color-info: #7c86b8;
+  --color-info-content: #0a0b14;
+  --color-success: #6e9b7d;
+  --color-success-content: #0a140e;
+  --color-warning: #c99a4a;
+  --color-warning-content: #160f05;
+  --color-error: #c2405a;
+  --color-error-content: #fdeef1;
+  --radius-selector: 0.125rem;
+  --radius-field: 0.125rem;
+  --radius-box: 0.125rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'anjo';
+  color-scheme: light;
+  --color-base-100: #fffdf8;
+  --color-base-200: #f4efe4;
+  --color-base-300: #e6dcc8;
+  --color-base-content: #2a2620;
+  --color-primary: #8c6a1c;
+  --color-primary-content: #fffdf8;
+  --color-secondary: #2f5f99;
+  --color-secondary-content: #f3f7fc;
+  --color-accent: #9a7a22;
+  --color-accent-content: #fffdf8;
+  --color-neutral: #3a342b;
+  --color-neutral-content: #f4efe4;
+  --color-info: #2f5f99;
+  --color-info-content: #f3f7fc;
+  --color-success: #3d7a4f;
+  --color-success-content: #f2f8f3;
+  --color-warning: #a06d14;
+  --color-warning-content: #fffaf0;
+  --color-error: #a8352b;
+  --color-error-content: #fdf1ef;
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'sistema';
+  color-scheme: dark;
+  --color-base-100: #04060c;
+  --color-base-200: #0c1424;
+  --color-base-300: #142036;
+  --color-base-content: #dce8ff;
+  --color-primary: #3ad7ff;
+  --color-primary-content: #031018;
+  --color-secondary: #8b5cf6;
+  --color-secondary-content: #f3eeff;
+  --color-accent: #fcd34d;
+  --color-accent-content: #1a1203;
+  --color-neutral: #142036;
+  --color-neutral-content: #dce8ff;
+  --color-info: #60a5fa;
+  --color-info-content: #031018;
+  --color-success: #34d399;
+  --color-success-content: #02140d;
+  --color-warning: #fbbf24;
+  --color-warning-content: #1a1203;
+  --color-error: #f87171;
+  --color-error-content: #1a0505;
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-display: var(--site-font-display);
+  --font-body: var(--site-font-body);
+  --font-num: var(--site-font-num);
+}
+
+/* Tipografia de cada tema, igual à do app. */
+:root,
+[data-theme='medieval'] {
+  --site-font-display: 'Cinzel', 'Times New Roman', serif;
+  --site-font-body: 'EB Garamond', Georgia, serif;
+  --site-font-num: 'Cinzel', Georgia, serif;
+}
+[data-theme='vampiro'] {
+  --site-font-display: 'Cinzel Decorative', 'Cinzel', serif;
+  --site-font-body: 'Cormorant Garamond', Georgia, serif;
+  --site-font-num: 'Cinzel', Georgia, serif;
+}
+[data-theme='anjo'] {
+  --site-font-display: 'Marcellus', 'Cinzel', serif;
+  --site-font-body: 'Spectral', Georgia, serif;
+  --site-font-num: 'Marcellus', Georgia, serif;
+}
+[data-theme='sistema'] {
+  --site-font-display: 'Rajdhani', 'Segoe UI', sans-serif;
+  --site-font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --site-font-num: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    transition:
+      background-color 0.4s ease,
+      color 0.4s ease;
+  }
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  .section {
+    @apply mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 md:py-28;
+  }
+  .eyebrow {
+    @apply text-primary text-xs font-semibold tracking-[0.25em] uppercase;
+    font-family: var(--font-display);
+  }
+  .glow {
+    background:
+      radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--color-primary) 18%, transparent), transparent 70%),
+      radial-gradient(40% 40% at 85% 30%, color-mix(in oklab, var(--color-secondary) 14%, transparent), transparent 70%);
+  }
+  .num {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+  }
+}
