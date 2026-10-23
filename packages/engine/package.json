@@ -1,6 +1,6 @@
 {
   "name": "@rpg/engine",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "Motor de gamificação puro (sem I/O): curva de XP, recompensas, penalidades, sequências, conquistas e economia.",
