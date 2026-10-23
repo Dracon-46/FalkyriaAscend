@@ -4,7 +4,7 @@ O Ascend tem um app Android que abre a mesma interface da versão web, com ícon
 
 ## Instalar
 
-1. Baixe o arquivo `Ascend-vX.Y.Z.apk` na [última release](https://github.com/Dracon-46/Sistema-Gameficado/releases/latest).
+1. Baixe o arquivo `Ascend-vX.Y.Z.apk` na [última release](https://github.com/Dracon-46/FalkyriaAscend/releases/latest).
 2. Abra o arquivo no celular. Se o Android pedir, permita **Instalar apps desconhecidos** para o navegador ou o gerenciador de arquivos.
 3. Toque em **Instalar** e abra o Ascend. Entre com a mesma conta da versão web.
 
@@ -27,4 +27,4 @@ Ainda não. Por enquanto a instalação é pelo APK das releases.
 **E no iPhone?**
 Use o PWA: abra o endereço do Ascend no Safari e escolha **Adicionar à Tela de Início**.
 
-Detalhes técnicos (assinatura, CI e configuração): [docs/15-app-android.md](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/15-app-android.md).
+Detalhes técnicos (assinatura, CI e configuração): [docs/15-app-android.md](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/15-app-android.md).

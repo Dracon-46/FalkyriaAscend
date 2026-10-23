@@ -22,4 +22,4 @@ No banco do servidor configurado (por exemplo, Supabase). Em **Configurações �
 Ainda não há app nativo para iOS. Use o PWA: abra o endereço no Safari e escolha **Adicionar à Tela de Início**.
 
 **Encontrei um bug ou tenho uma ideia.**
-Abra uma [issue](https://github.com/Dracon-46/Sistema-Gameficado/issues/new/choose). Falhas de segurança vão pelo canal privado descrito na [política de segurança](https://github.com/Dracon-46/Sistema-Gameficado/security/policy).
+Abra uma [issue](https://github.com/Dracon-46/FalkyriaAscend/issues/new/choose). Falhas de segurança vão pelo canal privado descrito na [política de segurança](https://github.com/Dracon-46/FalkyriaAscend/security/policy).

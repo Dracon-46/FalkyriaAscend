@@ -18,4 +18,4 @@ As integrações ficam em **Configurações → Integrações**. Toda atividade 
 
 Desde 01/06/2026 a política do Strava proíbe usar os dados com IA e limita o cache. Antes de ligar a integração em produção, vale confirmar o uso pessoal com developers@strava.com. Para musculação, a integração direta com a Lyfta é a alternativa recomendada.
 
-Detalhes técnicos: [doc 09](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/09-integracoes.md) e [pesquisa das APIs](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/09b-pesquisa-apis-externas.md).
+Detalhes técnicos: [doc 09](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/09-integracoes.md) e [pesquisa das APIs](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/09b-pesquisa-apis-externas.md).

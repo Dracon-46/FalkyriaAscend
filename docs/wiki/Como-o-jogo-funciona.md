@@ -55,4 +55,4 @@ Todo ganho e gasto vai para um **livro-razão imutável**. O saldo nunca fica ne
 
 Em **Configurações → Progressão** você ajusta a curva, os limites e as recompensas, com pré-visualização e simulação antes de publicar. Cada recompensa guarda a versão da configuração usada, então mudanças não reescrevem o passado.
 
-Detalhes técnicos: [regras](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/04-regras-de-gamificacao.md), [curva de XP](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/05-curva-de-xp.md) e [economia](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/06-economia.md).
+Detalhes técnicos: [regras](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/04-regras-de-gamificacao.md), [curva de XP](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/05-curva-de-xp.md) e [economia](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/06-economia.md).

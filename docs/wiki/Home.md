@@ -26,6 +26,6 @@
 
 ## Links
 
-- [Código e documentação técnica](https://github.com/Dracon-46/Sistema-Gameficado)
-- [Releases e notas de versão](https://github.com/Dracon-46/Sistema-Gameficado/releases)
-- [CHANGELOG](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/CHANGELOG.md)
+- [Código e documentação técnica](https://github.com/Dracon-46/FalkyriaAscend)
+- [Releases e notas de versão](https://github.com/Dracon-46/FalkyriaAscend/releases)
+- [CHANGELOG](https://github.com/Dracon-46/FalkyriaAscend/blob/main/CHANGELOG.md)

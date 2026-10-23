@@ -23,7 +23,7 @@ celular / navegador ──HTTPS──▶ Render (Docker: API + interface) ──
 2. **App:** no Render, **New → Blueprint** com este repositório. O `render.yaml` cria o serviço; preencha `DATABASE_URL`, `DATABASE_CA_CERT`, `APP_ORIGIN` e `INTEGRATION_ENCRYPTION_KEY`.
 3. **Deploy contínuo:** cada release que entra na `main` e passa na CI é publicada sozinha.
 
-O passo a passo completo, com planos, limites e backups, está no [guia de deploy](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/14-deploy.md).
+O passo a passo completo, com planos, limites e backups, está no [guia de deploy](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/14-deploy.md).
 
 ## Backup
 
@@ -31,8 +31,8 @@ O passo a passo completo, com planos, limites e backups, está no [guia de deplo
 DATABASE_URL="<URI do banco>" apps/api/scripts/backup.sh
 ```
 
-Restauração e política de retenção: [doc 10](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/10-backup-e-recuperacao.md).
+Restauração e política de retenção: [doc 10](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/10-backup-e-recuperacao.md).
 
 ## Variáveis de ambiente
 
-A lista completa, sem valores reais, está em [`.env.example`](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/.env.example). Segredos ficam só no servidor e nunca no repositório.
+A lista completa, sem valores reais, está em [`.env.example`](https://github.com/Dracon-46/FalkyriaAscend/blob/main/.env.example). Segredos ficam só no servidor e nunca no repositório.

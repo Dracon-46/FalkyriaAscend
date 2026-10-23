@@ -17,7 +17,7 @@ Alternativa futura: para publicar na Play Store, uma *Trusted Web Activity* (Bub
 
 ## Instalar
 
-1. Baixe `Ascend-vX.Y.Z.apk` na [última release](https://github.com/Dracon-46/Sistema-Gameficado/releases/latest).
+1. Baixe `Ascend-vX.Y.Z.apk` na [última release](https://github.com/Dracon-46/FalkyriaAscend/releases/latest).
 2. No Android, permita **Instalar apps desconhecidos** para o navegador ou gerenciador de arquivos.
 3. Abra o APK e instale. Novas versões assinadas com a mesma chave atualizam por cima, sem perder o login.
 
