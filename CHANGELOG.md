@@ -4,6 +4,10 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Adicionado
+- Smoke de produção (workflow `Smoke de produção` e `npm run test:smoke`): testes de ponta a ponta com Playwright contra o app publicado, sem criar dados. Rodam depois de cada release (esperando o Render publicar o commit dela), a cada 6 horas e sob demanda. Conferem API e banco no ar, proteção CSRF, tela de entrada no desktop e no celular e o PWA. As execuções periódicas também evitam que o Supabase pause o projeto por inatividade.
+- `/api/health` informa o commit publicado (`RENDER_GIT_COMMIT`, preenchido pelo Render).
+
 ## [0.4.0] - 2026-10-23
 
 ### Adicionado

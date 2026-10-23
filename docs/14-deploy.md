@@ -40,6 +40,17 @@ As migrações são aplicadas automaticamente quando a API inicia. Não é preci
 5. Abra a URL e cadastre-se: **o primeiro usuário vira administrador**. Novos cadastros ficam fechados (`ALLOW_REGISTRATION=false`).
 6. No celular, abra a URL e use **Adicionar à tela inicial** para instalar o PWA.
 
+### Conferir a produção
+
+O workflow **Smoke de produção** testa o app publicado depois de cada release, a cada 6 horas e sob demanda (**Actions → Smoke de produção → Run workflow**). Os testes são somente leitura: nada é cadastrado. Para rodar daqui:
+
+```bash
+npm run test:smoke                                    # https://falkyria-ascend.onrender.com
+SMOKE_BASE_URL=https://outro-endereco.onrender.com npm run test:smoke
+```
+
+Se o serviço estiver em outro endereço, defina a variável do repositório `ASCEND_APP_URL` (Settings → Secrets and variables → Actions → Variables). Ela vale para o smoke e para o APK.
+
 ## 3. Planos e limites
 
 | Item | Gratuito | Observação |

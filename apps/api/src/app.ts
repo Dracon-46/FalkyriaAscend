@@ -89,7 +89,7 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     return reply.status(500).send({ error: { code: 'internal', message: 'Erro interno. Tente novamente.' } });
   });
 
-  app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString() }));
+  app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString(), commit: opts.env.RENDER_GIT_COMMIT ?? null }));
 
   await registerAuthRoutes(app, ctx);
   await registerCoreRoutes(app, ctx);

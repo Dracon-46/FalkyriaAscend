@@ -14,8 +14,8 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: { baseURL: 'http://localhost:5174', trace: 'retain-on-failure', locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /mobile\.spec\.ts/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec\.ts/, dependencies: ['desktop'] },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: [/mobile\.spec\.ts/, /smoke\//] },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /e2e\/mobile\.spec\.ts/, dependencies: ['desktop'] },
   ],
   webServer: [
     {
