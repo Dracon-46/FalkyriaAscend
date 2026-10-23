@@ -71,7 +71,7 @@ Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @
 
 ## Documentação
 
-Guia de uso (para quem joga): a **[Wiki](https://github.com/Dracon-46/Sistema-Gameficado/wiki)**, gerada a partir de [`docs/wiki`](docs/wiki).
+Guia de uso (para quem joga): a **[Wiki](https://github.com/Dracon-46/FalkyriaAscend/wiki)**, gerada a partir de [`docs/wiki`](docs/wiki).
 
 Documentação técnica:
 

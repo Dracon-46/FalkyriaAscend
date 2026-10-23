@@ -12,7 +12,7 @@ e2e/                testes ponta a ponta (Playwright)
 docs/               documentação técnica; docs/wiki é a fonte desta wiki
 ```
 
-A arquitetura segue o [ADR-001](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/docs/13-padroes-de-arquitetura.md), com 17 regras de dependência verificadas por `npm run lint:arch`. Regras de jogo entram primeiro no `packages/engine`, com teste unitário.
+A arquitetura segue o [ADR-001](https://github.com/Dracon-46/FalkyriaAscend/blob/main/docs/13-padroes-de-arquitetura.md), com 17 regras de dependência verificadas por `npm run lint:arch`. Regras de jogo entram primeiro no `packages/engine`, com teste unitário.
 
 ## Git Flow
 
@@ -42,4 +42,4 @@ npm run test:e2e    # quando mudar interface ou fluxo
 | **Android** | Gera o APK e anexa à release |
 | **Wiki** | Publica `docs/wiki` nesta wiki a cada push na `main` |
 
-Guia completo: [CONTRIBUTING.md](https://github.com/Dracon-46/Sistema-Gameficado/blob/main/CONTRIBUTING.md).
+Guia completo: [CONTRIBUTING.md](https://github.com/Dracon-46/FalkyriaAscend/blob/main/CONTRIBUTING.md).

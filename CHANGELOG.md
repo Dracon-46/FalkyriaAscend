@@ -13,6 +13,7 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 - A data de cadastro do usuário passa a vir do relógio da aplicação, não do banco. A avaliação diária começa nesse dia, e a diferença fazia os testes de hábitos e penalidades falharem a partir de 23/10/2026 (o relógio dos testes começa em 21/10).
 
 ### Alterado
+- Repositório renomeado para `FalkyriaAscend`: links da documentação, da wiki, do CHANGELOG e dos templates de issue atualizados.
 - Dependências atualizadas: react-router 8, lucide-react 1, @fastify/static 10, tsup 9, Playwright 1.64, Prettier 3.9 e typescript-eslint 8.72; Actions `checkout`, `setup-node` e `upload-artifact` v7, `docker/build-push-action` v7 e `docker/setup-buildx-action` v4.
 
 ## [0.2.1] - 2026-10-22
@@ -45,7 +46,7 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.2.1...develop
-[0.2.1]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/Dracon-46/Sistema-Gameficado/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/Dracon-46/Sistema-Gameficado/releases/tag/v0.1.0
+[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.2.1...develop
+[0.2.1]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Dracon-46/FalkyriaAscend/releases/tag/v0.1.0
