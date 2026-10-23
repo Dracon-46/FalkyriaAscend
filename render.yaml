@@ -30,8 +30,9 @@ services:
         sync: false
       - key: INTEGRATION_ENCRYPTION_KEY
         sync: false
+      # Cadastro aberto: o primeiro usuário vira administrador; os seguintes são usuários comuns, sem acesso ao Admin.
       - key: ALLOW_REGISTRATION
-        value: 'false'
+        value: 'true'
       - key: SESSION_TTL_DAYS
         value: '30'
       - key: EVALUATION_INTERVAL_MINUTES

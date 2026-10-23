@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Alterado
+- Cadastro aberto por padrão em produção (`ALLOW_REGISTRATION=true` no `render.yaml`): o primeiro usuário continua sendo o administrador, e os seguintes entram como usuários comuns, com acesso só aos próprios dados e sem acesso à Administração. Teste de ponta a ponta cobre esse caminho.
+
 ### Corrigido
 - Deploy no Render travado depois da 0.4.1. Com `autoDeployTrigger: checksPass`, o Render esperava todos os checks do commit, inclusive o smoke de produção, que por sua vez espera o deploy. O Render agora publica a cada commit na `main` (`autoDeployTrigger: commit`). A `main` só recebe PRs com a CI verde, e o smoke confere o app depois.
 
