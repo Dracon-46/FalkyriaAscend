@@ -7,6 +7,7 @@
 | Camada | Tecnologia |
 |---|---|
 | Interface | React 19, Vite 7, TypeScript, Tailwind CSS 4, TanStack Query, Recharts, PWA |
+| Android | Capacitor 8 (APK publicado em cada release) |
 | API | Node.js 22, Fastify 5, Drizzle ORM, Zod |
 | Banco | PostgreSQL 16 (migrações versionadas) |
 | Regras | `@rpg/engine`: motor de gamificação puro e testado |
@@ -15,6 +16,7 @@
 ```
 apps/api            API em camadas (http → casos de uso → serviços → repositórios), avaliador diário, admin, integrações
 apps/web            interface (16 áreas + administração)
+apps/mobile         app Android (Capacitor) que abre a interface publicada
 packages/engine     regras: curva de XP, recompensas, penalidades, sequências, economia
 packages/contracts  esquemas de entrada compartilhados (Zod)
 docs/               requisitos, arquitetura, modelo de dados, regras, simulações…
@@ -55,7 +57,7 @@ npm run format:check && npm run lint && npm run typecheck && npm run lint:arch  
 
 ## Como contribuir
 
-O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`) e **Conventional Commits**, com CI obrigatória em todo pull request. Veja [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) e o [CHANGELOG](CHANGELOG.md).
+O projeto segue **Git Flow** (`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`) e **Conventional Commits**, com CI obrigatória em todo pull request. Veja [CONTRIBUTING.md](CONTRIBUTING.md), o [código de conduta](CODE_OF_CONDUCT.md), [SECURITY.md](SECURITY.md) e o [CHANGELOG](CHANGELOG.md).
 
 ## Produção
 
@@ -68,6 +70,10 @@ docker compose --profile app up -d --build   # banco + aplicação em http://loc
 Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @rpg/api`. A API serve a interface, aplica as migrações e roda o avaliador diário. Backups: `apps/api/scripts/backup.sh` (ver `docs/10-backup-e-recuperacao.md`).
 
 ## Documentação
+
+Guia de uso (para quem joga): a **[Wiki](https://github.com/Dracon-46/FalkyriaAscend/wiki)**, gerada a partir de [`docs/wiki`](docs/wiki).
+
+Documentação técnica:
 
 1. [Requisitos](docs/01-requisitos.md)
 2. [Arquitetura, SOLID e padrões](docs/02-arquitetura.md) e [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)
@@ -83,5 +89,6 @@ Ou sem Docker: `npm run build` e depois `WEB_DIST_DIR=../web/dist npm start -w @
 12. [Roadmap, pendências e ideias](docs/12-roadmap.md)
 13. [ADR-001: padrões de arquitetura](docs/13-padroes-de-arquitetura.md)
 14. [Deploy (Supabase + Render)](docs/14-deploy.md)
+15. [App Android](docs/15-app-android.md)
 
 O protótipo HTML original foi preservado em `docs/legacy/`.

@@ -30,12 +30,15 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      created: ${{ steps.publish.outputs.created }}
+      tag: ${{ steps.publish.outputs.tag }}
     env:
       TARGET: ${{ inputs.target || github.event.workflow_run.head_sha || github.sha }}
     steps:
       # No disparo manual, o checkout é do commit do workflow (scripts e CHANGELOG atuais);
       # o alvo informado só define onde a tag aponta.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Resolver versão
@@ -47,6 +50,7 @@ jobs:
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Versão inválida: '$version'"; exit 1; }
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Publicar se a tag ainda não existe
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
@@ -58,3 +62,15 @@ jobs:
           fi
           scripts/ci/release-notes.sh "$VERSION" > "$RUNNER_TEMP/notes.md"
           gh release create "$tag" --target "$TARGET" --title "$tag" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  # O APK acompanha só releases automáticas: versões antigas publicadas à mão podem não ter o app Android.
+  android:
+    name: APK Android
+    needs: release
+    if: needs.release.outputs.created == 'true' && github.event_name == 'workflow_run'
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+    secrets: inherit

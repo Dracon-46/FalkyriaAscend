@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Vulnerabilidade de segurança
-    url: https://github.com/Dracon-46/Sistema-Gameficado/security/advisories/new
+    url: https://github.com/Dracon-46/FalkyriaAscend/security/advisories/new
     about: Reporte vulnerabilidades em privado, nunca em issue pública.

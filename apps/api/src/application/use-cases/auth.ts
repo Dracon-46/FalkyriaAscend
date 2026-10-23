@@ -55,6 +55,9 @@ export async function registerUser(db: Db, input: RegisterInput, opts: { allowRe
       passwordHash: await hashPassword(input.password),
       displayName: input.displayName,
       role: first ? 'admin' : 'user',
+      // A avaliação diária começa no dia do cadastro: a data vem do relógio da aplicação, não do banco.
+      createdAt: opts.now,
+      updatedAt: opts.now,
     });
     await seedUserDefaults(tx, u.id, localDateOf(opts.now, opts.timezone));
     await audit(tx, { actorId: u.id, userId: u.id, action: 'user.register', entityType: 'users', entityId: u.id, meta: { role: u.role } });
