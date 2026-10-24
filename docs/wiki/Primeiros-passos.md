@@ -2,7 +2,7 @@
 
 ## 1. Criar a conta
 
-Abra o Ascend e escolha **Criar conta**. A **primeira conta** criada vira administradora. Depois dela, novos cadastros ficam fechados por padrão (`ALLOW_REGISTRATION=false`) e novas contas são criadas pelo Admin.
+Abra o Ascend e escolha **Criar conta**. A **primeira conta** criada vira administradora. As seguintes são contas comuns: cada pessoa tem o próprio personagem e só vê os próprios dados, sem acesso à Administração. Quem administra a instalação pode fechar novos cadastros (`ALLOW_REGISTRATION=false`) e passar a criar as contas pelo Admin.
 
 Ao cadastrar, você recebe um **catálogo inicial** para não começar do zero:
 

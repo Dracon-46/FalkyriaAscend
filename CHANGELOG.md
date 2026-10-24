@@ -4,6 +4,14 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+## [0.4.2] - 2026-10-23
+
+### Alterado
+- Cadastro aberto por padrão em produção (`ALLOW_REGISTRATION=true` no `render.yaml`): o primeiro usuário continua sendo o administrador, e os seguintes entram como usuários comuns, com acesso só aos próprios dados e sem acesso à Administração. Teste de ponta a ponta cobre esse caminho.
+
+### Corrigido
+- Deploy no Render travado depois da 0.4.1. Com `autoDeployTrigger: checksPass`, o Render esperava todos os checks do commit, inclusive o smoke de produção, que por sua vez espera o deploy. O Render agora publica a cada commit na `main` (`autoDeployTrigger: commit`). A `main` só recebe PRs com a CI verde, e o smoke confere o app depois.
+
 ## [0.4.1] - 2026-10-23
 
 ### Adicionado
@@ -67,7 +75,8 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.1...develop
+[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.2...develop
+[0.4.2]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.2.1...v0.3.0
