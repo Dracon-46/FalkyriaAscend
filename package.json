@@ -1,7 +1,7 @@
 {
   "name": "ascend",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Ascend — RPG pessoal de vida real (um produto Falkyria).",
   "type": "module",
   "workspaces": [
