@@ -1,9 +1,16 @@
 // Conteúdo do site derivado das regras reais do jogo: scripts/game-data.ts gera o JSON a partir do @rpg/engine.
 import game from './generated/game-data.json';
 
-export const REPO_URL = 'https://github.com/Dracon-46/FalkyriaAscend';
-export const RELEASES_URL = `${REPO_URL}/releases/latest`;
-export const WIKI_URL = `${REPO_URL}/wiki`;
+/**
+ * Repositório público só de distribuição: o site compilado e as releases com o APK.
+ * O código-fonte do Ascend é privado; nada aqui deve apontar para ele.
+ */
+export const DIST_REPO_URL = 'https://github.com/Dracon-46/ascend';
+/** Download direto do APK mais recente (cada release pública leva uma cópia com o nome fixo Ascend.apk). */
+export const APK_DOWNLOAD_URL = `${DIST_REPO_URL}/releases/latest/download/Ascend.apk`;
+export const ALL_RELEASES_URL = `${DIST_REPO_URL}/releases`;
+/** O app publicado (web/PWA). O APK abre este mesmo endereço. */
+export const APP_URL = 'https://falkyria-ascend.onrender.com';
 
 const DIFFICULTY_LABELS: Record<string, string> = {
   routine: 'Rotineira',

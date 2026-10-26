@@ -111,7 +111,35 @@ jobs:
           name="Ascend-$TAG.apk"
           [[ "$VARIANT" == "debug" ]] && name="Ascend-$TAG-debug.apk"
           cp "$src" "$RUNNER_TEMP/$name"
+          echo "APK_FILE=$RUNNER_TEMP/$name" >> "$GITHUB_ENV"
           gh release upload "$TAG" "$RUNNER_TEMP/$name" --clobber
+      # O código-fonte é privado: quem baixa o app usa as releases do repositório público de distribuição.
+      # Lá vai só o APK, com notas de instalação (as notas internas do CHANGELOG ficam aqui).
+      - name: Publicar no repositório público
+        env:
+          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/ascend' }}
+          GH_TOKEN: ${{ secrets.ASCEND_DIST_TOKEN }}
+          APP_URL: ${{ vars.ASCEND_APP_URL || 'https://falkyria-ascend.onrender.com' }}
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::warning::Sem ASCEND_DIST_TOKEN: o APK ficou só na release privada."
+            exit 0
+          fi
+          if ! gh release view "$TAG" --repo "$DIST_REPO" > /dev/null 2>&1; then
+            {
+              echo "Ascend $TAG para Android."
+              echo
+              echo "1. Baixe o arquivo \`$(basename "$APK_FILE")\` abaixo, no celular."
+              echo "2. Abra o arquivo. Se o Android pedir, permita instalar apps desta fonte."
+              echo "3. Ele atualiza por cima da versão anterior, sem perder seus dados (tudo fica no servidor)."
+              echo
+              echo "Prefere o navegador? O Ascend também roda em $APP_URL e pode ser instalado na tela inicial."
+            } > "$RUNNER_TEMP/notas.md"
+            gh release create "$TAG" --repo "$DIST_REPO" --title "Ascend $TAG" --notes-file "$RUNNER_TEMP/notas.md"
+          fi
+          # Cópia com nome fixo: o botão do site aponta para releases/latest/download/Ascend.apk (download direto da última versão).
+          cp "$APK_FILE" "$RUNNER_TEMP/Ascend.apk"
+          gh release upload "$TAG" "$APK_FILE" "$RUNNER_TEMP/Ascend.apk" --repo "$DIST_REPO" --clobber
       - name: Remover keystore
         if: always()
         run: rm -f "$RUNNER_TEMP/ascend-release.jks"

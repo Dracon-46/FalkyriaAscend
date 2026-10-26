@@ -1,7 +1,7 @@
 import { Download } from 'lucide-react';
 import { motion } from 'motion/react';
-import { GithubMark, NumberTicker, Section, SectionHeader, Shield } from '../components';
-import { PROJECT_STATS, RELEASES_URL, REPO_URL, WIKI_URL } from '../data';
+import { NumberTicker, Section, SectionHeader, Shield } from '../components';
+import { ALL_RELEASES_URL, APP_URL, PROJECT_STATS, APK_DOWNLOAD_URL } from '../data';
 
 const STACK = ['React 19', 'Fastify 5', 'PostgreSQL 16', 'Drizzle ORM', 'Zod', 'Tailwind CSS 4', 'Capacitor 8', 'Vitest', 'Playwright', 'GitHub Actions'];
 
@@ -44,11 +44,11 @@ export function FinalCta() {
           <h2 className="mt-4 text-4xl font-semibold md:text-5xl">Comece sua campanha</h2>
           <p className="text-base-content/75 mt-3 max-w-xl text-lg">O primeiro nível é só o começo. O resto é consistência.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a href={RELEASES_URL} className="btn btn-primary btn-lg gap-2">
+            <a href={APK_DOWNLOAD_URL} className="btn btn-primary btn-lg gap-2">
               <Download className="size-5" /> Baixar para Android
             </a>
-            <a href={REPO_URL} className="btn btn-outline btn-lg gap-2">
-              <GithubMark className="size-5" /> Ver o código
+            <a href={APP_URL} className="btn btn-outline btn-lg gap-2">
+              Abrir no navegador
             </a>
           </div>
         </div>
@@ -61,17 +61,11 @@ export function Footer() {
   return (
     <footer className="footer footer-horizontal footer-center bg-base-200 text-base-content/70 border-base-300 border-t p-10">
       <nav className="grid grid-flow-col gap-5">
-        <a className="link link-hover" href={WIKI_URL}>
-          Wiki
+        <a className="link link-hover" href={APP_URL}>
+          Entrar no app
         </a>
-        <a className="link link-hover" href={`${REPO_URL}/releases`}>
-          Releases
-        </a>
-        <a className="link link-hover" href={`${REPO_URL}/blob/main/CHANGELOG.md`}>
-          Novidades
-        </a>
-        <a className="link link-hover" href={`${REPO_URL}/security/policy`}>
-          Segurança
+        <a className="link link-hover" href={ALL_RELEASES_URL}>
+          Novidades e versões
         </a>
       </nav>
       <aside className="flex items-center gap-2">

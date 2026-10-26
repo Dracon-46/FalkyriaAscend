@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// Publicado no GitHub Pages em https://dracon-46.github.io/FalkyriaAscend/
+// Publicado no GitHub Pages do repositório público de distribuição: https://dracon-46.github.io/ascend/
 export default defineConfig({
-  base: process.env.SITE_BASE ?? '/FalkyriaAscend/',
+  base: process.env.SITE_BASE ?? '/ascend/',
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {

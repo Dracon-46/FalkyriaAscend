@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Menu, Palette } from 'lucide-react';
-import { GithubMark, Shield } from '../components';
-import { REPO_URL, THEMES, type ThemeId } from '../data';
+import { Shield } from '../components';
+import { APP_URL, THEMES, type ThemeId } from '../data';
 
 const LINKS = [
   { href: '#como-funciona', label: 'Como funciona' },
@@ -76,8 +76,8 @@ export function Nav({ theme, setTheme }: { theme: ThemeId; setTheme: (t: ThemeId
             ))}
           </ul>
         </div>
-        <a href={REPO_URL} className="btn btn-ghost btn-sm btn-square" aria-label="Código no GitHub">
-          <GithubMark className="size-5" />
+        <a href={APP_URL} className="btn btn-primary btn-sm">
+          Entrar
         </a>
       </div>
     </motion.nav>

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, Coins, Download, Flame, Sparkles, Trophy } from 'lucide-react';
-import { GithubMark, NumberTicker, Shield } from '../components';
-import { ATTRIBUTES, RELEASES_URL, REPO_URL, rankOf, sampleCharacter } from '../data';
+import { NumberTicker, Shield } from '../components';
+import { APP_URL, ATTRIBUTES, APK_DOWNLOAD_URL, rankOf, sampleCharacter } from '../data';
 import { gsap, useGSAP } from '../lib/animation';
 
 // Personagem de exemplo (4.380 XP): nível e progresso saem da curva real do motor.
@@ -154,7 +154,7 @@ export function Hero() {
             penalidades que nunca viram espiral.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start" data-hero-fade>
-            <motion.a whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} href={RELEASES_URL} className="btn btn-primary btn-lg gap-2">
+            <motion.a whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} href={APK_DOWNLOAD_URL} className="btn btn-primary btn-lg gap-2">
               <Download className="size-5" />
               Baixar para Android
             </motion.a>
@@ -164,10 +164,9 @@ export function Hero() {
             </motion.a>
           </div>
           <p className="text-base-content/60 mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm lg:justify-start" data-hero-fade>
-            <GithubMark className="size-4" />
-            Código aberto, com testes e CI em todo pull request.{' '}
-            <a href={REPO_URL} className="link link-hover">
-              Ver no GitHub
+            Sem Android? O Ascend também roda no navegador e instala como app no iPhone.{' '}
+            <a href={APP_URL} className="link link-hover">
+              Abrir no navegador
             </a>
           </p>
         </div>
