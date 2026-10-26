@@ -27,5 +27,5 @@
 ## Links
 
 - [Código e documentação técnica](https://github.com/Dracon-46/FalkyriaAscend)
-- [Releases e notas de versão](https://github.com/Dracon-46/FalkyriaAscend/releases)
+- [Downloads do app](https://github.com/Dracon-46/ascend/releases)
 - [CHANGELOG](https://github.com/Dracon-46/FalkyriaAscend/blob/main/CHANGELOG.md)

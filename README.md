@@ -2,7 +2,9 @@
 
 **RPG pessoal de vida real, um produto Falkyria.** Ascend transforma rotina, estudos, trabalho, treinos, hábitos e objetivos em progressão de longo prazo: níveis com dificuldade crescente, atributos, maestria, missões, penalidades previsíveis, moedas, loja, conquistas, temporadas e estatísticas. A interface tem cinco temas (Medieval, Vampiros, Anjos, Sistema e Personalizado).
 
-**Conheça o projeto:** [dracon-46.github.io/FalkyriaAscend](https://dracon-46.github.io/FalkyriaAscend/)
+**Conheça o projeto:** [dracon-46.github.io/ascend](https://dracon-46.github.io/ascend/) · **Baixar o app:** [Ascend.apk](https://github.com/Dracon-46/ascend/releases/latest/download/Ascend.apk)
+
+> Este repositório é **privado**. O público só recebe o site compilado e o APK, pelo repositório de distribuição [`Dracon-46/ascend`](https://github.com/Dracon-46/ascend). Detalhes em [docs/16-distribuicao.md](docs/16-distribuicao.md).
 
 ## Stack
 

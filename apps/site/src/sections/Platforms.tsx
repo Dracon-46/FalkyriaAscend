@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
-import { BookOpen, Download, Flame, Globe, Smartphone, Sparkles } from 'lucide-react';
+import { Download, Flame, Globe, Smartphone, Sparkles } from 'lucide-react';
 import { Section, SectionHeader, Shield } from '../components';
-import { RELEASES_URL, WIKI_URL } from '../data';
+import { APP_URL, APK_DOWNLOAD_URL } from '../data';
 
 function PhoneScreen() {
   return (
@@ -60,11 +60,11 @@ export function Platforms() {
             </li>
           </ul>
           <div className="mt-8 flex flex-wrap gap-3" data-reveal>
-            <a href={RELEASES_URL} className="btn btn-primary gap-2">
+            <a href={APK_DOWNLOAD_URL} className="btn btn-primary gap-2">
               <Download className="size-5" /> Baixar APK
             </a>
-            <a href={WIKI_URL} className="btn btn-ghost gap-2">
-              <BookOpen className="size-5" /> Guia de uso
+            <a href={APP_URL} className="btn btn-ghost gap-2">
+              <Globe className="size-5" /> Abrir no navegador
             </a>
           </div>
         </div>
