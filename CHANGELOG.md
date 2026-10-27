@@ -4,6 +4,8 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+## [0.4.3] - 2026-10-27
+
 ### Alterado
 - Código-fonte privado, distribuição pública separada: o site e o APK passam a ser publicados no repositório público [`Dracon-46/ascend`](https://github.com/Dracon-46/ascend), que não recebe código. O site vai compilado e sem source maps para o branch `gh-pages`. Cada release pública leva o APK versionado e a cópia fixa `Ascend.apk`. Guia em `docs/16-distribuicao.md`.
 - Site: os botões "Baixar para Android" baixam o APK direto (`releases/latest/download/Ascend.apk`). Os links para o código e para a wiki saíram; entraram "Entrar" e "Abrir no navegador", que levam ao app.
@@ -79,7 +81,8 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.2...develop
+[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.3...develop
+[0.4.3]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.3.0...v0.4.0
