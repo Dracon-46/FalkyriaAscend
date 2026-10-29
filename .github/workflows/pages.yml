@@ -1,7 +1,9 @@
 name: Site
 
-# Publica o site de apresentação (apps/site) no GitHub Pages a cada push na main que o afete.
-# Requer Settings → Pages → Source: "GitHub Actions".
+# Publica o site de apresentação (apps/site) no repositório público de distribuição
+# (variável ASCEND_DIST_REPO, padrão Dracon-46/ascend), no branch gh-pages servido pelo GitHub Pages.
+# O código-fonte continua privado: só o build (HTML, CSS, JS e imagens, sem source maps) vai para lá.
+# Requer o segredo ASCEND_DIST_TOKEN: token fine-grained com "Contents: Read and write" apenas no repositório público.
 on:
   push:
     branches: [main]
@@ -14,12 +16,10 @@ concurrency:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
-  build:
-    name: Build do site
+  publish:
+    name: Publicar o site no repositório público
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,19 +30,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build --workspace @rpg/site
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: apps/site/dist
-
-  deploy:
-    name: Publicar no GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Conferir que o build não leva código-fonte
+        run: |
+          if find apps/site/dist -name '*.map' -o -name '*.ts' -o -name '*.tsx' | grep -q .; then
+            echo "::error::O build do site contém source maps ou fontes TypeScript; nada disso pode ir para o repositório público."
+            exit 1
+          fi
+      - name: Publicar no branch gh-pages do repositório público
+        env:
+          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/ascend' }}
+          DIST_TOKEN: ${{ secrets.ASCEND_DIST_TOKEN }}
+        run: |
+          if [[ -z "$DIST_TOKEN" ]]; then
+            echo "::error::Falta o segredo ASCEND_DIST_TOKEN (token com escrita apenas em $DIST_REPO)."
+            exit 1
+          fi
+          version="$(node -p "require('./package.json').version")"
+          cd apps/site/dist
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Site do Ascend $version"
+          git push -q --force "https://x-access-token:${DIST_TOKEN}@github.com/${DIST_REPO}.git" gh-pages
+          echo "Site publicado em $DIST_REPO (gh-pages), versão $version."

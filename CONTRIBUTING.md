@@ -61,9 +61,9 @@ Preencha o template do PR e informe só os testes que você realmente executou.
 | `CI` | PR para `main`, `develop`, `release/**`; push em `main`, `develop`, `release/**`, `hotfix/**` | qualidade (Prettier, ESLint, typecheck e arquitetura), testes do motor, testes da API com PostgreSQL, build (app e site), E2E Playwright, APK Android de debug e imagem Docker |
 | `Convenções de PR` | todo PR | origem/destino no Git Flow e título em Conventional Commits |
 | `Release` | CI verde em push na `main`; manual | tag `vX.Y.Z` e GitHub Release com as notas do CHANGELOG |
-| `Android` | chamado pelo `Release`; manual (informando a tag) | gera o APK (assinado, se houver os segredos) e anexa à release |
+| `Android` | chamado pelo `Release`; manual (informando a tag) | gera o APK (assinado, se houver os segredos), anexa à release privada e publica no repositório público (`Ascend-vX.Y.Z.apk` e a cópia fixa `Ascend.apk`) |
 | `Wiki` | push na `main` que altere `docs/wiki`; manual | publica `docs/wiki` na wiki do GitHub (páginas removidas também saem) |
-| `Site` | push na `main` que altere `apps/site` ou o motor; manual | publica o site de apresentação no GitHub Pages (Settings → Pages → Source: GitHub Actions) |
+| `Site` | push na `main` que altere `apps/site` ou o motor; manual | publica o build do site no branch `gh-pages` do repositório público de distribuição (`Dracon-46/ascend`), servido pelo GitHub Pages |
 | `Smoke de produção` | depois de cada `Release`; a cada 6 horas; manual | testes de ponta a ponta somente leitura contra o app publicado (`npm run test:smoke`): API e banco no ar, CSRF, tela de entrada, PWA e layout de celular. Após uma release, espera o Render publicar o commit dela |
 | Dependabot | semanal/mensal | atualizações de npm, Actions e Docker, sempre contra `develop` |
 
