@@ -59,6 +59,12 @@ export const loginInput = z.object({
   email: z.email('E-mail inválido').max(200),
   password: z.string().min(1).max(200),
 });
+export const verifyEmailInput = z.object({
+  token: z.string().trim().min(20).max(200),
+});
+export const resendVerificationInput = z.object({
+  email: z.email('E-mail inválido').max(200),
+});
 export const changePasswordInput = z.object({
   currentPassword: z.string().min(1).max(200),
   newPassword: z.string().min(10, 'Mínimo de 10 caracteres').max(200),
@@ -458,6 +464,8 @@ export const configUpdateInput = z.object({
 export type RegisterInput = z.infer<typeof registerInput>;
 export type LoginInput = z.infer<typeof loginInput>;
 export type ChangePasswordInput = z.infer<typeof changePasswordInput>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailInput>;
+export type ResendVerificationInput = z.infer<typeof resendVerificationInput>;
 export type ProfileInput = z.infer<typeof profileInput>;
 export type SettingsInput = z.infer<typeof settingsInput>;
 export type CategoryInput = z.infer<typeof categoryInput>;

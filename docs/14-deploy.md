@@ -40,6 +40,20 @@ As migrações são aplicadas automaticamente quando a API inicia. Não é preci
 5. Abra a URL e cadastre-se: **o primeiro usuário vira administrador**. Os cadastros seguintes ficam abertos (`ALLOW_REGISTRATION=true`) e criam **usuários comuns**: cada um vê e altera só os próprios dados e não acessa a área de Administração. Para fechar novos cadastros, mude a variável para `false` no Render. Aí só o administrador cria contas, pelo Admin.
 6. No celular, abra a URL e use **Adicionar à tela inicial** para instalar o PWA.
 
+### E-mail de confirmação (Gmail)
+
+Com o SMTP configurado, quem cria conta recebe um link e só entra depois de confirmar o e-mail. O link vale 24 horas, e dá para pedir outro na tela de entrada. Contas antigas, a primeira conta (administrador) e contas criadas pelo Admin já entram confirmadas.
+
+1. Na sua conta Google, ative a **verificação em duas etapas** (Conta Google → Segurança).
+2. Abra https://myaccount.google.com/apppasswords, crie uma senha de app com o nome `Ascend` e copie as 16 letras.
+3. No Render, em **Environment**, preencha:
+   - `SMTP_USER`: seu endereço Gmail;
+   - `SMTP_PASSWORD`: a senha de app (os espaços são ignorados);
+   - opcional, `EMAIL_FROM`: o remetente exibido, por exemplo `Ascend <seu-email@gmail.com>`.
+4. Salve. O serviço reinicia e a confirmação passa a ser exigida.
+
+O Gmail permite cerca de 500 envios por dia. Para desligar a confirmação sem apagar as credenciais, use `EMAIL_VERIFICATION=off`.
+
 ### Conferir a produção
 
 O workflow **Smoke de produção** testa o app publicado depois de cada release, a cada 6 horas e sob demanda (**Actions → Smoke de produção → Run workflow**). Os testes são somente leitura: nada é cadastrado. Para rodar daqui:
