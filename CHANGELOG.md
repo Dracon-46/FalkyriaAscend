@@ -7,6 +7,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 ### Adicionado
 - Confirmação de e-mail no cadastro: quem cria conta recebe um link (válido por 24 h, de uso único, guardado só como hash) e só entra depois de confirmar. A tela de entrada permite reenviar o link (no máximo um por minuto, sem revelar se o e-mail existe). O envio usa SMTP, por padrão o Gmail com senha de app (`SMTP_USER`, `SMTP_PASSWORD`). Com o SMTP configurado a confirmação é exigida (`EMAIL_VERIFICATION=auto`). Contas existentes, a primeira conta e as criadas pelo Admin já entram confirmadas.
 
+### Corrigido
+- Site público em branco: o repositório de distribuição se chama `Ascend` e o caminho do GitHub Pages diferencia maiúsculas, então o site buscava os arquivos em `/ascend/` e não achava nada. O build usa `/Ascend/` e os links (README, documentação, wiki, site) apontam para https://dracon-46.github.io/Ascend/.
+
 ## [0.4.3] - 2026-10-27
 
 ### Alterado

@@ -4,7 +4,7 @@ O Ascend tem um app Android que abre a mesma interface da versão web, com ícon
 
 ## Instalar
 
-1. Baixe o arquivo `Ascend-vX.Y.Z.apk` na [página de downloads](https://github.com/Dracon-46/ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/ascend/releases/latest/download/Ascend.apk)).
+1. Baixe o arquivo `Ascend-vX.Y.Z.apk` na [página de downloads](https://github.com/Dracon-46/Ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/Ascend/releases/latest/download/Ascend.apk)).
 2. Abra o arquivo no celular. Se o Android pedir, permita **Instalar apps desconhecidos** para o navegador ou o gerenciador de arquivos.
 3. Toque em **Instalar** e abra o Ascend. Entre com a mesma conta da versão web.
 
