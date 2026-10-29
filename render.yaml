@@ -30,6 +30,11 @@ services:
         sync: false
       - key: INTEGRATION_ENCRYPTION_KEY
         sync: false
+      # Confirmação de e-mail no cadastro (Gmail com senha de app). Com os dois preenchidos, passa a ser exigida.
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
       # Cadastro aberto: o primeiro usuário vira administrador; os seguintes são usuários comuns, sem acesso ao Admin.
       - key: ALLOW_REGISTRATION
         value: 'true'

@@ -4,6 +4,9 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+### Adicionado
+- Confirmação de e-mail no cadastro: quem cria conta recebe um link (válido por 24 h, de uso único, guardado só como hash) e só entra depois de confirmar. A tela de entrada permite reenviar o link (no máximo um por minuto, sem revelar se o e-mail existe). O envio usa SMTP, por padrão o Gmail com senha de app (`SMTP_USER`, `SMTP_PASSWORD`). Com o SMTP configurado a confirmação é exigida (`EMAIL_VERIFICATION=auto`). Contas existentes, a primeira conta e as criadas pelo Admin já entram confirmadas.
+
 ### Alterado
 - Código-fonte privado, distribuição pública separada: o site e o APK passam a ser publicados no repositório público [`Dracon-46/ascend`](https://github.com/Dracon-46/ascend), que não recebe código. O site vai compilado e sem source maps para o branch `gh-pages`. Cada release pública leva o APK versionado e a cópia fixa `Ascend.apk`. Guia em `docs/16-distribuicao.md`.
 - Site: os botões "Baixar para Android" baixam o APK direto (`releases/latest/download/Ascend.apk`). Os links para o código e para a wiki saíram; entraram "Entrar" e "Abrir no navegador", que levam ao app.

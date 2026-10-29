@@ -34,6 +34,22 @@ const envSchema = z.object({
   /** Diretório do build da interface para servir em produção (opcional). */
   WEB_DIST_DIR: z.string().optional(),
   LOG_LEVEL: z.string().default('info'),
+  /**
+   * Confirmação de e-mail no cadastro: `auto` (padrão) exige quando o SMTP está configurado; `required` sempre
+   * (e falha ao iniciar sem SMTP); `off` nunca. Contas existentes e criadas pelo administrador já nascem confirmadas.
+   */
+  EMAIL_VERIFICATION: z.enum(['auto', 'required', 'off']).default('auto'),
+  /** SMTP para os e-mails da aplicação. Padrão: Gmail (porta 465, TLS) com senha de app. */
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().int().default(465),
+  SMTP_USER: z.string().optional(),
+  /** Senha de app do Gmail (16 letras; os espaços que o Google mostra são ignorados). */
+  SMTP_PASSWORD: z
+    .string()
+    .optional()
+    .transform((v) => v?.replace(/\s+/g, '') || undefined),
+  /** Remetente exibido. Padrão: "Ascend <SMTP_USER>". */
+  EMAIL_FROM: z.string().optional(),
   /** Commit publicado, preenchido pelo Render a cada deploy. Exposto em /api/health para o smoke de produção. */
   RENDER_GIT_COMMIT: z.string().optional(),
 });
@@ -42,10 +58,22 @@ export type Env = z.infer<typeof envSchema>;
 
 export function loadEnv(overrides: Partial<Record<keyof Env, string>> = {}): Env {
   const env = envSchema.parse({ ...process.env, ...overrides });
+  if (env.EMAIL_VERIFICATION === 'required' && !smtpConfigured(env)) {
+    throw new Error('EMAIL_VERIFICATION=required exige SMTP_USER e SMTP_PASSWORD (por exemplo, Gmail com senha de app).');
+  }
   if (env.DATABASE_SSL === 'verify-full' && !env.DATABASE_CA_CERT) {
     throw new Error('DATABASE_SSL=verify-full exige DATABASE_CA_CERT (certificado PEM da autoridade do banco).');
   }
   return env;
+}
+
+export function smtpConfigured(env: Env): boolean {
+  return Boolean(env.SMTP_USER && env.SMTP_PASSWORD);
+}
+
+/** Se novas contas precisam confirmar o e-mail antes de entrar. */
+export function emailVerificationRequired(env: Env): boolean {
+  return env.EMAIL_VERIFICATION === 'required' || (env.EMAIL_VERIFICATION === 'auto' && smtpConfigured(env));
 }
 
 /** Opções de conexão do banco derivadas do ambiente. */

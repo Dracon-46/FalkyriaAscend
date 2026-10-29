@@ -5,6 +5,7 @@ import { createDb, type Db } from '../src/persistence/client';
 import { runMigrations } from '../src/persistence/migrate';
 import { loadEnv } from '../src/config/env';
 import { resetEvaluationThrottle } from '../src/application/evaluation';
+import type { Mailer } from '../src/integrations/mailer';
 
 export const TEST_DB_URL = process.env.TEST_DATABASE_URL ?? 'postgresql://rpg:rpg@localhost:5432/rpg_test';
 
@@ -16,7 +17,7 @@ export interface TestCtx {
 }
 
 /** Recria o schema do zero e sobe a aplicação com relógio controlável. */
-export async function setup(): Promise<TestCtx> {
+export async function setup(opts: { env?: Record<string, string>; mailer?: Mailer } = {}): Promise<TestCtx> {
   const { db, pool } = createDb(TEST_DB_URL);
   await db.execute(sql`drop schema if exists public cascade`);
   await db.execute(sql`drop schema if exists drizzle cascade`);
@@ -31,8 +32,9 @@ export async function setup(): Promise<TestCtx> {
     INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
     STRAVA_WEBHOOK_VERIFY_TOKEN: 'segredo-webhook-teste',
     EVALUATION_INTERVAL_MINUTES: '0',
+    ...opts.env,
   });
-  const app = await buildApp({ db, env, now: () => clock.now, logger: false });
+  const app = await buildApp({ db, env, now: () => clock.now, logger: false, mailer: opts.mailer });
   resetEvaluationThrottle();
   return {
     app,

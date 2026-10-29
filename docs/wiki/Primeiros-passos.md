@@ -2,7 +2,7 @@
 
 ## 1. Criar a conta
 
-Abra o Ascend e escolha **Criar conta**. A **primeira conta** criada vira administradora. As seguintes são contas comuns: cada pessoa tem o próprio personagem e só vê os próprios dados, sem acesso à Administração. Quem administra a instalação pode fechar novos cadastros (`ALLOW_REGISTRATION=false`) e passar a criar as contas pelo Admin.
+Abra o Ascend e escolha **Criar conta**. Depois, abra o e-mail que chegou e toque em **Confirmar e-mail**: o link vale por 24 horas e já te leva para dentro do app (não chegou? confira o spam ou peça outro na tela de entrada). A **primeira conta** criada vira administradora. As seguintes são contas comuns: cada pessoa tem o próprio personagem e só vê os próprios dados, sem acesso à Administração. Quem administra a instalação pode fechar novos cadastros (`ALLOW_REGISTRATION=false`) e passar a criar as contas pelo Admin.
 
 Ao cadastrar, você recebe um **catálogo inicial** para não começar do zero:
 

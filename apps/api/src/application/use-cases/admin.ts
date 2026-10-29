@@ -419,6 +419,8 @@ export async function createUserAsAdmin(db: Db, admin: AdminActor, input: Regist
       passwordHash: await hashPassword(input.password),
       displayName: input.displayName,
       role: input.role,
+      // Conta criada pelo administrador já nasce com o e-mail confirmado.
+      emailVerifiedAt: now,
       // A avaliação diária começa no dia do cadastro: a data vem do relógio da aplicação, não do banco.
       createdAt: now,
       updatedAt: now,
