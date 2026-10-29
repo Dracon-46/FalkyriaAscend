@@ -5,7 +5,7 @@ import game from './generated/game-data.json';
  * Repositório público só de distribuição: o site compilado e as releases com o APK.
  * O código-fonte do Ascend é privado; nada aqui deve apontar para ele.
  */
-export const DIST_REPO_URL = 'https://github.com/Dracon-46/ascend';
+export const DIST_REPO_URL = 'https://github.com/Dracon-46/Ascend';
 /** Download direto do APK mais recente (cada release pública leva uma cópia com o nome fixo Ascend.apk). */
 export const APK_DOWNLOAD_URL = `${DIST_REPO_URL}/releases/latest/download/Ascend.apk`;
 export const ALL_RELEASES_URL = `${DIST_REPO_URL}/releases`;

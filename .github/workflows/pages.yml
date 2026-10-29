@@ -1,7 +1,7 @@
 name: Site
 
 # Publica o site de apresentação (apps/site) no repositório público de distribuição
-# (variável ASCEND_DIST_REPO, padrão Dracon-46/ascend), no branch gh-pages servido pelo GitHub Pages.
+# (variável ASCEND_DIST_REPO, padrão Dracon-46/Ascend), no branch gh-pages servido pelo GitHub Pages.
 # O código-fonte continua privado: só o build (HTML, CSS, JS e imagens, sem source maps) vai para lá.
 # Requer o segredo ASCEND_DIST_TOKEN: token fine-grained com "Contents: Read and write" apenas no repositório público.
 on:
@@ -38,7 +38,7 @@ jobs:
           fi
       - name: Publicar no branch gh-pages do repositório público
         env:
-          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/ascend' }}
+          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/Ascend' }}
           DIST_TOKEN: ${{ secrets.ASCEND_DIST_TOKEN }}
         run: |
           if [[ -z "$DIST_TOKEN" ]]; then
