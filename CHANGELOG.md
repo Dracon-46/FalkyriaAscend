@@ -4,6 +4,8 @@ Todas as mudanças relevantes deste projeto. Formato baseado em [Keep a Changelo
 
 ## [Não lançado]
 
+## [0.5.0] - 2026-10-30
+
 ### Adicionado
 - Confirmação de e-mail no cadastro: quem cria conta recebe um link (válido por 24 h, de uso único, guardado só como hash) e só entra depois de confirmar. A tela de entrada permite reenviar o link (no máximo um por minuto, sem revelar se o e-mail existe). O envio usa SMTP, por padrão o Gmail com senha de app (`SMTP_USER`, `SMTP_PASSWORD`). Com o SMTP configurado a confirmação é exigida (`EMAIL_VERIFICATION=auto`). Contas existentes, a primeira conta e as criadas pelo Admin já entram confirmadas.
 
@@ -91,7 +93,8 @@ Primeira versão do Ascend.
 ### Conhecido
 - Integrações Strava, Lyfta e Hevy implementadas e testadas com dados de exemplo, mas ainda não validadas com credenciais reais.
 
-[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.3...develop
+[Não lançado]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.5.0...develop
+[0.5.0]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Dracon-46/FalkyriaAscend/compare/v0.4.0...v0.4.1
