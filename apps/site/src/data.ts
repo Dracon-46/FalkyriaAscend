@@ -9,6 +9,8 @@ export const DIST_REPO_URL = 'https://github.com/Dracon-46/Ascend';
 /** Download direto do APK mais recente (cada release pública leva uma cópia com o nome fixo Ascend.apk). */
 export const APK_DOWNLOAD_URL = `${DIST_REPO_URL}/releases/latest/download/Ascend.apk`;
 export const ALL_RELEASES_URL = `${DIST_REPO_URL}/releases`;
+/** Página da marca Falkyria. */
+export const FALKYRIA_URL = 'https://dracon-46.github.io/Portifolio/#falkyria';
 /** O app publicado (web/PWA). O APK abre este mesmo endereço. */
 export const APP_URL = 'https://falkyria-ascend.onrender.com';
 

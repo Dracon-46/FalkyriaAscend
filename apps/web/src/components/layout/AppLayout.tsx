@@ -8,6 +8,7 @@ import { fmt, fmtDateTime } from '../../lib/format';
 import { CountUp } from '../../lib/motion';
 import type { Lookups } from '../../lib/types';
 import { useSession } from '../../app/session';
+import { FalkyriaLogo } from '../ui/Falkyria';
 import { Icon } from '../ui/Icon';
 import { Modal } from '../ui/Modal';
 import { Button, Input, ProgressBar, Select, cx } from '../ui/primitives';
@@ -37,7 +38,10 @@ function Brand() {
       <img src="/icons/icon.svg" alt="" width={34} height={34} className="shrink-0" />
       <div className="leading-tight">
         <p className="font-display text-lg tracking-[0.2em] text-accent">{APP_NAME.toUpperCase()}</p>
-        <p className="text-[0.65rem] tracking-[0.25em] text-faint uppercase">por {COMPANY_NAME}</p>
+        <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.25em] text-faint uppercase">
+          <FalkyriaLogo size={11} />
+          por {COMPANY_NAME}
+        </p>
       </div>
     </div>
   );
