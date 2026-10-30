@@ -3,7 +3,7 @@
   "private": true,
   "author": "Falkyria",
   "license": "UNLICENSED",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Ascend — RPG pessoal de vida real (um produto Falkyria).",
   "type": "module",
   "workspaces": [
