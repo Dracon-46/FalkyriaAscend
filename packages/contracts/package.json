@@ -2,6 +2,8 @@
   "name": "@rpg/contracts",
   "version": "0.4.3",
   "private": true,
+  "author": "Falkyria",
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Esquemas de entrada (Zod) e tipos de resposta compartilhados entre API e interface.",
   "exports": {

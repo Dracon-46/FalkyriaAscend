@@ -2,6 +2,8 @@
   "name": "@rpg/mobile",
   "version": "0.4.3",
   "private": true,
+  "author": "Falkyria",
+  "license": "UNLICENSED",
   "type": "module",
   "description": "App Android do Ascend (Capacitor): abre a interface publicada, com tela própria para quando não há conexão.",
   "scripts": {

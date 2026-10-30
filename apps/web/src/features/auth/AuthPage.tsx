@@ -6,6 +6,7 @@ import { api, ApiError, errorMessage } from '../../lib/api';
 import { APP_NAME, APP_TAGLINE, COMPANY_NAME } from '../../lib/brand';
 import { useMe } from '../../app/session';
 import { Button, Input } from '../../components/ui/primitives';
+import { FalkyriaSignature } from '../../components/ui/Falkyria';
 import { Icon } from '../../components/ui/Icon';
 
 export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
@@ -54,7 +55,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
           <img src="/icons/icon.svg" alt="" width={64} height={64} className="mx-auto mb-3" />
           <h1 className="text-3xl tracking-[0.3em] text-accent">{APP_NAME.toUpperCase()}</h1>
           <p className="mt-1 text-muted">{APP_TAGLINE}</p>
-          <p className="mt-1 text-xs tracking-[0.25em] text-faint uppercase">um produto {COMPANY_NAME}</p>
+          <FalkyriaSignature className="mt-2" />
         </div>
         {pending ? (
           <div className="panel space-y-4 text-center" role="status">
@@ -164,6 +165,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             )}
           </form>
         )}
+        <p className="mt-8 text-center text-xs text-faint">© 2026 {COMPANY_NAME}. Todos os direitos reservados.</p>
       </div>
     </div>
   );
