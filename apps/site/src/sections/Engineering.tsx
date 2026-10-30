@@ -1,7 +1,7 @@
 import { Download } from 'lucide-react';
 import { motion } from 'motion/react';
-import { NumberTicker, Section, SectionHeader, Shield } from '../components';
-import { ALL_RELEASES_URL, APP_URL, PROJECT_STATS, APK_DOWNLOAD_URL } from '../data';
+import { FalkyriaLogo, NumberTicker, Section, SectionHeader, Shield } from '../components';
+import { ALL_RELEASES_URL, APP_URL, FALKYRIA_URL, PROJECT_STATS, APK_DOWNLOAD_URL } from '../data';
 
 const STACK = ['React 19', 'Fastify 5', 'PostgreSQL 16', 'Drizzle ORM', 'Zod', 'Tailwind CSS 4', 'Capacitor 8', 'Vitest', 'Playwright', 'GitHub Actions'];
 
@@ -68,9 +68,16 @@ export function Footer() {
           Novidades e versões
         </a>
       </nav>
-      <aside className="flex items-center gap-2">
-        <Shield className="size-6" />
-        <p>Ascend, um produto Falkyria.</p>
+      <aside className="flex flex-col items-center gap-2">
+        <p className="flex items-center gap-2">
+          <Shield className="size-6" />
+          Ascend
+        </p>
+        <a className="link link-hover flex items-center gap-2" href={FALKYRIA_URL} target="_blank" rel="noopener noreferrer">
+          <FalkyriaLogo className="size-5" />
+          Um produto Falkyria
+        </a>
+        <p className="text-sm">© 2026 Falkyria. Todos os direitos reservados.</p>
       </aside>
     </footer>
   );

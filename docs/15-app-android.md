@@ -17,7 +17,7 @@ Alternativa futura: para publicar na Play Store, uma *Trusted Web Activity* (Bub
 
 ## Instalar
 
-1. Baixe `Ascend-vX.Y.Z.apk` na [página de downloads](https://github.com/Dracon-46/ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/ascend/releases/latest/download/Ascend.apk)).
+1. Baixe `Ascend-vX.Y.Z.apk` na [página de downloads](https://github.com/Dracon-46/Ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/Ascend/releases/latest/download/Ascend.apk)).
 2. No Android, permita **Instalar apps desconhecidos** para o navegador ou gerenciador de arquivos.
 3. Abra o APK e instale. Novas versões assinadas com a mesma chave atualizam por cima, sem perder o login.
 

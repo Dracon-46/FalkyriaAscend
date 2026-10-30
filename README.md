@@ -1,10 +1,17 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/marca/falkyria-marca-branca.svg">
+    <img src=".github/marca/falkyria-marca.svg" alt="Falkyria" width="220">
+  </picture>
+</p>
+
 # Ascend
 
 **RPG pessoal de vida real, um produto Falkyria.** Ascend transforma rotina, estudos, trabalho, treinos, hábitos e objetivos em progressão de longo prazo: níveis com dificuldade crescente, atributos, maestria, missões, penalidades previsíveis, moedas, loja, conquistas, temporadas e estatísticas. A interface tem cinco temas (Medieval, Vampiros, Anjos, Sistema e Personalizado).
 
-**Conheça o projeto:** [dracon-46.github.io/ascend](https://dracon-46.github.io/ascend/) · **Baixar o app:** [Ascend.apk](https://github.com/Dracon-46/ascend/releases/latest/download/Ascend.apk)
+**Conheça o projeto:** [dracon-46.github.io/Ascend](https://dracon-46.github.io/Ascend/) · **Baixar o app:** [Ascend.apk](https://github.com/Dracon-46/Ascend/releases/latest/download/Ascend.apk)
 
-> Este repositório é **privado**. O público só recebe o site compilado e o APK, pelo repositório de distribuição [`Dracon-46/ascend`](https://github.com/Dracon-46/ascend). Detalhes em [docs/16-distribuicao.md](docs/16-distribuicao.md).
+> Este repositório é **privado**. O público só recebe o site compilado e o APK, pelo repositório de distribuição [`Dracon-46/Ascend`](https://github.com/Dracon-46/Ascend). Detalhes em [docs/16-distribuicao.md](docs/16-distribuicao.md).
 
 ## Stack
 
@@ -97,3 +104,7 @@ Documentação técnica:
 15. [App Android](docs/15-app-android.md)
 
 O protótipo HTML original foi preservado em `docs/legacy/`.
+
+## Licença
+
+Ascend é software proprietário da Falkyria. Todos os direitos reservados. O código está visível apenas para consulta; veja [LICENSE](LICENSE).

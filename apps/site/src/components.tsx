@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 import { animate, motion, useInView, useMotionValue, useTransform } from 'motion/react';
 import { gsap, useGSAP } from './lib/animation';
 
@@ -23,6 +23,29 @@ export function Shield({ className, drawRef }: { className?: string; drawRef?: R
       <circle data-draw cx="32" cy="17" r="3" fill="url(#shield-gold)" />
       <path data-draw d="M20 37 32 25l12 12" fill="none" stroke="url(#shield-gold)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       <path data-draw d="M22 45 32 35l10 10" fill="none" stroke="var(--color-secondary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Logo da Falkyria. O corpo usa a cor do texto (acompanha o tema); o olho mantém o azul da marca. */
+export function FalkyriaLogo({ className }: { className?: string }) {
+  const mask = useId();
+  return (
+    <svg viewBox="40 0 480 500" className={className} aria-hidden="true">
+      <mask id={mask} maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600">
+        <rect width="600" height="600" fill="#fff" />
+        <g fill="#000">
+          <polygon points="254,118 278,118 233.6,340 209.6,340" />
+          <polygon points="254,118 560,35.4 560,59.4 254,142" />
+          <polygon points="235.2,212 560,124.3 560,148.3 235.2,236" />
+        </g>
+      </mask>
+      <path
+        d="M54 198L58 160Q66 130 100 112Q120 102 150 96L205 100L300 74L400 42L504 14L486 58L492 84L452 150L460 178L410 232Q362 268 318 302Q284 336 272 392L238 494L184 412Q138 300 118 212L100 178Q84 166 70 176Z"
+        fill="currentColor"
+        mask={`url(#${mask})`}
+      />
+      <polygon points="118,130 158,120 148,139 124,142" fill="#00A6FF" />
     </svg>
   );
 }

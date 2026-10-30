@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { loginInput, registerInput } from '@rpg/contracts';
-import { api, errorMessage } from '../../lib/api';
+import { api, ApiError, errorMessage } from '../../lib/api';
 import { APP_NAME, APP_TAGLINE, COMPANY_NAME } from '../../lib/brand';
 import { useMe } from '../../app/session';
 import { Button, Input } from '../../components/ui/primitives';
+import { FalkyriaSignature } from '../../components/ui/Falkyria';
 import { Icon } from '../../components/ui/Icon';
 
 export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
@@ -15,6 +16,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const status = useQuery({ queryKey: ['auth-status'], queryFn: () => api.get<{ hasUsers: boolean; registrationOpen: boolean }>('/api/auth/status') });
   const [form, setForm] = useState({ email: '', password: '', displayName: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Cadastro feito, aguardando a confirmação do e-mail.
+  const [pending, setPending] = useState<{ email: string; emailSent: boolean } | null>(null);
   // Sem nenhuma conta, qualquer tela de acesso vira o cadastro do fundador (inclusive /entrar).
   const firstRun = status.data ? !status.data.hasUsers : false;
   const effectiveMode = firstRun ? 'register' : mode;
@@ -28,13 +31,20 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
       }
       setErrors({});
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      return effectiveMode === 'login' ? api.post('/api/auth/login', parsed.data) : api.post('/api/auth/register', { ...parsed.data, timezone: tz });
+      return effectiveMode === 'login'
+        ? api.post<AuthResult>('/api/auth/login', parsed.data)
+        : api.post<AuthResult>('/api/auth/register', { ...parsed.data, timezone: tz });
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      if (result && 'verificationRequired' in result) {
+        setPending({ email: result.email, emailSent: result.emailSent });
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ['me'] });
       navigate('/');
     },
   });
+  const notVerified = submit.error instanceof ApiError && submit.error.code === 'email_not_verified';
 
   if (me.data) return <Navigate to="/" replace />;
 
@@ -45,9 +55,29 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
           <img src="/icons/icon.svg" alt="" width={64} height={64} className="mx-auto mb-3" />
           <h1 className="text-3xl tracking-[0.3em] text-accent">{APP_NAME.toUpperCase()}</h1>
           <p className="mt-1 text-muted">{APP_TAGLINE}</p>
-          <p className="mt-1 text-xs tracking-[0.25em] text-faint uppercase">um produto {COMPANY_NAME}</p>
+          <FalkyriaSignature className="mt-2" />
         </div>
-        {!status.data ? (
+        {pending ? (
+          <div className="panel space-y-4 text-center" role="status">
+            <Icon name="mail" size={32} className="mx-auto text-accent" />
+            <h2 className="panel-title justify-center">Confirme seu e-mail</h2>
+            {pending.emailSent ? (
+              <p className="text-sm text-muted">
+                Enviamos um link para <strong className="text-fg">{pending.email}</strong>. Abra o e-mail, no celular ou no computador, para ativar a conta. Se
+                não aparecer, confira o spam.
+              </p>
+            ) : (
+              <p className="text-sm text-danger">A conta foi criada, mas não conseguimos enviar o e-mail agora. Peça um novo link abaixo.</p>
+            )}
+            <ResendVerification email={pending.email} />
+            <p className="text-sm text-muted">
+              Já confirmou?{' '}
+              <Link className="link" to="/entrar" onClick={() => setPending(null)}>
+                Entrar
+              </Link>
+            </p>
+          </div>
+        ) : !status.data ? (
           <div className="panel space-y-3 text-center" role="status">
             {status.isError ? (
               <>
@@ -110,6 +140,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
                 {errorMessage(submit.error)}
               </p>
             )}
+            {notVerified && <ResendVerification email={form.email} />}
             <Button type="submit" variant="primary" className="w-full" loading={submit.isPending}>
               {effectiveMode === 'login' ? 'Entrar' : 'Começar a jornada'}
             </Button>
@@ -134,7 +165,33 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             )}
           </form>
         )}
+        <p className="mt-8 text-center text-xs text-faint">© 2026 {COMPANY_NAME}. Todos os direitos reservados.</p>
       </div>
+    </div>
+  );
+}
+
+type AuthResult = { id: string; email: string; displayName: string; role: string } | { verificationRequired: true; email: string; emailSent: boolean };
+
+/** Pede um novo link de confirmação. A resposta é sempre a mesma, exista ou não a conta. */
+function ResendVerification({ email }: { email: string }) {
+  const [wait, setWait] = useState(0);
+  const resend = useMutation({
+    mutationFn: () => api.post('/api/auth/resend-verification', { email }),
+    onSuccess: () => setWait(60),
+  });
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(t);
+  }, [wait]);
+  return (
+    <div className="space-y-2 text-center">
+      <Button type="button" variant="ghost" onClick={() => resend.mutate()} loading={resend.isPending} disabled={wait > 0 || !email}>
+        {wait > 0 ? `Reenviar em ${wait}s` : 'Reenviar e-mail de confirmação'}
+      </Button>
+      {resend.isSuccess && <p className="text-xs text-muted">Se a conta ainda não estiver confirmada, um novo link chega em instantes.</p>}
+      {resend.isError && <p className="text-xs text-danger">{errorMessage(resend.error)}</p>}
     </div>
   );
 }

@@ -1,7 +1,9 @@
 {
   "name": "@rpg/site",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "private": true,
+  "author": "Falkyria",
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Site de apresentação do Ascend (GitHub Pages).",
   "scripts": {

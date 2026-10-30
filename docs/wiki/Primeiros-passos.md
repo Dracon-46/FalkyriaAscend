@@ -2,7 +2,7 @@
 
 ## 1. Criar a conta
 
-Abra o Ascend e escolha **Criar conta**. A **primeira conta** criada vira administradora. As seguintes são contas comuns: cada pessoa tem o próprio personagem e só vê os próprios dados, sem acesso à Administração. Quem administra a instalação pode fechar novos cadastros (`ALLOW_REGISTRATION=false`) e passar a criar as contas pelo Admin.
+Abra o Ascend e escolha **Criar conta**. Depois, abra o e-mail que chegou e toque em **Confirmar e-mail**: o link vale por 24 horas e já te leva para dentro do app (não chegou? confira o spam ou peça outro na tela de entrada). A **primeira conta** criada vira administradora. As seguintes são contas comuns: cada pessoa tem o próprio personagem e só vê os próprios dados, sem acesso à Administração. Quem administra a instalação pode fechar novos cadastros (`ALLOW_REGISTRATION=false`) e passar a criar as contas pelo Admin.
 
 Ao cadastrar, você recebe um **catálogo inicial** para não começar do zero:
 
@@ -32,7 +32,7 @@ Doente, viajando ou sem condições? Registre uma **indisponibilidade** em **Há
 
 ## 5. Instalar no celular
 
-- **Android:** instale o APK da [página de downloads](https://github.com/Dracon-46/ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/ascend/releases/latest/download/Ascend.apk)) (passo a passo em [App Android](App-Android)) ou use o PWA.
+- **Android:** instale o APK da [página de downloads](https://github.com/Dracon-46/Ascend/releases/latest) (ou direto em [Ascend.apk](https://github.com/Dracon-46/Ascend/releases/latest/download/Ascend.apk)) (passo a passo em [App Android](App-Android)) ou use o PWA.
 - **PWA (qualquer celular):** abra o endereço do Ascend no navegador e escolha **Adicionar à tela inicial**.
 
 Próximo: [Como o jogo funciona](Como-o-jogo-funciona).

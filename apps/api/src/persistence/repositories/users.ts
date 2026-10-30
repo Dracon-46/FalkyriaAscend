@@ -1,7 +1,7 @@
-/** Usuários (identidade) e sessões. */
-import { and, asc, count, eq, gt, isNull, ne, sql } from 'drizzle-orm';
+/** Usuários (identidade), sessões e confirmação de e-mail. */
+import { and, asc, count, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 import type { DbOrTx } from '../client';
-import { sessions, users } from '../schema';
+import { emailVerificationTokens, sessions, users } from '../schema';
 
 export type NewUser = typeof users.$inferInsert;
 export type UserPatch = Partial<Omit<NewUser, 'id'>>;
@@ -109,4 +109,31 @@ export async function deleteOtherSessions(db: DbOrTx, userId: string, keepSessio
 
 export async function listUserIds(db: DbOrTx): Promise<string[]> {
   return (await db.select({ id: users.id }).from(users)).map((u) => u.id);
+}
+
+// ------------------------------------------------------------------ Confirmação de e-mail
+
+/** Troca os tokens pendentes da pessoa por um novo (só o mais recente vale). */
+export async function replaceEmailVerificationToken(tx: DbOrTx, values: { id: string; userId: string; expiresAt: Date; createdAt: Date }) {
+  await tx.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, values.userId));
+  await tx.insert(emailVerificationTokens).values(values);
+}
+
+export async function findEmailVerificationToken(db: DbOrTx, id: string) {
+  const [t] = await db.select().from(emailVerificationTokens).where(eq(emailVerificationTokens.id, id));
+  return t ?? null;
+}
+
+export async function latestEmailVerificationToken(db: DbOrTx, userId: string) {
+  const [t] = await db
+    .select()
+    .from(emailVerificationTokens)
+    .where(eq(emailVerificationTokens.userId, userId))
+    .orderBy(desc(emailVerificationTokens.createdAt))
+    .limit(1);
+  return t ?? null;
+}
+
+export async function deleteEmailVerificationTokens(tx: DbOrTx, userId: string) {
+  await tx.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, userId));
 }

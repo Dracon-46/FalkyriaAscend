@@ -6,7 +6,8 @@ import fastifyStatic from '@fastify/static';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { Db } from './persistence/client';
-import type { Env } from './config/env';
+import { smtpConfigured, type Env } from './config/env';
+import { createMemoryMailer, createSmtpMailer, type Mailer } from './integrations/mailer';
 import { registerAdminRoutes } from './http/routes/admin';
 import { registerIntegrationRoutes } from './http/routes/integrations';
 import { AppError, pgCode, PG } from './shared/errors';
@@ -25,6 +26,20 @@ export interface BuildOptions {
   env: Env;
   now?: () => Date;
   logger?: boolean;
+  /** Envio de e-mail. Sem ele, usa SMTP se configurado; senão, guarda em memória (nada é enviado). */
+  mailer?: Mailer;
+}
+
+/** SMTP quando configurado; sem ele, os e-mails ficam em memória e a confirmação não é exigida (modo `auto`). */
+function mailerFromEnv(env: Env): Mailer {
+  if (!smtpConfigured(env)) return createMemoryMailer();
+  return createSmtpMailer({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    user: env.SMTP_USER!,
+    password: env.SMTP_PASSWORD!,
+    from: env.EMAIL_FROM ?? `Ascend <${env.SMTP_USER}>`,
+  });
 }
 
 /** Cabeçalho obrigatório em requisições que alteram estado (defesa CSRF junto com SameSite=Lax). */
@@ -39,7 +54,7 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     trustProxy: true,
     bodyLimit: 2 * 1024 * 1024,
   });
-  const ctx: AppContext = { db: opts.db, env: opts.env, now: opts.now ?? (() => new Date()) };
+  const ctx: AppContext = { db: opts.db, env: opts.env, now: opts.now ?? (() => new Date()), mailer: opts.mailer ?? mailerFromEnv(opts.env) };
 
   await app.register(helmet, {
     contentSecurityPolicy: {

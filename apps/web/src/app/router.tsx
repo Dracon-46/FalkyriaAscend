@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, useRouteError } from 'react-router';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ErrorState, Loading } from '../components/ui/primitives';
 import { AuthPage } from '../features/auth/AuthPage';
+import { VerifyEmailPage } from '../features/auth/VerifyEmailPage';
 import { useMe } from './session';
 
 const page = (loader: () => Promise<Record<string, unknown>>, name: string) => {
@@ -45,6 +46,7 @@ function RouteError() {
 export const router = createBrowserRouter([
   { path: '/entrar', element: <AuthPage mode="login" /> },
   { path: '/cadastro', element: <AuthPage mode="register" /> },
+  { path: '/verificar-email', element: <VerifyEmailPage /> },
   {
     path: '/',
     element: (

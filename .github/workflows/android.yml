@@ -117,7 +117,7 @@ jobs:
       # Lá vai só o APK, com notas de instalação (as notas internas do CHANGELOG ficam aqui).
       - name: Publicar no repositório público
         env:
-          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/ascend' }}
+          DIST_REPO: ${{ vars.ASCEND_DIST_REPO || 'Dracon-46/Ascend' }}
           GH_TOKEN: ${{ secrets.ASCEND_DIST_TOKEN }}
           APP_URL: ${{ vars.ASCEND_APP_URL || 'https://falkyria-ascend.onrender.com' }}
         run: |

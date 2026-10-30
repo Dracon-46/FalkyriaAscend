@@ -107,10 +107,24 @@ export const users = pgTable(
     bio: text('bio'),
     isDemo: boolean('is_demo').notNull().default(false),
     disabledAt: timestamp('disabled_at', { withTimezone: true }),
+    /** Quando a pessoa confirmou o e-mail. Nulo = ainda não confirmou (só bloqueia o login se a confirmação for exigida). */
+    emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex('users_email_uq').on(sql`lower(${t.email})`)],
+);
+
+export const emailVerificationTokens = pgTable(
+  'email_verification_tokens',
+  {
+    /** SHA-256 do token; o token em si só existe no link enviado por e-mail. */
+    id: text('id').primaryKey(),
+    userId: userRef(),
+    createdAt: createdAt(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('email_verification_tokens_user_idx').on(t.userId)],
 );
 
 export const sessions = pgTable(

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, Coins, Download, Flame, Sparkles, Trophy } from 'lucide-react';
-import { NumberTicker, Shield } from '../components';
-import { APP_URL, ATTRIBUTES, APK_DOWNLOAD_URL, rankOf, sampleCharacter } from '../data';
+import { FalkyriaLogo, NumberTicker, Shield } from '../components';
+import { APP_URL, ATTRIBUTES, APK_DOWNLOAD_URL, FALKYRIA_URL, rankOf, sampleCharacter } from '../data';
 import { gsap, useGSAP } from '../lib/animation';
 
 // Personagem de exemplo (4.380 XP): nível e progresso saem da curva real do motor.
@@ -135,9 +135,10 @@ export function Hero() {
         <div className="min-w-0 text-center lg:text-left">
           <div className="mb-6 flex items-center justify-center gap-3 lg:justify-start">
             <Shield drawRef={shieldRef} className="size-14" />
-            <span className="badge badge-outline badge-primary" data-hero-fade>
+            <a href={FALKYRIA_URL} target="_blank" rel="noopener noreferrer" className="badge badge-outline badge-primary gap-1.5" data-hero-fade>
+              <FalkyriaLogo className="size-3.5" />
               Um produto Falkyria
-            </span>
+            </a>
           </div>
           <h1 className="text-5xl leading-[1.05] font-semibold sm:text-6xl md:text-7xl">
             {title.map((w, i) => (
