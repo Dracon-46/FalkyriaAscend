@@ -17,15 +17,15 @@
     "backup": "bash scripts/backup.sh"
   },
   "dependencies": {
-    "@fastify/cookie": "^11.0.2",
+    "@fastify/cookie": "^11.1.5",
     "@fastify/helmet": "^13.0.1",
     "@fastify/rate-limit": "^10.3.0",
-    "@fastify/static": "^10.1.7",
+    "@fastify/static": "^10.1.8",
     "@rpg/contracts": "*",
     "@rpg/engine": "*",
     "drizzle-orm": "^0.45.0",
     "fastify": "^5.6.0",
-    "nodemailer": "^10.1.1",
+    "nodemailer": "^10.3.1",
     "pg": "^8.16.0",
     "zod": "^4.1.0"
   },
